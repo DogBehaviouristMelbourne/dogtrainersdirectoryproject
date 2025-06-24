@@ -1,0 +1,50 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<Layout title="Dog Trainers Directory Melbourne" description="Connect with certified dog trainers in Melbourne.">
+    <Header />
+    
+    <main id="main-content">
+        <section class="hero-section">
+            <div class="container">
+                <h1>Find the Perfect Dog Trainer in Melbourne</h1>
+                <p>Connect with certified professionals who understand your dog's unique needs.</p>
+                <a href="/trainers" class="button primary">Start Your Search</a>
+            </div>
+        </section>
+    </main>
+    
+    <Footer />
+</Layout>
+
+<style>
+    .hero-section {
+        padding: 4rem 0;
+        text-align: center;
+    }
+    
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+    
+    .button {
+        display: inline-block;
+        padding: 1rem 2rem;
+        background: var(--color-accent-mustard);
+        color: var(--color-text-light);
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 600;
+        margin-top: 2rem;
+    }
+    
+    .button:hover {
+        background: var(--color-accent-teal);
+        color: white;
+    }
+</style>

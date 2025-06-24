@@ -6,7 +6,9 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "lint": "echo \"No linting configured - add ESLint if needed\"",
+    "test": "echo \"No tests configured - add Vitest if needed\""
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.50.0",
