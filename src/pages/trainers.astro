@@ -1,0 +1,618 @@
+---
+// src/pages/trainers.astro
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import TrainerCard from '../components/TrainerCard.astro';
+import trainersData from '../data/trainers.json';
+
+// Use static data for build, with client-side Supabase loading for production
+const trainers = trainersData;
+
+const suburbs = [...new Set(trainers.map(t => t.suburb))].sort();
+const categories = [...new Set(trainers.flatMap(t => t.categories ?? []))].sort();
+---
+
+<Layout title="Find Dog Trainers in Melbourne" description="Browse certified dog trainers in Melbourne. Filter by specialization, location, and more to find the perfect match for your dog.">
+    <Header />
+    
+    <main id="main-content">
+        <section class="trainers-page">
+            <div class="container">
+                <div class="page-header">
+                    <h1>Find Your Perfect Dog Trainer</h1>
+                    <p class="page-subtitle">Browse our directory of certified professionals in Melbourne</p>
+                </div>
+
+                <!-- Search and Filter Controls -->
+                <div style="display: flex; flex-wrap: wrap; gap: 1rem; justify-content: flex-end; margin-bottom: 1.5rem;">
+                  <a href="/submit" class="button">Are You a Trainer? List Your Services</a>
+                  <a href="/claim" class="button small">Already listed? Request an update</a>
+                </div>
+                <div class="search-controls">
+                    <div class="search-bar">
+                        <input 
+                            type="text" 
+                            id="search-input" 
+                            placeholder="Search by trainer name, location, or specialization..."
+                            aria-label="Search trainers"
+                        >
+                    </div>
+                    
+                    <div class="filter-controls">
+                        <h3>Filter by Specialization:</h3>
+                        <div class="category-filters">
+                            <button class="category-button active" data-category="">All Trainers</button>
+                            {categories.map(cat => (
+                              <button class="category-button" data-category={cat}>{cat}</button>
+                            ))}
+                        </div>
+                        <div class="suburb-filter">
+                          <label for="suburbFilter">Suburb:</label>
+                          <select id="suburbFilter">
+                            <option value="">All suburbs</option>
+                            {suburbs.map(s => <option value={s}>{s}</option>)}
+                          </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sort Controls -->
+                <div class="sort-controls" style="margin-bottom:1.5rem;display:flex;align-items:center;gap:1em;">
+                  <label for="sort-select" style="font-weight:500;">Sort by:</label>
+                  <select id="sort-select" aria-label="Sort trainers">
+                    <option value="name">Name (A-Z)</option>
+                    <option value="suburb">Suburb (A-Z)</option>
+                    <option value="reviews">Most Reviewed</option>
+                  </select>
+                </div>
+
+                <!-- Results Count -->
+                <div class="results-info">
+                    <p id="results-count">Showing all {trainers ? trainers.length : 0} trainers</p>
+                </div>
+
+                <!-- Trainers Grid -->
+                <div class="trainer-grid" id="trainer-list"></div>
+                
+                <!-- Loading Skeleton -->
+                <div class="trainer-grid skeleton-grid" id="loading-skeleton">
+                    <div class="skeleton-card">
+                        <div class="skeleton-avatar"></div>
+                        <div class="skeleton-content">
+                            <div class="skeleton-line skeleton-title"></div>
+                            <div class="skeleton-line skeleton-subtitle"></div>
+                            <div class="skeleton-line skeleton-text"></div>
+                            <div class="skeleton-line skeleton-text short"></div>
+                        </div>
+                    </div>
+                    <div class="skeleton-card">
+                        <div class="skeleton-avatar"></div>
+                        <div class="skeleton-content">
+                            <div class="skeleton-line skeleton-title"></div>
+                            <div class="skeleton-line skeleton-subtitle"></div>
+                            <div class="skeleton-line skeleton-text"></div>
+                            <div class="skeleton-line skeleton-text short"></div>
+                        </div>
+                    </div>
+                    <div class="skeleton-card">
+                        <div class="skeleton-avatar"></div>
+                        <div class="skeleton-content">
+                            <div class="skeleton-line skeleton-title"></div>
+                            <div class="skeleton-line skeleton-subtitle"></div>
+                            <div class="skeleton-line skeleton-text"></div>
+                            <div class="skeleton-line skeleton-text short"></div>
+                        </div>
+                    </div>
+                    <div class="skeleton-card">
+                        <div class="skeleton-avatar"></div>
+                        <div class="skeleton-content">
+                            <div class="skeleton-line skeleton-title"></div>
+                            <div class="skeleton-line skeleton-subtitle"></div>
+                            <div class="skeleton-line skeleton-text"></div>
+                            <div class="skeleton-line skeleton-text short"></div>
+                        </div>
+                    </div>
+                    <div class="skeleton-card">
+                        <div class="skeleton-avatar"></div>
+                        <div class="skeleton-content">
+                            <div class="skeleton-line skeleton-title"></div>
+                            <div class="skeleton-line skeleton-subtitle"></div>
+                            <div class="skeleton-line skeleton-text"></div>
+                            <div class="skeleton-line skeleton-text short"></div>
+                        </div>
+                    </div>
+                    <div class="skeleton-card">
+                        <div class="skeleton-avatar"></div>
+                        <div class="skeleton-content">
+                            <div class="skeleton-line skeleton-title"></div>
+                            <div class="skeleton-line skeleton-subtitle"></div>
+                            <div class="skeleton-line skeleton-text"></div>
+                            <div class="skeleton-line skeleton-text short"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="pagination-controls" class="pagination-controls"></div>
+
+                <!-- No Results -->
+                <div class="no-results" id="no-results" style="display: none;">
+                  <img src="/images/sad-dog-404.png" alt="Sad dog" width="200" height="200">
+                  <h3>No trainers found</h3>
+                  <p>Try adjusting your search criteria or browse all trainers.</p>
+                  <button class="button primary" onclick="clearFilters()">Clear Filters</button>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <Footer />
+</Layout>
+
+<script define:vars={{ suburbs, categories }}>
+  window.addEventListener('DOMContentLoaded', () => {
+    const cardsData = JSON.parse(JSON.stringify({trainers})).map(t => t); // Deep copy for filtering
+    let filtered = cardsData;
+    let currentPage = 1;
+    const perPage = 12;
+    const trainerList = document.getElementById('trainer-list');
+    const pagination = document.getElementById('pagination-controls');
+    const resultsCount = document.getElementById('results-count');
+    const skeletonLoader = document.getElementById('loading-skeleton');
+    let currentSearchTerm = '';
+    let currentCategory = '';
+    let currentSuburb = '';
+
+    const searchInput = document.getElementById('search-input');
+    const categoryButtons = document.querySelectorAll('.category-button');
+    const suburbSelect = document.getElementById('suburbFilter');
+    const sortSelect = document.getElementById('sort-select');
+
+    // Show skeleton loader initially
+    skeletonLoader.style.display = 'grid';
+
+    function renderPage(page) {
+      // Hide skeleton loader once we start rendering
+      skeletonLoader.style.display = 'none';
+      
+      trainerList.innerHTML = '';
+      const start = (page - 1) * perPage;
+      const end = start + perPage;
+      const pageData = filtered.slice(start, end);
+      if (pageData.length === 0) {
+        document.getElementById('no-results').style.display = 'block';
+        pagination.innerHTML = '';
+        return;
+      } else {
+        if (document.getElementById('no-results')) document.getElementById('no-results').style.display = 'none';
+      }
+      pageData.forEach(trainer => {
+        const div = document.createElement('div');
+        div.innerHTML = `<TrainerCard trainer='${JSON.stringify(trainer)}' />`;
+        trainerList.appendChild(div.firstChild);
+      });
+      renderPagination();
+      resultsCount.textContent =
+        filtered.length === cardsData.length
+          ? `Showing ${filtered.length} trainers`
+          : `Showing ${filtered.length} of ${cardsData.length} trainers`;
+    }
+
+    function renderPagination() {
+      const totalPages = Math.ceil(filtered.length / perPage);
+      if (totalPages <= 1) {
+        pagination.innerHTML = '';
+        return;
+      }
+      let html = '';
+      for (let i = 1; i <= totalPages; i++) {
+        html += `<button class="pagination-btn${i === currentPage ? ' active' : ''}" data-page="${i}">${i}</button>`;
+      }
+      pagination.innerHTML = html;
+      document.querySelectorAll('.pagination-btn').forEach(btn => {
+        btn.addEventListener('click', e => {
+          currentPage = parseInt(e.target.dataset.page);
+          renderPage(currentPage);
+          window.scrollTo({ top: trainerList.offsetTop - 80, behavior: 'smooth' });
+        });
+      });
+    }
+
+    function sortTrainers() {
+      const sortBy = sortSelect.value;
+      if (sortBy === 'name') {
+        filtered.sort((a, b) => a.name.localeCompare(b.name));
+      } else if (sortBy === 'suburb') {
+        filtered.sort((a, b) => (a.suburb || '').localeCompare(b.suburb || ''));
+      } else if (sortBy === 'reviews') {
+        filtered.sort((a, b) => (b.review_count || 0) - (a.review_count || 0));
+      }
+    }
+
+    function applyFilters() {
+      filtered = cardsData.filter(trainer => {
+        const name    = trainer.name.toLowerCase();
+        const suburb  = trainer.suburb?.toLowerCase() || '';
+        const catsArr = trainer.categories || [];
+        const desc    = trainer.description?.toLowerCase() || '';
+        const matchCat  = !currentCategory || catsArr.includes(currentCategory);
+        const matchSub  = !currentSuburb  || suburb === currentSuburb.toLowerCase();
+        const matchText = !currentSearchTerm || (
+            name.includes(currentSearchTerm) ||
+            suburb.includes(currentSearchTerm) ||
+            desc.includes(currentSearchTerm)
+          );
+        return matchCat && matchSub && matchText;
+      });
+      sortTrainers();
+      currentPage = 1;
+      renderPage(currentPage);
+    }
+
+    searchInput.addEventListener('input', (event) => {
+      currentSearchTerm = event.target.value.trim().toLowerCase();
+      applyFilters();
+    });
+    categoryButtons.forEach(button => {
+      button.addEventListener('click', (event) => {
+        categoryButtons.forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+        currentCategory = event.target.dataset.category;
+        applyFilters();
+      });
+    });
+    suburbSelect.addEventListener('change', (event) => {
+      currentSuburb = event.target.value;
+      applyFilters();
+    });
+    sortSelect.addEventListener('change', () => {
+      sortTrainers();
+      renderPage(currentPage);
+    });
+    window.clearFilters = () => {
+      currentSearchTerm = '';
+      currentCategory = '';
+      currentSuburb = '';
+      searchInput.value = '';
+      suburbSelect.value = '';
+      categoryButtons.forEach(btn => btn.classList.remove('active'));
+      categoryButtons[0].classList.add('active');
+      applyFilters();
+    };
+    // Initial render
+    applyFilters();
+  });
+</script>
+<style>
+    .trainers-page {
+        padding: 3rem 0;
+        min-height: 70vh;
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .page-header h1 {
+        font-size: 3em;
+        color: var(--color-text-light);
+        margin-bottom: 1rem;
+    }
+
+    .page-subtitle {
+        font-size: 1.2em;
+        color: var(--color-text-light);
+        opacity: 0.8;
+    }
+
+    /* Search Controls */
+    .search-controls {
+        background-color: var(--color-card-bg-light);
+        border: 1px solid var(--color-border-light);
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .search-bar {
+        margin-bottom: 2rem;
+    }
+
+    .search-bar input {
+        width: 100%;
+        padding: 1rem 1.5rem;
+        border: 1px solid var(--color-border-light);
+        border-radius: 8px;
+        font-size: 1.1em;
+        background-color: var(--color-background-light);
+        color: var(--color-text-light);
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .search-bar input:focus {
+        outline: none;
+        border-color: var(--color-accent-teal);
+        box-shadow: 0 0 0 3px rgba(90, 155, 156, 0.1);
+    }
+
+    .filter-controls h3 {
+        margin-bottom: 1rem;
+        color: var(--color-text-light);
+        font-size: 1.2em;
+    }
+
+    .category-filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.8rem;
+    }
+
+    .category-button {
+        background-color: var(--color-background-light);
+        color: var(--color-text-light);
+        border: 1px solid var(--color-border-light);
+        padding: 0.6em 1.2em;
+        border-radius: 20px;
+        font-size: 0.9em;
+        font-weight: 500;
+        transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+        will-change: transform;
+    }
+
+    .category-button:hover {
+        background-color: var(--color-accent-teal);
+        color: white;
+        border-color: var(--color-accent-teal);
+        transform: translateY(-3px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    }
+
+    .category-button:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        background-color: color-mix(in srgb, var(--color-accent-teal) 90%, black);
+    }
+
+    .category-button.active {
+        background-color: var(--color-accent-mustard);
+        color: var(--color-primary-button-text);
+        border-color: var(--color-accent-mustard);
+        font-weight: 600;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .suburb-filter {
+        margin-top: 1.5rem;
+    }
+
+    .suburb-filter label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: var(--color-text-light);
+        font-weight: 500;
+    }
+
+    .suburb-filter select {
+        width: 100%;
+        padding: 0.8rem 1.2rem;
+        border: 1px solid var(--color-border-light);
+        border-radius: 8px;
+        font-size: 1em;
+        background-color: var(--color-background-light);
+        color: var(--color-text-light);
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .suburb-filter select:focus {
+        outline: none;
+        border-color: var(--color-accent-teal);
+        box-shadow: 0 0 0 3px rgba(90, 155, 156, 0.1);
+    }
+
+    /* Sort Controls */
+    .sort-controls select {
+      border: 1px solid var(--color-border-light);
+      border-radius: 8px;
+      padding: 0.5em 1em;
+      font-size: 1em;
+      background: var(--color-background-light);
+      color: var(--color-text-light);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .sort-controls select:focus {
+      outline: none;
+      border-color: var(--color-accent-teal);
+      box-shadow: 0 0 0 2px rgba(90, 155, 156, 0.12);
+    }
+
+    /* Results Info */
+    .results-info {
+        margin-bottom: 2rem;
+    }
+
+    .results-info p {
+        color: var(--color-text-light);
+        opacity: 0.8;
+        font-weight: 500;
+    }
+
+    /* Trainers Grid */
+    .trainer-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+
+    .trainer-grid.results-fade-in {
+        animation: resultsFadeIn 0.5s ease-out;
+    }
+
+    /* No Results */
+    .no-results {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: var(--color-text-light);
+    }
+
+    .no-results img {
+        margin-bottom: 2rem;
+        opacity: 0.8;
+    }
+
+    .no-results h3 {
+        font-size: 2em;
+        margin-bottom: 1rem;
+        color: var(--color-text-light);
+    }
+
+    .no-results p {
+        font-size: 1.1em;
+        opacity: 0.8;
+        margin-bottom: 2rem;
+    }
+
+    /* Pagination */
+    .pagination-controls {
+      display: flex;
+      gap: 0.5em;
+      justify-content: center;
+      margin: 2em 0 1em 0;
+    }
+    .pagination-btn {
+      background: var(--color-background-light);
+      border: 1px solid var(--color-border-light);
+      color: var(--color-text-light);
+      border-radius: 6px;
+      padding: 0.5em 1.1em;
+      font-size: 1em;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s, border 0.2s;
+    }
+    .pagination-btn.active, .pagination-btn:hover {
+      background: var(--color-accent-teal);
+      color: #fff;
+      border-color: var(--color-accent-teal);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .page-header h1 {
+            font-size: 2.2em;
+        }
+
+        .search-controls {
+            padding: 1.5rem;
+        }
+
+        .category-filters {
+            gap: 0.5rem;
+        }
+
+        .category-button {
+            font-size: 0.8em;
+            padding: 0.5em 1em;
+        }
+
+        .trainer-grid {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+    }
+
+    /* Loading Skeleton Styles */
+    .skeleton-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+
+    .skeleton-card {
+        background: var(--color-card-bg-light);
+        border: 1px solid var(--color-border-light);
+        border-radius: 12px;
+        padding: 1.5rem;
+        display: flex;
+        gap: 1rem;
+        animation: skeleton-pulse 1.5s ease-in-out infinite alternate;
+    }
+
+    .skeleton-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: skeleton-shimmer 1.5s infinite;
+        flex-shrink: 0;
+    }
+
+    .skeleton-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .skeleton-line {
+        height: 1rem;
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: skeleton-shimmer 1.5s infinite;
+        border-radius: 4px;
+    }
+
+    .skeleton-title {
+        height: 1.25rem;
+        width: 70%;
+    }
+
+    .skeleton-subtitle {
+        height: 1rem;
+        width: 50%;
+    }
+
+    .skeleton-text {
+        height: 0.875rem;
+        width: 90%;
+    }
+
+    .skeleton-text.short {
+        width: 60%;
+    }
+
+    @keyframes skeleton-shimmer {
+        0% {
+            background-position: -200% 0;
+        }
+        100% {
+            background-position: 200% 0;
+        }
+    }
+
+    @keyframes skeleton-pulse {
+        0% {
+            opacity: 1;
+        }
+        100% {
+            opacity: 0.7;
+        }
+    }
+
+    /* Dark mode skeleton */
+    .dark-mode .skeleton-card {
+        background: var(--color-card-bg-light);
+        border-color: var(--color-border-light);
+    }
+
+    .dark-mode .skeleton-avatar,
+    .dark-mode .skeleton-line {
+        background: linear-gradient(90deg, #4a4a4a 25%, #3a3a3a 50%, #4a4a4a 75%);
+        background-size: 200% 100%;
+    }
+</style>
+

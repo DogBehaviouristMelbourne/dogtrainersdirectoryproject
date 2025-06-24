@@ -1,0 +1,280 @@
+---
+// src/components/WaggingWisdom.astro
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY
+)
+
+const { data: wisdomTips, error } = await supabase
+  .from('wisdom_tips')
+  .select('*')
+  .order('created_at', { ascending: true })
+
+// Map Supabase data to the structure expected by the original carousel script
+const waggingWisdomData = wisdomTips?.map((tip, i) => ({
+  icon: tip.icon || 'paw', // Use icon from DB or fallback to 'paw'
+  title: tip.author || `Cosmo #${i + 1}`,
+  content: tip.tip_text,
+  type: tip.type || 'tip' // Use type from DB or fallback to 'tip'
+})) ?? []
+---
+
+<section class="wagging-wisdom">
+  <div class="container">
+    <h2>Wagging Wisdom</h2>
+    <p class="subtitle">Daily tips and fascinating facts from the world of dog training</p>
+
+    <div class="wisdom-carousel">
+      <button class="wisdom-nav wisdom-nav-left" aria-label="Previous tip" type="button">&#8592;</button>
+      <div class="wisdom-content" id="wisdom-content"></div>
+      <button class="wisdom-nav wisdom-nav-right" aria-label="Next tip" type="button">&#8594;</button>
+      <div class="carousel-indicators" id="carousel-indicators"></div>
+    </div>
+  </div>
+
+  <script define:vars={{ waggingWisdomData }}>
+    let currentIndex = 0;
+    let autoPlayInterval;
+    
+    const wisdomContent = document.getElementById('wisdom-content');
+    const indicatorsContainer = document.getElementById('carousel-indicators');
+    const leftBtn = document.querySelector('.wisdom-nav-left');
+    const rightBtn = document.querySelector('.wisdom-nav-right');
+    
+    // Create indicators
+    waggingWisdomData.forEach((_, index) => {
+        const indicator = document.createElement('button');
+        indicator.className = 'indicator';
+        indicator.setAttribute('aria-label', `Go to tip ${index + 1}`);
+        indicator.addEventListener('click', () => goToSlide(index));
+        indicatorsContainer.appendChild(indicator);
+    });
+    
+    const indicators = indicatorsContainer.querySelectorAll('.indicator');
+    
+    const updateContent = () => {
+        const currentItem = waggingWisdomData[currentIndex];
+        
+        wisdomContent.innerHTML = `
+            <div class="wisdom-item fade-in">
+                <div class="wisdom-icon">
+                    <img src="/images/icons/${currentItem.icon}.svg" alt={`${currentItem.icon} icon`} width="32" height="32">
+                </div>
+                <div class="wisdom-text">
+                    <h3>${currentItem.title}</h3>
+                    <p>${currentItem.content}</p>
+                    <span class="wisdom-type">${currentItem.type === 'tip' ? '💡 Training Tip' : '🐕 Fun Fact'}</span>
+                </div>
+            </div>
+        `;
+        
+        // Update indicators
+        indicators.forEach((indicator, index) => {
+            indicator.classList.toggle('active', index === currentIndex);
+        });
+    };
+    
+    const goToSlide = (index) => {
+        currentIndex = index;
+        updateContent();
+        resetAutoPlay();
+    };
+    
+    const nextSlide = () => {
+        currentIndex = (currentIndex + 1) % waggingWisdomData.length;
+        updateContent();
+    };
+    const prevSlide = () => {
+        currentIndex = (currentIndex - 1 + waggingWisdomData.length) % waggingWisdomData.length;
+        updateContent();
+    };
+    
+    const startAutoPlay = () => {
+        autoPlayInterval = setInterval(nextSlide, 5000); // Change every 5 seconds
+    };
+    
+    const resetAutoPlay = () => {
+        clearInterval(autoPlayInterval);
+        startAutoPlay();
+    };
+    
+    // Add event listeners for nav buttons
+    leftBtn.addEventListener('click', () => { prevSlide(); resetAutoPlay(); });
+    rightBtn.addEventListener('click', () => { nextSlide(); resetAutoPlay(); });
+    
+    // Initialize
+    updateContent();
+    startAutoPlay();
+    
+    // Pause auto-play when user hovers over the carousel
+    const carousel = document.querySelector('.wisdom-carousel');
+    carousel.addEventListener('mouseenter', () => clearInterval(autoPlayInterval));
+    carousel.addEventListener('mouseleave', startAutoPlay);
+  </script>
+</section>
+
+<style>
+    .wagging-wisdom {
+        background: linear-gradient(135deg, var(--color-accent-teal) 0%, var(--color-accent-terracotta) 100%);
+        color: white;
+        padding: 4rem 0;
+        margin: 3rem 0;
+    }
+
+    .wagging-wisdom h2 {
+        text-align: center;
+        font-size: 2.5em;
+        margin-bottom: 0.5rem;
+        color: white;
+    }
+
+    .wagging-wisdom .subtitle {
+        text-align: center;
+        font-size: 1.2em;
+        opacity: 0.9;
+        margin-bottom: 3rem;
+    }
+
+    .wisdom-carousel {
+        max-width: 800px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    .wisdom-content {
+        min-height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .wisdom-item {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        text-align: left;
+        padding: 2rem;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .wisdom-icon {
+        flex-shrink: 0;
+        width: 64px;
+        height: 64px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .wisdom-icon img {
+        filter: brightness(0) invert(1); /* Make SVG icons white */
+    }
+
+    .wisdom-text h3 {
+        margin-bottom: 0.5rem;
+        font-size: 1.5em;
+        color: white;
+    }
+
+    .wisdom-text p {
+        margin-bottom: 1rem;
+        line-height: 1.6;
+        font-size: 1.1em;
+    }
+
+    .wisdom-type {
+        font-size: 0.9em;
+        opacity: 0.8;
+        font-weight: 500;
+    }
+
+    .carousel-indicators {
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-top: 2rem;
+    }
+
+    .carousel-indicators .indicator {
+        width: 8px !important;
+        height: 8px !important;
+        border-radius: 50%;
+        border: 1px solid rgba(255, 255, 255, 0.5) !important;
+        background: red !important;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .carousel-indicators .indicator.active {
+        background: white !important;
+        border-color: white !important;
+    }
+
+    .carousel-indicators .indicator:hover {
+        border-color: white !important;
+        transform: scale(1.2);
+    }
+
+    .wisdom-nav {
+        background: rgba(255,255,255,0.15);
+        border: none;
+        color: white;
+        font-size: 1.5em;
+        border-radius: 50%;
+        width: 2.2em;
+        height: 2.2em;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 2;
+        transition: background 0.2s;
+    }
+    .wisdom-nav-left {
+        left: -2.5em;
+    }
+    .wisdom-nav-right {
+        right: -2.5em;
+    }
+    .wisdom-nav:hover {
+        background: rgba(255,255,255,0.3);
+    }
+    @media (max-width: 768px) {
+        .wagging-wisdom {
+            padding: 3rem 0;
+        }
+
+        .wisdom-item {
+            flex-direction: column;
+            text-align: center;
+            gap: 1.5rem;
+            padding: 1.5rem;
+        }
+
+        .wagging-wisdom h2 {
+            font-size: 2em;
+        }
+
+        .wisdom-text h3 {
+            font-size: 1.3em;
+        }
+
+        .wisdom-text p {
+            font-size: 1em;
+        }
+
+        .wisdom-nav-left { left: 0; }
+        .wisdom-nav-right { right: 0; }
+    }
+</style>
+

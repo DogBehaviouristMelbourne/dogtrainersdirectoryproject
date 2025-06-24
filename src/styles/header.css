@@ -1,0 +1,242 @@
+/* src/styles/header.css */
+
+/* --------------------------------------------------- */
+/* Header Bar - Now Sticky */
+/* --------------------------------------------------- */
+.site-header {
+    background-color: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--color-border-light);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 1000; /* High z-index to stay above all content */
+    transition: background-color 0.2s ease;
+}
+
+/* Dark mode adjustments for sticky header */
+.dark-mode .site-header {
+    background-color: rgba(18, 18, 18, 0.9);
+    border-bottom-color: var(--color-border-dark);
+}
+
+.site-header .logo {
+    font-family: 'Balsamiq Sans', cursive;
+    font-size: 1.8em;
+    color: var(--color-accent-teal);
+    text-decoration: none;
+    white-space: nowrap; /* Keep logo on one line */
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.site-header .logo img {
+    height: 2rem;
+    width: 2rem;
+}
+
+/* Hide desktop nav by default, show on larger screens */
+.desktop-nav {
+    display: none;
+}
+
+@media (min-width: 768px) {
+    .desktop-nav {
+        display: flex;
+        gap: 2rem;
+    }
+
+    .desktop-nav a {
+        color: var(--color-text-light);
+        font-weight: 500;
+        position: relative;
+        padding-bottom: 0.2em;
+        transition: color 0.2s ease;
+    }
+
+    .desktop-nav a::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 0;
+        height: 2px;
+        background-color: var(--color-accent-mustard);
+        transition: width 0.3s ease-out;
+    }
+
+    .desktop-nav a:hover::after,
+    .desktop-nav a.active::after {
+        width: 100%;
+        background-color: var(--color-accent-teal);
+    }
+
+    .desktop-nav a:hover,
+    .desktop-nav a.active {
+        color: var(--color-accent-teal);
+        font-weight: 700;
+    }
+}
+
+.toggles-wrapper {
+    display: flex;
+    gap: 10px; /* Space between toggles */
+    align-items: center;
+}
+
+/* --------------------------------------------------- */
+/* Burger Button */
+/* --------------------------------------------------- */
+.burger-button {
+    background: none;
+    border: none;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0;
+    cursor: pointer;
+    z-index: 1001; /* Above the overlay */
+    position: relative; /* For absolute positioning of lines */
+    transition: transform 0.3s ease;
+}
+
+.burger-button .line {
+    width: 30px;
+    height: 3px;
+    background-color: var(--color-text-light);
+    border-radius: 2px;
+    transition: all 0.3s ease;
+    position: absolute;
+}
+
+.burger-button .line-top { top: 10px; }
+.burger-button .line-middle { top: 50%; transform: translateY(-50%); }
+.burger-button .line-bottom { bottom: 10px; }
+
+/* Burger to Paw Print Transformation */
+.burger-button.open .line-top {
+    transform: rotate(45deg) translate(7px, 7px);
+    background-color: var(--color-accent-mustard);
+}
+.burger-button.open .line-middle {
+    opacity: 0;
+    transform: translateX(-30px);
+}
+.burger-button.open .line-bottom {
+    transform: rotate(-45deg) translate(7px, -7px);
+    background-color: var(--color-accent-mustard);
+}
+
+/* Paw print dots (using pseudo-elements) */
+.burger-button.open::before,
+.burger-button.open::after {
+    content: '';
+    position: absolute;
+    background-color: var(--color-accent-mustard);
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    opacity: 1;
+}
+
+.burger-button.open::before { /* Top-left dot */
+    width: 8px; height: 8px;
+    top: 0px; left: 0px;
+    transform: translate(-50%, -50%);
+}
+.burger-button.open::after { /* Top-right dot */
+    width: 8px; height: 8px;
+    top: 0px; right: 0px;
+    transform: translate(50%, -50%);
+}
+
+@media (min-width: 768px) {
+    .burger-button {
+        display: none; /* Hide burger on desktop */
+    }
+}
+
+/* --------------------------------------------------- */
+/* Mobile Navigation Overlay (Paw Print Portal) */
+/* --------------------------------------------------- */
+.mobile-nav-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--color-background-light); /* Use background color for consistency */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 1001; /* Above sticky header */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.4s ease, visibility 0.4s ease;
+
+    /* Initial state for clip-path (closed portal) */
+    clip-path: circle(0% at var(--clip-x, 85%) var(--clip-y, 50px)); /* Default to top-right corner */
+}
+
+.mobile-nav-overlay.open {
+    opacity: 1;
+    visibility: visible;
+    /* Animated clip-path (open portal) */
+    clip-path: circle(150% at var(--clip-x, 85%) var(--clip-y, 50px)); /* Expands from burger */
+    transition: opacity 0.4s ease, visibility 0.4s ease, clip-path 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55); /* Elastic effect */
+}
+
+.mobile-nav-overlay nav {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    text-align: center;
+}
+
+.mobile-nav-overlay nav a {
+    color: var(--color-text-light);
+    font-family: 'Balsamiq Sans', cursive; /* Use heading font for menu items */
+    font-size: 2.5em;
+    text-decoration: none;
+    opacity: 0; /* Initial state for staggered reveal */
+    transform: translateY(20px); /* Initial state for staggered reveal */
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+/* Staggered reveal for menu items */
+.mobile-nav-overlay.open nav a:nth-child(1) { transition-delay: 0.1s; opacity: 1; transform: translateY(0); }
+.mobile-nav-overlay.open nav a:nth-child(2) { transition-delay: 0.15s; opacity: 1; transform: translateY(0); }
+.mobile-nav-overlay.open nav a:nth-child(3) { transition-delay: 0.2s; opacity: 1; transform: translateY(0); }
+.mobile-nav-overlay.open nav a:nth-child(4) { transition-delay: 0.25s; opacity: 1; transform: translateY(0); }
+.mobile-nav-overlay.open nav a:nth-child(5) { transition-delay: 0.3s; opacity: 1; transform: translateY(0); }
+
+/* Blur effect on main content when menu is open */
+body.menu-open main {
+    filter: blur(5px);
+    transition: filter 0.3s ease;
+}
+body main {
+    transition: filter 0.3s ease; /* Smooth transition when closing */
+}
+
+/* Hide toggles on desktop when they are inside the mobile overlay */
+.mobile-only {
+    display: none;
+}
+@media (max-width: 767px) {
+    .desktop-only {
+        display: none;
+    }
+    .mobile-only {
+        display: flex; /* Show mobile-only toggles */
+    }
+}
+

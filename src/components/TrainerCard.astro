@@ -1,0 +1,236 @@
+---
+// src/components/TrainerCard.astro
+interface Trainer {
+    id: string;
+    name: string;
+    location: string;
+    categories: string[];
+    phone?: string;
+    email?: string;
+    website?: string;
+    facebook?: string;
+    instagram?: string;
+    profile_image_url?: string;
+    description?: string;
+    why?: string;
+    suburb?: string;
+    review_count?: number;
+    avg_rating?: number;
+}
+
+const { trainer } = Astro.props;
+
+// Helper to format category names for display
+const formatCategory = (category: string) => {
+    switch (category) {
+        case 'puppy-training': return 'Puppy Training & Socialisation';
+        case 'anxiety-stress-management': return 'Anxiety & Stress Management';
+        case 'behaviour-obedience': return 'Behaviour Training & Obedience';
+        default: return category;
+    }
+};
+---
+
+{trainer.slug ? (
+  <a href={`/trainers/${trainer.slug}`} class="trainer-card-link" aria-label={`View profile for ${trainer.name}`} style="text-decoration:none; color:inherit; display:block;">
+    <article class="trainer-card"
+      data-suburb={trainer.suburb}
+      data-cats={trainer.categories.join(',')}
+      data-name={trainer.name.toLowerCase()}
+      data-desc={trainer.description?.toLowerCase() || ''}
+      tabindex="0"
+      role="group"
+      aria-label={`Trainer card for ${trainer.name}`}
+    >
+      <img src={trainer.profile_image_url || '/images/dog-placeholder.svg'} alt={trainer.name} loading="lazy" onerror={(e: Event) => (e.currentTarget as HTMLImageElement).src = '/images/dog-placeholder.svg'} width="80" height="80" style="border-radius: 50%; object-fit: cover; margin-bottom: 0.5em;" />
+      <h3>{trainer.name}</h3>
+      {trainer.avg_rating && (
+        <div class="trainer-rating">
+          <span class="star">★</span> {trainer.avg_rating.toFixed(1)}
+          {trainer.review_count ? <span class="review-count">({trainer.review_count} review{trainer.review_count > 1 ? 's' : ''})</span> : null}
+        </div>
+      )}
+      {(!trainer.avg_rating && trainer.review_count) && (
+        <div class="trainer-rating">
+          <span class="review-count">{trainer.review_count} review{trainer.review_count > 1 ? 's' : ''}</span>
+        </div>
+      )}
+      {trainer.suburb && <p class="location">{trainer.suburb}</p>}
+      <div class="categories">
+          {trainer.categories && trainer.categories.map((cat: string) => (
+              <span class="category-tag">{formatCategory(cat)}</span>
+          ))}
+      </div>
+      <p class="description">{trainer.description?.length > 10 ? trainer.description : 'Fun, professional dog training in Melbourne.'}</p>
+      {trainer.why && (
+        <div class="why-section">
+          <strong>Why choose me?</strong>
+          <p>{trainer.why}</p>
+        </div>
+      )}
+      <div class="contact-info">
+          {trainer.phone && <p>Phone: <a href={`tel:${trainer.phone}`}>{trainer.phone}</a></p>}
+          {trainer.email && <p>Email: <a href={`mailto:${trainer.email}`}>{trainer.email}</a></p>}
+          {trainer.website && <p>Website: <a href={trainer.website} target="_blank" rel="noopener noreferrer">{(() => { try { return new URL(trainer.website).hostname; } catch { return trainer.website; } })()}</a></p>}
+          {trainer.facebook && <p>Facebook: <a href={trainer.facebook} target="_blank" rel="noopener noreferrer">Facebook</a></p>}
+          {trainer.instagram && <p>Instagram: <a href={trainer.instagram} target="_blank" rel="noopener noreferrer">Instagram</a></p>}
+      </div>
+    </article>
+  </a>
+) : (
+  <article class="trainer-card"
+    data-suburb={trainer.suburb}
+    data-cats={trainer.categories.join(',')}
+    data-name={trainer.name.toLowerCase()}
+    data-desc={trainer.description?.toLowerCase() || ''}
+    tabindex="0"
+    role="group"
+    aria-label={`Trainer card for ${trainer.name}`}
+  >
+    <img src={trainer.profile_image_url || '/images/dog-placeholder.svg'} alt={trainer.name} loading="lazy" onerror={(e: Event) => (e.currentTarget as HTMLImageElement).src = '/images/dog-placeholder.svg'} width="80" height="80" style="border-radius: 50%; object-fit: cover; margin-bottom: 0.5em;" />
+    <h3>{trainer.name}</h3>
+    {trainer.avg_rating && (
+      <div class="trainer-rating">
+        <span class="star">★</span> {trainer.avg_rating.toFixed(1)}
+        {trainer.review_count ? <span class="review-count">({trainer.review_count} review{trainer.review_count > 1 ? 's' : ''})</span> : null}
+      </div>
+    )}
+    {(!trainer.avg_rating && trainer.review_count) && (
+      <div class="trainer-rating">
+        <span class="review-count">{trainer.review_count} review{trainer.review_count > 1 ? 's' : ''}</span>
+      </div>
+    )}
+    {trainer.suburb && <p class="location">{trainer.suburb}</p>}
+    <div class="categories">
+        {trainer.categories && trainer.categories.map((cat: string) => (
+            <span class="category-tag">{formatCategory(cat)}</span>
+        ))}
+    </div>
+    <p class="description">{trainer.description?.length > 10 ? trainer.description : 'Fun, professional dog training in Melbourne.'}</p>
+    {trainer.why && (
+      <div class="why-section">
+        <strong>Why choose me?</strong>
+        <p>{trainer.why}</p>
+      </div>
+    )}
+    <div class="contact-info">
+        {trainer.phone && <p>Phone: <a href={`tel:${trainer.phone}`}>{trainer.phone}</a></p>}
+        {trainer.email && <p>Email: <a href={`mailto:${trainer.email}`}>{trainer.email}</a></p>}
+        {trainer.website && <p>Website: <a href={trainer.website} target="_blank" rel="noopener noreferrer">{(() => { try { return new URL(trainer.website).hostname; } catch { return trainer.website; } })()}</a></p>}
+        {trainer.facebook && <p>Facebook: <a href={trainer.facebook} target="_blank" rel="noopener noreferrer">Facebook</a></p>}
+        {trainer.instagram && <p>Instagram: <a href={trainer.instagram} target="_blank" rel="noopener noreferrer">Instagram</a></p>}
+    </div>
+  </article>
+)}
+
+<style>
+    .trainer-card {
+        background-color: var(--color-card-bg-light);
+        border: 1px solid var(--color-border-light);
+        border-radius: 12px; /* Noticeably rounded corners */
+        padding: 1.5rem;
+        box-shadow: var(--shadow-sm);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+        height: 100%; /* Ensure cards have equal height in grid */
+    }
+
+    .trainer-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .trainer-card h3 {
+        color: var(--color-accent-teal); /* Use an accent color for trainer names */
+        margin-bottom: 0.2em;
+        font-size: 1.6em;
+    }
+
+    .trainer-card .location {
+        font-weight: 500;
+        color: var(--color-text-light);
+        opacity: 0.8;
+        font-size: 0.95em;
+    }
+
+    .trainer-card .categories {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+
+    .trainer-card .category-tag {
+        background-color: var(--color-accent-mustard);
+        color: var(--color-primary-button-text); /* Dark text on mustard */
+        padding: 0.3em 0.8em;
+        border-radius: 6px;
+        font-size: 0.8em;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .trainer-card .description {
+        font-size: 0.95em;
+        color: var(--color-text-light);
+        margin-top: 0.5rem;
+        flex-grow: 1; /* Allow description to take available space */
+    }
+
+    .trainer-card .contact-info {
+        margin-top: auto; /* Push contact info to bottom */
+        border-top: 1px dashed var(--color-border-light);
+        padding-top: 1rem;
+        font-size: 0.9em;
+    }
+
+    .trainer-card .contact-info p {
+        margin-bottom: 0.5em;
+    }
+
+    .trainer-card .contact-info a {
+        font-weight: 500;
+    }
+
+    .trainer-card .contact-info a:hover {
+        color: var(--color-accent-teal);
+    }
+
+    .why-section {
+      background: var(--color-background-light);
+      border-left: 4px solid var(--color-accent-teal);
+      padding: 0.7em 1em;
+      margin: 1em 0 0.5em 0;
+      border-radius: 8px;
+      font-size: 1.05em;
+      color: var(--color-text-light);
+    }
+    .why-section strong {
+      color: var(--color-accent-teal);
+      font-size: 1.08em;
+      display: block;
+      margin-bottom: 0.2em;
+    }
+
+    .trainer-rating {
+      color: var(--color-accent-teal);
+      font-weight: 600;
+      font-size: 1.08em;
+      margin-bottom: 0.2em;
+      display: flex;
+      align-items: center;
+      gap: 0.4em;
+    }
+    .trainer-rating .star {
+      color: #e8b94f;
+      font-size: 1.1em;
+    }
+    .trainer-rating .review-count {
+      color: var(--color-text-light);
+      font-size: 0.98em;
+      opacity: 0.8;
+    }
+</style>
+

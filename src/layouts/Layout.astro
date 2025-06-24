@@ -1,0 +1,88 @@
+---
+// src/layouts/Layout.astro
+import '../styles/global.css'; // Import your global styles
+
+interface Props {
+    title: string;
+    description?: string;
+}
+
+const { title, description = "Find expert dog trainers in Melbourne. Connect with certified professionals specializing in puppy training, anxiety management, and behavior modification." } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <meta name="generator" content={Astro.generator}>
+    <title>{title} | Dog Trainers Directory Melbourne</title>
+    <meta name="description" content={description}>
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={`https://dogtrainersdirectory.com.au${Astro.url.pathname}`} />
+    <meta property="og:image" content="/images/social-preview.png" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content="/images/social-preview.png" />
+
+    <!-- Preload Google Fonts for better performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!-- Light/Dark Mode Script -->
+    <script is:inline>
+        // This script runs before the page renders to prevent FOUC (Flash of Unstyled Content)
+        const getThemePreference = () => {
+            if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
+                return localStorage.getItem('theme');
+            }
+            return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        };
+
+        const theme = getThemePreference();
+        if (theme === 'dark') {
+            document.documentElement.classList.add('dark-mode');
+        }
+    </script>
+
+    <!-- JSON-LD Structured Data for SEO -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Dog Trainers Directory Melbourne",
+        "url": "https://dogtrainersdirectory.com.au",
+        "description": "A behaviour-focused directory for certified dog training professionals in Melbourne."
+      }
+    </script>
+</head>
+<body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <slot /> <!-- This is where your page content will be injected -->
+    <!-- Cloudflare Web Analytics -->
+    <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "29712a3600a64cf39255d209b0c50f6b"}'></script>
+    <!-- End Cloudflare Web Analytics -->
+</body>
+</html>
+
+<style is:global>
+    /* Additional layout-specific styles if needed */
+    body {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    main {
+        flex: 1;
+    }
+</style>
+

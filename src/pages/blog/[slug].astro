@@ -1,0 +1,60 @@
+---
+import Layout from '../../layouts/Layout.astro'
+import posts from '../../data/blog.json'
+
+export async function getStaticPaths() {
+  return posts.map(post => ({
+    params: { slug: post.slug },
+    props: { post }
+  }));
+}
+
+const { slug } = Astro.params;
+const { post } = Astro.props;
+---
+
+{!post ? (
+  <Layout title="Not Found" description="Blog post not found.">
+    <section class="container">
+      <h1>Post Not Found</h1>
+      <p>Sorry, this blog post does not exist.</p>
+    </section>
+  </Layout>
+) : (
+  <Layout title={post.title} description={post.excerpt}>
+    <section class="container">
+      <h1 class="blog-title">{post.title}</h1>
+      <p class="meta">By {post.author} — {post.date}</p>
+      {post.image && <img src={post.image} alt={`${post.title} - illustration`} />}
+      <div class="blog-content" set:html={post.content}></div>
+    </section>
+    <style>
+      .blog-title {
+        text-align: center;
+        color: var(--color-accent-teal);
+        font-family: 'Balsamiq Sans', cursive, sans-serif;
+        font-size: 2em;
+        margin-bottom: 1.2rem;
+      }
+      .meta {
+        font-size: 0.98rem;
+        color: #777;
+        margin-bottom: 1.5rem;
+        text-align: center;
+      }
+      .blog-content {
+        max-width: 700px;
+        margin: 0 auto;
+        color: var(--color-text-light);
+        font-size: 1.13em;
+      }
+      .blog-content p {
+        margin-bottom: 1rem;
+      }
+      .blog-content ul, .blog-content ol {
+        margin-left: 1.5rem;
+        margin-bottom: 1rem;
+      }
+    </style>
+  </Layout>
+)}

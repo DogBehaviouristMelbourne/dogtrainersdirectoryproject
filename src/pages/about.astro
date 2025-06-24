@@ -1,0 +1,105 @@
+---
+// src/pages/about.astro
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<Layout title="About Dog Trainers Directory" description="Learn about the mission behind Dog Trainers Directory Melbourne — a curated platform for certified dog training professionals.">
+    <Header />
+    
+    <main id="main-content">
+        <section class="about-page">
+            <div class="container">
+                <div class="page-header">
+                    <h1>About Dog Trainers Directory</h1>
+                </div>
+
+                <div class="about-content">
+                    <p>Dog Trainers Directory Melbourne is a curated platform designed to connect Melbourne dog owners with certified, professional training providers.</p>
+                    <p>Built for simplicity, speed, and local trust, our mission is to help owners make informed decisions with ease.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+    <section class="container trust-section">
+      <h2>Why Trust This Directory?</h2>
+      <ul>
+        <li>✅ All trainers are manually reviewed</li>
+        <li>🎓 We prioritize certified behaviour professionals only</li>
+        <li>🔒 No login required — privacy-first, no spam</li>
+        <li>📍 Melbourne-based, locally focused</li>
+        <li>🧠 No AI-generated junk — real people, real listings</li>
+      </ul>
+    </section>
+    <Footer />
+</Layout>
+
+<style>
+    .about-page {
+        padding: 3rem 0;
+        min-height: 70vh;
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .page-header h1 {
+        font-size: 2.5em;
+        color: var(--color-text-light);
+        margin-bottom: 1rem;
+    }
+
+    .about-content {
+        max-width: 800px;
+        margin: 0 auto;
+        text-align: center;
+    }
+
+    .about-content p {
+        color: var(--color-text-light);
+        line-height: 1.7;
+        margin-bottom: 1.5rem;
+        font-size: 1.1em;
+    }
+
+    .trust-section {
+        max-width: 700px;
+        margin: 2.5rem auto 3rem auto;
+        background: var(--color-card-bg-light);
+        border: 1px solid var(--color-border-light);
+        border-radius: 16px;
+        box-shadow: var(--shadow-sm);
+        padding: 2.5rem 2rem 2rem 2rem;
+        text-align: left;
+    }
+    .trust-section h2 {
+        color: var(--color-accent-teal);
+        font-family: 'Balsamiq Sans', cursive, sans-serif;
+        font-size: 1.5em;
+        margin-bottom: 1.2rem;
+        text-align: center;
+    }
+    .trust-section ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    .trust-section li {
+        font-size: 1.13em;
+        color: var(--color-text-light);
+        margin-bottom: 0.7em;
+        display: flex;
+        align-items: center;
+        gap: 0.7em;
+    }
+
+    @media (max-width: 768px) {
+        .page-header h1 {
+            font-size: 2em;
+        }
+    }
+</style>
+

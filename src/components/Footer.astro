@@ -1,0 +1,214 @@
+---
+// src/components/Footer.astro
+---
+import SuccessModal from './SuccessModal.astro';
+
+let modalVisible = false;
+let modalMessage = '';
+
+<footer class="site-footer">
+    <div class="footer-content">
+        <div class="footer-section">
+            <h3>Dog Trainers Directory</h3>
+            <p>Connecting Melbourne dog owners with certified, professional trainers since 2024.</p>
+            <div class="social-links">
+                <!-- Add social media links when available -->
+            </div>
+        </div>
+        
+        <div class="footer-section">
+            <h4>Quick Links</h4>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/trainers">Find a Trainer</a></li>
+                <li><a href="/about">About Us</a></li>
+                <li><a href="/for-trainers">For Trainers</a></li>
+                <li><a href="/submit">List Your Services</a></li>
+                <li><a href="/claim">Update or Claim Listing</a></li>
+                <li><a href="/blog">Blog</a></li>
+            </ul>
+        </div>
+        
+        <div class="footer-section">
+            <h4>Support</h4>
+            <ul>
+                <li><a href="mailto:info@dogtrainersdirectory.com.au">Contact Us</a></li>
+                <li><a href="/privacy">Privacy Policy</a></li>
+                <li><a href="/terms">Terms of Service</a></li>
+                <li><a href="/faq">FAQ</a></li>
+            </ul>
+        </div>
+        
+        <div class="footer-section">
+            <h4>Melbourne Areas</h4>
+            <ul>
+                <li>Inner Melbourne</li>
+                <li>Eastern Suburbs</li>
+                <li>Western Suburbs</li>
+                <li>Northern Suburbs</li>
+                <li>Bayside</li>
+            </ul>
+        </div>
+        
+        <div class="footer-section">
+            <h4>Newsletter</h4>
+            <form id="newsletter-form" autocomplete="off">
+                <input type="email" id="newsletter-email" placeholder="Your email" required aria-label="Email address for newsletter signup" style="margin-bottom:0.5rem;max-width:180px;" />
+                <button type="submit" aria-label="Subscribe to newsletter">Subscribe</button>
+                <span id="form-loading" style="display: none; margin-left: 0.5em;">Submitting...</span>
+            </form>
+            <p id="newsletter-status" style="min-height:1.5em;font-size:0.95em;"></p>
+            <div id="newsletter-modal-root"></div>
+        </div>
+    </div>
+    
+    <div class="footer-bottom">
+        <p>&copy; 2024 Dog Trainers Directory Melbourne. All rights reserved.</p>
+        <p>Made with ❤️ for Melbourne's furry friends</p>
+    </div>
+</footer>
+
+<style>
+    .site-footer {
+        background-color: var(--color-card-bg-light);
+        border-top: 1px solid var(--color-border-light);
+        padding: 3rem 1.5rem 1.5rem;
+        margin-top: auto; /* Push footer to bottom */
+    }
+
+    .footer-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+    }
+
+    .footer-section h3 {
+        color: var(--color-accent-teal);
+        margin-bottom: 1rem;
+        font-size: 1.5em;
+    }
+
+    .footer-section h4 {
+        color: var(--color-text-light);
+        margin-bottom: 1rem;
+        font-size: 1.2em;
+    }
+
+    .footer-section p {
+        color: var(--color-text-light);
+        opacity: 0.8;
+        line-height: 1.6;
+        margin-bottom: 1rem;
+    }
+
+    .footer-section ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .footer-section ul li {
+        margin-bottom: 0.5rem;
+    }
+
+    .footer-section ul li a {
+        color: var(--color-text-light);
+        opacity: 0.8;
+        text-decoration: none;
+        transition: color 0.2s ease, opacity 0.2s ease;
+    }
+
+    .footer-section ul li a:hover {
+        color: var(--color-accent-teal);
+        opacity: 1;
+    }
+
+    .footer-bottom {
+        max-width: 1200px;
+        margin: 2rem auto 0;
+        padding-top: 2rem;
+        border-top: 1px solid var(--color-border-light);
+        text-align: center;
+        color: var(--color-text-light);
+        opacity: 0.7;
+    }
+
+    .footer-bottom p {
+        margin: 0.5rem 0;
+        font-size: 0.9em;
+    }
+
+    .success-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+    }
+    .modal-box {
+      background: white;
+      color: #111;
+      padding: 1.5rem;
+      border-radius: 8px;
+      font-weight: 500;
+      min-width: 250px;
+      text-align: center;
+    }
+
+    @media (max-width: 768px) {
+        .site-footer {
+            padding: 2rem 1rem 1rem;
+        }
+        
+        .footer-content {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+    }
+</style>
+
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+  import SuccessModal from './SuccessModal.astro';
+
+  const supabase = createClient(
+    import.meta.env.VITE_SUPABASE_URL,
+    import.meta.env.VITE_SUPABASE_ANON_KEY
+  );
+
+  const form = document.querySelector('#newsletter-form');
+  const input = document.querySelector('#newsletter-email');
+  const status = document.querySelector('#newsletter-status');
+  const loading = document.querySelector('#form-loading');
+  const modalRoot = document.getElementById('newsletter-modal-root');
+
+  function showModal(message) {
+    modalRoot.innerHTML = `<div class="success-modal"><div class="modal-box"><p>${message}</p></div></div>`;
+    setTimeout(() => { modalRoot.innerHTML = ''; }, 3000);
+  }
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    status.textContent = '';
+    loading.style.display = 'inline-block';
+    const email = input.value?.trim();
+    if (!email || !email.includes('@')) {
+      status.textContent = 'Please enter a valid email.';
+      loading.style.display = 'none';
+      return;
+    }
+    const { error } = await supabase.from('newsletter_subscribers').insert({ email });
+    loading.style.display = 'none';
+    if (error) {
+      status.textContent = 'Oops! Email already added or invalid.';
+    } else {
+      form.reset();
+      showModal('You’re subscribed!');
+    }
+  });
+</script>
+

@@ -1,0 +1,316 @@
+---
+import Layout from '../layouts/Layout.astro'
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import SuccessModal from '../components/SuccessModal.astro';
+
+let modalVisible = false;
+let modalMessage = '';
+if (Astro.request.url.includes('submitted=trainer')) {
+  modalVisible = true;
+  modalMessage = '✅ Submission received. We will review your listing shortly.';
+}
+---
+<Layout title="Join the Directory" description="Join Melbourne's leading dog trainer directory. Get listed and connect with dog owners looking for professional training services.">
+  <Header />
+  <main id="main-content">
+  <section class="container">
+    <h1 class="form-title">Submit Your Trainer Profile</h1>
+    <form id="trainer-form" class="trainer-form" novalidate>
+      <div class="form-row">
+        <label>
+          Name
+          <input type="text" id="trainer-name" required aria-label="Trainer name" />
+        </label>
+        <label>
+          Suburb
+          <input type="text" id="trainer-suburb" required aria-label="Suburb" />
+        </label>
+      </div>
+      <label>
+        Why choose me? (optional)
+        <textarea id="trainer-why" aria-label="Why choose me? (optional)" placeholder="Share your training philosophy or what makes you unique"></textarea>
+      </label>
+      <div class="form-row">
+        <label>
+          Instagram (optional)
+          <input type="url" id="trainer-instagram" placeholder="https://instagram.com/yourprofile" aria-label="Instagram (optional)" />
+        </label>
+        <label>
+          Facebook (optional)
+          <input type="url" id="trainer-facebook" placeholder="https://facebook.com/yourpage" aria-label="Facebook (optional)" />
+        </label>
+      </div>
+      <label>
+        Profile Image URL (optional)
+        <input type="url" id="trainer-image" aria-label="Profile image URL (optional)" />
+        <div id="trainer-image-preview" class="image-preview" style="display:none; margin-top:0.5em;"></div>
+        <span id="trainer-image-error" class="form-error" style="display:none;"></span>
+      </label>
+      <fieldset class="form-fieldset">
+        <legend>Service Categories</legend>
+        <label><input type="checkbox" value="puppy-training" /> Puppy Training</label>
+        <label><input type="checkbox" value="anxiety-stress-management" /> Anxiety & Stress</label>
+        <label><input type="checkbox" value="behaviour-obedience" /> Behaviour & Obedience</label>
+      </fieldset>
+      <div class="form-row">
+        <label>
+          Match Tags (comma separated)
+          <input type="text" id="trainer-tags" placeholder="e.g. leash, fear, recall" aria-label="Match tags (comma separated)" />
+        </label>
+        <label>
+          Website
+          <input type="url" id="trainer-website" aria-label="Website" />
+        </label>
+        <label>
+          Email
+          <input type="email" id="trainer-email" required aria-label="Email address" />
+        </label>
+      </div>
+      <div class="form-row">
+        <label>
+          Phone
+          <input type="text" id="trainer-phone" aria-label="Phone number" />
+        </label>
+        <label class="form-description-label">
+          Description
+          <textarea id="trainer-description" required aria-label="Trainer description"></textarea>
+        </label>
+      </div>
+      <button type="submit" class="button primary" aria-label="Submit trainer listing">Submit Listing</button>
+      <span id="form-loading" style="display: none; margin-left: 0.5em;">Submitting...</span>
+    </form>
+    <p id="trainer-status" class="form-error"></p>
+    <SuccessModal visible={modalVisible} message={modalMessage} />
+  </section>
+  <style>
+    .trainer-form {
+      background: var(--color-card-bg-light);
+      border: 1px solid var(--color-border-light);
+      border-radius: 18px;
+      box-shadow: var(--shadow-sm);
+      padding: 2.5rem 2rem 2rem 2rem;
+      max-width: 700px;
+      margin: 2rem auto 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+    .form-title {
+      text-align: center;
+      font-family: 'Balsamiq Sans', cursive, sans-serif;
+      font-size: 2.3em;
+      color: var(--color-accent-teal);
+      margin-bottom: 1.5rem;
+    }
+    .form-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+    }
+    .form-row label {
+      flex: 1 1 220px;
+      display: flex;
+      flex-direction: column;
+      font-weight: 500;
+      color: var(--color-text-light);
+      gap: 0.5rem;
+    }
+    .form-fieldset {
+      border: 1px solid var(--color-border-light);
+      border-radius: 12px;
+      padding: 1.2rem 1.5rem 1rem 1.5rem;
+      background: var(--color-background-light);
+      margin-bottom: 0.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+    }
+    .form-fieldset legend {
+      font-weight: 600;
+      color: var(--color-accent-teal);
+      font-size: 1.1em;
+      margin-bottom: 0.5rem;
+    }
+    .form-fieldset label {
+      font-weight: 400;
+      color: var(--color-text-light);
+      font-size: 1.1em;
+      display: flex;
+      align-items: center;
+      gap: 0.5em;
+    }
+    .trainer-form input,
+    .trainer-form textarea {
+      border: 1px solid var(--color-border-light);
+      border-radius: 8px;
+      padding: 0.8em 1em;
+      font-size: 1.05em;
+      background: var(--color-background-light);
+      color: var(--color-text-light);
+      transition: border-color 0.2s, box-shadow 0.2s;
+      font-family: inherit;
+    }
+    .trainer-form input:focus,
+    .trainer-form textarea:focus {
+      outline: none;
+      border-color: var(--color-accent-teal);
+      box-shadow: 0 0 0 2px rgba(90, 155, 156, 0.12);
+    }
+    .form-description-label {
+      flex: 2 1 320px;
+    }
+    .trainer-form textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+    .trainer-form button.button.primary {
+      background: var(--color-accent-mustard);
+      color: var(--color-primary-button-text);
+      border: none;
+      border-radius: 8px;
+      padding: 1em 2.2em;
+      font-size: 1.1em;
+      font-weight: 700;
+      box-shadow: var(--shadow-sm);
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+      margin-top: 0.5rem;
+      align-self: flex-end;
+    }
+    .trainer-form button.button.primary:hover {
+      background: var(--color-accent-teal);
+      color: #fff;
+      box-shadow: var(--shadow-md);
+    }
+    .image-preview img {
+      border: 2px solid var(--color-border-light);
+      background: var(--color-background-light);
+      margin-top: 0.2em;
+    }
+    .form-error {
+      color: var(--color-accent-terracotta);
+      font-size: 0.98em;
+      margin-top: 0.2em;
+      display: block;
+    }
+    @media (max-width: 700px) {
+      .trainer-form {
+        padding: 1.2rem 0.5rem 1.5rem 0.5rem;
+      }
+      .form-row {
+        flex-direction: column;
+        gap: 1rem;
+      }
+    }
+  </style>
+  <script type="module">
+    import { supabase } from '../lib/supabaseClient.js'
+    const form = document.querySelector('#trainer-form');
+    const loading = document.getElementById('form-loading');
+    const status = document.getElementById('trainer-status');
+    const imageInput = document.querySelector('#trainer-image');
+    const imagePreview = document.getElementById('trainer-image-preview');
+    const imageError = document.getElementById('trainer-image-error');
+    form?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      loading.style.display = 'inline-block';
+      status.textContent = '';
+      
+      // Get form values
+      const name = document.querySelector('#trainer-name').value.trim();
+      const suburb = document.querySelector('#trainer-suburb').value.trim();
+      const categories = Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).map(el => el.value);
+      const match_tags = document.querySelector('#trainer-tags').value.trim().split(',').map(tag => tag.trim()).filter(tag => tag);
+      const website = document.querySelector('#trainer-website').value.trim();
+      const email = document.querySelector('#trainer-email').value.trim();
+      const phone = document.querySelector('#trainer-phone').value.trim();
+      const description = document.querySelector('#trainer-description').value.trim();
+      const profile_image = document.querySelector('#trainer-image').value.trim();
+      const why_choose_me = document.querySelector('#trainer-why').value.trim();
+      const instagram = document.querySelector('#trainer-instagram').value.trim();
+      const facebook = document.querySelector('#trainer-facebook').value.trim();
+      
+      let hasError = false;
+      
+      // Required field validation
+      if (!name) {
+        status.textContent = 'Name is required.';
+        hasError = true;
+      } else if (!suburb) {
+        status.textContent = 'Suburb is required.';
+        hasError = true;
+      } else if (!email) {
+        status.textContent = 'Email is required.';
+        hasError = true;
+      } else if (!description) {
+        status.textContent = 'Description is required.';
+        hasError = true;
+      } else if (profile_image && !profile_image.match(/^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)$/i)) {
+        imageError.textContent = 'Please enter a valid image URL ending in .jpg, .png, .gif, or .webp.';
+        imageError.style.display = 'block';
+        hasError = true;
+      } else {
+        imageError.textContent = '';
+        imageError.style.display = 'none';
+      }
+      
+      if (hasError) {
+        loading.style.display = 'none';
+        return;
+      }
+      
+      // Prepare social links object
+      const social_links = {};
+      if (instagram) social_links.instagram = instagram;
+      if (facebook) social_links.facebook = facebook;
+      const { error } = await supabase.from('pending_trainers').insert({
+        name, 
+        suburb, 
+        categories, 
+        match_tags, 
+        website: website || null, 
+        email, 
+        phone: phone || null, 
+        description,
+        profile_image: profile_image || null,
+        why_choose_me: why_choose_me || null,
+        social_links: Object.keys(social_links).length > 0 ? social_links : null
+      });
+      loading.style.display = 'none';
+      if (error) {
+        status.textContent = 'Error submitting form. Please try again.';
+        console.error('Error inserting data:', error);
+      } else {
+        form.reset();
+        status.textContent = '✅ Submission received. We’ll review your listing shortly.';
+        modalVisible = true;
+        modalMessage = '✅ Submission received. We’ll review your listing shortly.';
+        setTimeout(() => {
+          modalVisible = false;
+        }, 5000);
+      }
+    });
+    imageInput.addEventListener('input', () => {
+      const url = imageInput.value.trim();
+      if (url && !url.match(/^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)$/i)) {
+        imagePreview.innerHTML = '';
+        imagePreview.style.display = 'none';
+        imageError.textContent = 'Please enter a valid image URL ending in .jpg, .png, .gif, or .webp.';
+        imageError.style.display = 'block';
+      } else if (url) {
+        imagePreview.innerHTML = `<img src="${url}" alt="Profile preview" style="max-width:100px;max-height:100px;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,0.1);">`;
+        imagePreview.style.display = 'block';
+        imageError.textContent = '';
+        imageError.style.display = 'none';
+      } else {
+        imagePreview.innerHTML = '';
+        imagePreview.style.display = 'none';
+        imageError.textContent = '';
+        imageError.style.display = 'none';
+      }
+    });
+  </script>
+  </main>
+  <Footer />
+</Layout>

@@ -1,0 +1,663 @@
+---
+// src/components/PawsonalityQuiz.astro
+import trainersData from '../data/trainers.json';
+---
+
+<section class="pawsonality-quiz">
+    <div class="container">
+        <div class="quiz-header">
+            <h2>🐾 Paw-sonality Matchmaker</h2>
+            <p class="quiz-subtitle">Answer a few questions about your dog to get personalized trainer recommendations</p>
+        </div>
+
+        <!-- Quiz Start Screen -->
+        <div class="quiz-start" id="quiz-start">
+            <div class="quiz-intro">
+                <h3>Find Your Perfect Training Match</h3>
+                <p>Our intelligent matching system considers your dog's age, personality, and specific needs to recommend the most suitable trainers in Melbourne.</p>
+                <div class="quiz-features">
+                    <div class="feature">
+                        <span class="feature-icon">🎯</span>
+                        <span>Personalized recommendations</span>
+                    </div>
+                    <div class="feature">
+                        <span class="feature-icon">⚡</span>
+                        <span>Quick 2-minute quiz</span>
+                    </div>
+                    <div class="feature">
+                        <span class="feature-icon">🏆</span>
+                        <span>Expert-matched results</span>
+                    </div>
+                </div>
+                <button class="button primary quiz-start-btn" onclick="startQuiz()">Start Quiz</button>
+            </div>
+        </div>
+
+        <!-- Quiz Questions -->
+        <div class="quiz-container" id="quiz-container" style="display: none;">
+            <div class="quiz-progress">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+                <span class="progress-text" id="progress-text">Question 1 of 6</span>
+            </div>
+
+            <div class="quiz-question" id="quiz-question">
+                <!-- Question content will be populated by JavaScript -->
+            </div>
+
+            <div class="quiz-navigation">
+                <button class="button secondary" id="prev-btn" onclick="prevQuestion()" style="display: none;">Previous</button>
+                <button class="button primary" id="next-btn" onclick="nextQuestion()" style="display: none;">Next</button>
+                <button class="button primary" id="submit-btn" onclick="submitQuiz()" style="display: none;">Get My Matches</button>
+            </div>
+        </div>
+
+        <!-- Quiz Results -->
+        <div class="quiz-results" id="quiz-results" style="display: none;">
+            <div class="results-header">
+                <h3>🎉 Your Perfect Matches</h3>
+                <p>Based on your answers, here are the trainers best suited for your dog:</p>
+            </div>
+            <div class="recommended-trainers" id="recommended-trainers">
+                <!-- Results will be populated by JavaScript -->
+            </div>
+            <div class="results-actions">
+                <button class="button secondary" onclick="retakeQuiz()">Retake Quiz</button>
+                <a href="/trainers" class="button primary">View All Trainers</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script define:vars={{ trainersData }}>
+    const quizQuestions = [
+        {
+            id: 'age',
+            question: 'How old is your dog?',
+            type: 'single',
+            options: [
+                { text: 'Puppy (under 16 weeks)', value: 'puppy', tags: ['puppy', 'socialization'] },
+                { text: 'Young dog (4-12 months)', value: 'young', tags: ['basic-obedience', 'socialization'] },
+                { text: 'Adult dog (1-7 years)', value: 'adult', tags: ['basic-obedience', 'advanced-obedience'] },
+                { text: 'Senior dog (7+ years)', value: 'senior', tags: ['gentle-training', 'basic-obedience'] }
+            ]
+        },
+        {
+            id: 'primary_concern',
+            question: 'What is your primary training concern?',
+            type: 'single',
+            options: [
+                { text: 'Basic obedience and manners', value: 'obedience', tags: ['basic-obedience', 'leash-manners'] },
+                { text: 'Anxiety or fearfulness', value: 'anxiety', tags: ['anxiety', 'fear', 'confidence-building'] },
+                { text: 'Aggressive or reactive behavior', value: 'aggression', tags: ['reactivity', 'aggression', 'counter-conditioning'] },
+                { text: 'Puppy socialization', value: 'socialization', tags: ['puppy', 'socialization'] }
+            ]
+        },
+        {
+            id: 'behavior_issues',
+            question: 'Which behaviors would you like to address? (Select all that apply)',
+            type: 'multiple',
+            options: [
+                { text: 'Jumping on people', value: 'jumping', tags: ['jumping'] },
+                { text: 'Excessive barking', value: 'barking', tags: ['barking'] },
+                { text: 'Pulling on leash', value: 'leash_pulling', tags: ['leash-manners'] },
+                { text: 'House training issues', value: 'house_training', tags: ['house-training'] },
+                { text: 'Separation anxiety', value: 'separation', tags: ['separation-anxiety'] },
+                { text: 'Fear of strangers/dogs', value: 'fear', tags: ['fear', 'anxiety'] }
+            ]
+        },
+        {
+            id: 'training_experience',
+            question: 'What is your experience with dog training?',
+            type: 'single',
+            options: [
+                { text: 'Complete beginner', value: 'beginner', tags: ['basic-obedience', 'positive-reinforcement'] },
+                { text: 'Some experience', value: 'some', tags: ['basic-obedience', 'advanced-obedience'] },
+                { text: 'Experienced owner', value: 'experienced', tags: ['advanced-obedience'] },
+                { text: 'Previous training failed', value: 'failed', tags: ['anxiety', 'confidence-building'] }
+            ]
+        },
+        {
+            id: 'training_goals',
+            question: 'What are your main training goals?',
+            type: 'multiple',
+            options: [
+                { text: 'Better recall (coming when called)', value: 'recall', tags: ['recall'] },
+                { text: 'Calm, confident behavior', value: 'confidence', tags: ['confidence-building'] },
+                { text: 'Good manners with guests', value: 'manners', tags: ['basic-obedience'] },
+                { text: 'Reduced anxiety/stress', value: 'anxiety_reduction', tags: ['anxiety', 'desensitization'] },
+                { text: 'Advanced tricks and commands', value: 'advanced', tags: ['advanced-obedience'] }
+            ]
+        },
+        {
+            id: 'urgency',
+            question: 'How urgent is your training need?',
+            type: 'single',
+            options: [
+                { text: 'Very urgent - immediate help needed', value: 'urgent', tags: ['anxiety', 'reactivity'] },
+                { text: 'Soon - within the next month', value: 'soon', tags: ['basic-obedience'] },
+                { text: 'Not urgent - planning ahead', value: 'planning', tags: ['puppy', 'socialization'] },
+                { text: 'Just exploring options', value: 'exploring', tags: ['basic-obedience'] }
+            ]
+        }
+    ];
+
+    let currentQuestionIndex = 0;
+    let userAnswers = {};
+
+    const startQuiz = () => {
+        document.getElementById('quiz-start').style.display = 'none';
+        document.getElementById('quiz-container').style.display = 'block';
+        showQuestion(0);
+    };
+
+    const showQuestion = (index) => {
+        const question = quizQuestions[index];
+        const questionContainer = document.getElementById('quiz-question');
+        
+        // Update progress
+        const progress = ((index + 1) / quizQuestions.length) * 100;
+        document.getElementById('progress-fill').style.width = `${progress}%`;
+        document.getElementById('progress-text').textContent = `Question ${index + 1} of ${quizQuestions.length}`;
+        
+        // Build question HTML
+        let optionsHTML = '';
+        question.options.forEach((option, optionIndex) => {
+            const inputType = question.type === 'multiple' ? 'checkbox' : 'radio';
+            const inputName = question.id;
+            const isChecked = userAnswers[question.id] && 
+                (Array.isArray(userAnswers[question.id]) 
+                    ? userAnswers[question.id].includes(option.value)
+                    : userAnswers[question.id] === option.value);
+            
+            optionsHTML += `
+                <label class="quiz-option">
+                    <input type="${inputType}" name="${inputName}" value="${option.value}" ${isChecked ? 'checked' : ''}>
+                    <span class="option-text">${option.text}</span>
+                </label>
+            `;
+        });
+        
+        questionContainer.innerHTML = `
+            <h3>${question.question}</h3>
+            <div class="quiz-options">
+                ${optionsHTML}
+            </div>
+        `;
+        
+        // Update navigation buttons
+        document.getElementById('prev-btn').style.display = index > 0 ? 'inline-block' : 'none';
+        document.getElementById('next-btn').style.display = index < quizQuestions.length - 1 ? 'inline-block' : 'none';
+        document.getElementById('submit-btn').style.display = index === quizQuestions.length - 1 ? 'inline-block' : 'none';
+        
+        // Add event listeners to options
+        const options = questionContainer.querySelectorAll('input');
+        options.forEach(option => {
+            option.addEventListener('change', () => {
+                saveAnswer(question.id, question.type);
+                updateNextButtonState();
+            });
+        });
+        
+        updateNextButtonState();
+    };
+
+    const saveAnswer = (questionId, questionType) => {
+        const inputs = document.querySelectorAll(`input[name="${questionId}"]:checked`);
+        
+        if (questionType === 'multiple') {
+            userAnswers[questionId] = Array.from(inputs).map(input => input.value);
+        } else {
+            userAnswers[questionId] = inputs.length > 0 ? inputs[0].value : null;
+        }
+    };
+
+    const updateNextButtonState = () => {
+        const currentQuestion = quizQuestions[currentQuestionIndex];
+        const hasAnswer = userAnswers[currentQuestion.id] && 
+            (Array.isArray(userAnswers[currentQuestion.id]) 
+                ? userAnswers[currentQuestion.id].length > 0
+                : userAnswers[currentQuestion.id] !== null);
+        
+        const nextBtn = document.getElementById('next-btn');
+        const submitBtn = document.getElementById('submit-btn');
+        
+        if (nextBtn.style.display !== 'none') {
+            nextBtn.disabled = !hasAnswer;
+        }
+        if (submitBtn.style.display !== 'none') {
+            submitBtn.disabled = !hasAnswer;
+        }
+    };
+
+    const nextQuestion = () => {
+        if (currentQuestionIndex < quizQuestions.length - 1) {
+            currentQuestionIndex++;
+            showQuestion(currentQuestionIndex);
+        }
+    };
+
+    const prevQuestion = () => {
+        if (currentQuestionIndex > 0) {
+            currentQuestionIndex--;
+            showQuestion(currentQuestionIndex);
+        }
+    };
+
+    const submitQuiz = () => {
+        // Calculate matches
+        const matches = calculateMatches();
+        showResults(matches);
+    };
+
+    const calculateMatches = () => {
+        // Collect all user tags from answers
+        const userTags = [];
+        
+        Object.keys(userAnswers).forEach(questionId => {
+            const question = quizQuestions.find(q => q.id === questionId);
+            const answer = userAnswers[questionId];
+            
+            if (Array.isArray(answer)) {
+                answer.forEach(value => {
+                    const option = question.options.find(opt => opt.value === value);
+                    if (option) userTags.push(...option.tags);
+                });
+            } else {
+                const option = question.options.find(opt => opt.value === answer);
+                if (option) userTags.push(...option.tags);
+            }
+        });
+        
+        // Score trainers based on tag matches
+        const scoredTrainers = trainersData.map(trainer => {
+            const matchingTags = trainer.matchTags.filter(tag => userTags.includes(tag));
+            const score = matchingTags.length;
+            return { ...trainer, score, matchingTags };
+        });
+        
+        // Sort by score and return top matches
+        return scoredTrainers
+            .filter(trainer => trainer.score > 0)
+            .sort((a, b) => b.score - a.score)
+            .slice(0, 3); // Top 3 matches
+    };
+
+    const showResults = (matches) => {
+        document.getElementById('quiz-container').style.display = 'none';
+        document.getElementById('quiz-results').style.display = 'block';
+        
+        const resultsContainer = document.getElementById('recommended-trainers');
+        
+        if (matches.length === 0) {
+            resultsContainer.innerHTML = `
+                <div class="no-matches">
+                    <p>We couldn't find specific matches based on your answers, but don't worry! All our trainers are qualified to help.</p>
+                    <a href="/trainers" class="button primary">Browse All Trainers</a>
+                </div>
+            `;
+            return;
+        }
+        
+        resultsContainer.innerHTML = matches.map((trainer, index) => `
+            <div class="match-card ${index === 0 ? 'best-match' : ''}">
+                ${index === 0 ? '<div class="best-match-badge">🏆 Best Match</div>' : ''}
+                <h4>${trainer.name}</h4>
+                <p class="match-location">${trainer.location}</p>
+                <div class="match-score">
+                    <span class="score-label">Match Score:</span>
+                    <div class="score-bar">
+                        <div class="score-fill" style="width: ${(trainer.score / 5) * 100}%"></div>
+                    </div>
+                    <span class="score-text">${trainer.score}/5</span>
+                </div>
+                <p class="match-description">${trainer.description}</p>
+                <div class="match-tags">
+                    ${trainer.matchingTags.slice(0, 3).map(tag => 
+                        `<span class="match-tag">${tag}</span>`
+                    ).join('')}
+                </div>
+                <div class="match-contact">
+                    ${trainer.phone ? `<a href="tel:${trainer.phone}" class="contact-link">📞 ${trainer.phone}</a>` : ''}
+                    ${trainer.email ? `<a href="mailto:${trainer.email}" class="contact-link">✉️ Email</a>` : ''}
+                    ${trainer.website ? `<a href="${trainer.website}" target="_blank" class="contact-link">🌐 Website</a>` : ''}
+                </div>
+            </div>
+        `).join('');
+    };
+
+    const retakeQuiz = () => {
+        currentQuestionIndex = 0;
+        userAnswers = {};
+        document.getElementById('quiz-results').style.display = 'none';
+        document.getElementById('quiz-start').style.display = 'block';
+    };
+
+    // Make functions globally available
+    window.startQuiz = startQuiz;
+    window.nextQuestion = nextQuestion;
+    window.prevQuestion = prevQuestion;
+    window.submitQuiz = submitQuiz;
+    window.retakeQuiz = retakeQuiz;
+</script>
+
+<style>
+    .pawsonality-quiz {
+        background: linear-gradient(135deg, var(--color-background-light) 0%, #f8f6f3 100%);
+        padding: 4rem 0;
+        margin: 3rem 0;
+    }
+
+    .quiz-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .quiz-header h2 {
+        font-size: 2.5em;
+        color: var(--color-accent-teal);
+        margin-bottom: 1rem;
+    }
+
+    .quiz-subtitle {
+        font-size: 1.2em;
+        color: var(--color-text-light);
+        opacity: 0.8;
+    }
+
+    /* Quiz Start Screen */
+    .quiz-start {
+        max-width: 600px;
+        margin: 0 auto;
+        text-align: center;
+    }
+
+    .quiz-intro {
+        background-color: var(--color-card-bg-light);
+        border-radius: 16px;
+        padding: 3rem;
+        box-shadow: var(--shadow-md);
+    }
+
+    .quiz-intro h3 {
+        color: var(--color-text-light);
+        margin-bottom: 1rem;
+    }
+
+    .quiz-intro p {
+        color: var(--color-text-light);
+        opacity: 0.8;
+        margin-bottom: 2rem;
+        line-height: 1.6;
+    }
+
+    .quiz-features {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .feature {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .feature-icon {
+        font-size: 2em;
+    }
+
+    .feature span:last-child {
+        font-size: 0.9em;
+        color: var(--color-text-light);
+        opacity: 0.8;
+    }
+
+    /* Quiz Container */
+    .quiz-container {
+        max-width: 700px;
+        margin: 0 auto;
+        background-color: var(--color-card-bg-light);
+        border-radius: 16px;
+        padding: 3rem;
+        box-shadow: var(--shadow-md);
+    }
+
+    .quiz-progress {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .progress-bar {
+        flex: 1;
+        height: 8px;
+        background-color: var(--color-border-light);
+        border-radius: 4px;
+        margin-right: 1rem;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--color-accent-teal), var(--color-accent-mustard));
+        border-radius: 4px;
+        transition: width 0.3s ease;
+    }
+
+    .progress-text {
+        font-size: 0.9em;
+        color: var(--color-text-light);
+        opacity: 0.8;
+        white-space: nowrap;
+    }
+
+    .quiz-question h3 {
+        color: var(--color-text-light);
+        margin-bottom: 2rem;
+        font-size: 1.5em;
+    }
+
+    .quiz-options {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .quiz-option {
+        display: flex;
+        align-items: center;
+        padding: 1rem 1.5rem;
+        background-color: var(--color-background-light);
+        border: 2px solid var(--color-border-light);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .quiz-option:hover {
+        border-color: var(--color-accent-teal);
+        background-color: var(--color-card-bg-light);
+    }
+
+    .quiz-option input {
+        margin-right: 1rem;
+        transform: scale(1.2);
+    }
+
+    .quiz-option input:checked + .option-text {
+        font-weight: 600;
+        color: var(--color-accent-teal);
+    }
+
+    .quiz-option:has(input:checked) {
+        border-color: var(--color-accent-mustard);
+        background-color: rgba(232, 185, 79, 0.1);
+    }
+
+    .quiz-navigation {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+
+    .quiz-navigation button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    /* Quiz Results */
+    .quiz-results {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .results-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .results-header h3 {
+        color: var(--color-accent-teal);
+        font-size: 2em;
+        margin-bottom: 1rem;
+    }
+
+    .match-card {
+        background-color: var(--color-card-bg-light);
+        border: 1px solid var(--color-border-light);
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-sm);
+        position: relative;
+    }
+
+    .match-card.best-match {
+        border-color: var(--color-accent-mustard);
+        box-shadow: 0 8px 25px rgba(232, 185, 79, 0.2);
+    }
+
+    .best-match-badge {
+        position: absolute;
+        top: -10px;
+        right: 20px;
+        background: var(--color-accent-mustard);
+        color: var(--color-primary-button-text);
+        padding: 0.5em 1em;
+        border-radius: 20px;
+        font-size: 0.9em;
+        font-weight: 600;
+    }
+
+    .match-card h4 {
+        color: var(--color-accent-teal);
+        margin-bottom: 0.5rem;
+        font-size: 1.4em;
+    }
+
+    .match-location {
+        color: var(--color-text-light);
+        opacity: 0.8;
+        margin-bottom: 1rem;
+    }
+
+    .match-score {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .score-bar {
+        flex: 1;
+        height: 8px;
+        background-color: var(--color-border-light);
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .score-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--color-accent-teal), var(--color-accent-mustard));
+        border-radius: 4px;
+    }
+
+    .match-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin: 1rem 0;
+    }
+
+    .match-tag {
+        background-color: var(--color-accent-teal);
+        color: white;
+        padding: 0.3em 0.8em;
+        border-radius: 12px;
+        font-size: 0.8em;
+        font-weight: 500;
+    }
+
+    .match-contact {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .contact-link {
+        color: var(--color-accent-teal);
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 0.9em;
+    }
+
+    .contact-link:hover {
+        color: var(--color-accent-mustard);
+    }
+
+    .results-actions {
+        text-align: center;
+        margin-top: 3rem;
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .pawsonality-quiz {
+            padding: 3rem 0;
+        }
+
+        .quiz-intro,
+        .quiz-container {
+            padding: 2rem;
+        }
+
+        .quiz-features {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .quiz-navigation {
+            flex-direction: column;
+        }
+
+        .results-actions {
+            flex-direction: column;
+        }
+
+        .match-contact {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+    }
+</style>
+

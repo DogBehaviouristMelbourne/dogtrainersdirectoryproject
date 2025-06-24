@@ -1,0 +1,128 @@
+---
+import Layout from '../layouts/Layout.astro'
+
+const url = new URL(Astro.request.url)
+const submitted = url.searchParams.get('submitted')
+
+let title = 'Thank You'
+let message = 'Thank you for your submission!'
+let description = 'We have received your information and will be in touch soon.'
+
+if (submitted === 'trainer') {
+  title = 'Trainer Submission Received'
+  message = '🐕 Your trainer profile has been submitted!'
+  description = 'We\'ll review your submission and contact you within 1-2 business days. Thank you for wanting to join our directory!'
+} else if (submitted === 'newsletter') {
+  title = 'Newsletter Subscription Confirmed'
+  message = '📧 You\'re now subscribed to our newsletter!'
+  description = 'You\'ll receive weekly dog training tips and updates from our community of expert trainers.'
+} else if (submitted === 'contact') {
+  title = 'Message Sent'
+  message = '💌 Your message has been sent!'
+  description = 'We\'ll get back to you within 24 hours. Thank you for reaching out!'
+} else if (submitted === 'feedback') {
+  title = 'Feedback Received'
+  message = '💭 Thank you for your feedback!'
+  description = 'Your input helps us improve our directory and better serve the dog training community.'
+}
+---
+
+<Layout title={title}>
+  <section class="thank-you-container">
+    <div class="thank-you-card">
+      <h1 class="thank-you-title">{message}</h1>
+      <p class="thank-you-description">{description}</p>
+      <div class="thank-you-actions">
+        <a href="/" class="button primary">Return to Home</a>
+        <a href="/trainers" class="button secondary">Browse Trainers</a>
+      </div>
+    </div>
+  </section>
+
+  <style>
+    .thank-you-container {
+      min-height: 60vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .thank-you-card {
+      background: var(--color-card-bg-light);
+      border: 1px solid var(--color-border-light);
+      border-radius: 18px;
+      box-shadow: var(--shadow-lg);
+      padding: 3rem;
+      text-align: center;
+      max-width: 500px;
+      width: 100%;
+    }
+
+    .thank-you-title {
+      font-family: 'Balsamiq Sans', cursive, sans-serif;
+      font-size: 2.2em;
+      color: var(--color-accent-teal);
+      margin-bottom: 1rem;
+    }
+
+    .thank-you-description {
+      font-size: 1.1em;
+      color: var(--color-text-light);
+      line-height: 1.6;
+      margin-bottom: 2rem;
+    }
+
+    .thank-you-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .button {
+      display: inline-block;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      border: 2px solid transparent;
+    }
+
+    .button.primary {
+      background: var(--color-accent-mustard);
+      color: var(--color-primary-button-text);
+    }
+
+    .button.primary:hover {
+      background: var(--color-accent-teal);
+      color: white;
+    }
+
+    .button.secondary {
+      background: transparent;
+      color: var(--color-accent-teal);
+      border-color: var(--color-accent-teal);
+    }
+
+    .button.secondary:hover {
+      background: var(--color-accent-teal);
+      color: white;
+    }
+
+    @media (max-width: 600px) {
+      .thank-you-card {
+        padding: 2rem;
+      }
+
+      .thank-you-actions {
+        flex-direction: column;
+      }
+
+      .button {
+        width: 100%;
+      }
+    }
+  </style>
+</Layout>

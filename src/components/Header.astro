@@ -1,0 +1,119 @@
+---
+// src/components/Header.astro
+import ThemeToggle from './ThemeToggle.astro';
+import SoundToggle from './SoundToggle.astro'; // Import SoundToggle
+import '../styles/header.css';
+
+// Define navigation links with explicit Home link
+const navLinks = [
+    { name: 'Home', href: '/' },
+    { name: 'Find a Trainer', href: '/trainers' },
+    { name: 'About Us', href: '/about' },
+    { name: 'For Trainers', href: '/for-trainers' },
+    { name: 'Contact', href: '/contact' },
+    { name: 'Become a Listed Trainer', href: '/submit' },
+    { name: 'Update Listing', href: '/claim' },
+    { name: 'Blog', href: '/blog' },
+];
+
+// Get current path for active link styling
+const currentPath = Astro.url.pathname;
+
+// Helper function for active link styling
+const isActive = (href: string) => currentPath === href ? 'active' : '';
+---
+
+<header class="site-header sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-gray-200">
+    <!-- Logo with explicit home link -->
+    <a href="/" class="logo flex items-center gap-2" aria-label="Dog Trainers Directory - Home">
+        <img src="/favicon.svg" alt="Dog Trainers Directory logo" class="h-8 w-8" />
+        <span class="font-bold">Dog Trainers Directory</span>
+        <span class="sr-only">Home</span>
+    </a>
+
+    <!-- Desktop Navigation -->
+    <nav class="desktop-nav">
+        {navLinks.map(link => (
+            <a href={link.href} class={isActive(link.href)} aria-current={currentPath === link.href ? 'page' : undefined}>
+                {link.name}
+            </a>
+        ))}
+    </nav>
+
+    <!-- Toggles for Desktop -->
+    <div class="toggles-wrapper desktop-only">
+        <ThemeToggle />
+        <SoundToggle />
+    </div>
+
+    <!-- Burger Button for Mobile -->
+    <button class="burger-button" aria-label="Open navigation menu">
+        <span class="line line-top"></span>
+        <span class="line line-middle"></span>
+        <span class="line line-bottom"></span>
+    </button>
+
+    <!-- Mobile Navigation Overlay -->
+    <div class="mobile-nav-overlay">
+        <nav>
+            {navLinks.map(link => (
+                <a href={link.href} class={isActive(link.href)} aria-current={currentPath === link.href ? 'page' : undefined}>
+                    {link.name}
+                </a>
+            ))}
+        </nav>
+        <!-- Toggles for Mobile (inside overlay) -->
+        <div class="toggles-wrapper mobile-only">
+            <ThemeToggle />
+            <SoundToggle />
+        </div>
+    </div>
+</header>
+
+<script is:inline>
+    const burgerButton = document.querySelector('.burger-button');
+    const mobileNavOverlay = document.querySelector('.mobile-nav-overlay');
+    const body = document.body;
+
+    // Get the position of the burger button to animate clip-path from there
+    const setClipPathOrigin = () => {
+        const rect = burgerButton.getBoundingClientRect();
+        // Calculate center of the burger button relative to viewport
+        const x = rect.left + rect.width / 2;
+        const y = rect.top + rect.height / 2;
+        mobileNavOverlay.style.setProperty('--clip-x', `${x}px`);
+        mobileNavOverlay.style.setProperty('--clip-y', `${y}px`);
+    };
+
+    // Set initial origin on load
+    setClipPathOrigin();
+    // Recalculate on resize to ensure correct animation origin
+    window.addEventListener('resize', setClipPathOrigin);
+
+    burgerButton.addEventListener('click', () => {
+        const isOpen = mobileNavOverlay.classList.contains('open');
+
+        if (isOpen) {
+            // Close menu
+            mobileNavOverlay.classList.remove('open');
+            burgerButton.classList.remove('open');
+            body.classList.remove('menu-open');
+        } else {
+            // Open menu
+            setClipPathOrigin(); // Recalculate just before opening
+            mobileNavOverlay.classList.add('open');
+            burgerButton.classList.add('open');
+            body.classList.add('menu-open');
+        }
+    });
+
+    // Close menu when a link is clicked (for SPA-like navigation)
+    mobileNavOverlay.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+            mobileNavOverlay.classList.remove('open');
+            burgerButton.classList.remove('open');
+            body.classList.remove('menu-open');
+        });
+    });
+</script>
+

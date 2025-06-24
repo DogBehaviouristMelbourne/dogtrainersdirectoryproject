@@ -1,0 +1,31 @@
+---
+const { message, visible } = Astro.props;
+---
+{visible && (
+  <div class="success-modal">
+    <div class="modal-box">
+      <p>{message}</p>
+    </div>
+  </div>
+)}
+
+<style>
+.success-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+.modal-box {
+  background: white;
+  color: #111;
+  padding: 1.5rem;
+  border-radius: 8px;
+  font-weight: 500;
+  min-width: 250px;
+  text-align: center;
+}
+</style>

@@ -1,0 +1,110 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+---
+<Layout title="Page Not Found - Lost Dog?">
+  <Header />
+  <main id="main-content">
+    <section class="container error-page">
+      <div class="error-content">
+        <img src="/images/sad-dog-404.png" alt="Sad dog looking confused - page not found illustration" class="error-image" />
+        <h1 class="error-title">Woof! This page went walkies...</h1>
+        <p class="error-message">
+          Looks like this page slipped its leash and wandered off! 🐕<br />
+          Don't worry - we'll help you find your way back to the pack.
+        </p>
+        <div class="error-actions">
+          <a href="/" class="button primary">🏠 Back to Home</a>
+          <a href="/trainers" class="button secondary">🔍 Find Trainers</a>
+        </div>
+        <p class="error-help">
+          Still lost? <a href="/contact">Contact us</a> and we'll help you find what you're looking for!
+        </p>
+      </div>
+    </section>
+  </main>
+  <Footer />
+</Layout>
+
+<style>
+  .error-page {
+    text-align: center;
+    padding: 4rem 2rem;
+    min-height: 70vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .error-content {
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  .error-image {
+    max-width: 220px;
+    width: 100%;
+    margin-bottom: 2rem;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
+  }
+
+  .error-title {
+    font-family: 'Balsamiq Sans', cursive;
+    font-size: 2.5rem;
+    color: var(--color-accent-teal);
+    margin-bottom: 1rem;
+    line-height: 1.2;
+  }
+
+  .error-message {
+    font-size: 1.2rem;
+    color: var(--color-text-light);
+    margin-bottom: 2.5rem;
+    line-height: 1.6;
+  }
+
+  .error-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .error-help {
+    font-size: 1rem;
+    color: var(--color-text-light);
+    opacity: 0.8;
+  }
+
+  .error-help a {
+    color: var(--color-accent-teal);
+    text-decoration: underline;
+  }
+
+  @media (max-width: 480px) {
+    .error-title {
+      font-size: 2rem;
+    }
+    
+    .error-actions {
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .error-actions .button {
+      width: 100%;
+      max-width: 250px;
+    }
+  }
+</style>Layout from '../layouts/Layout.astro';
+---
+<Layout title="Page Not Found">
+  <section class="container" style="text-align:center; padding:4rem 0;">
+    <img src="/images/sad-dog-404.png" alt="Sad dog - page not found" style="max-width:220px;width:100%;margin-bottom:2rem;" />
+    <h1 style="font-size:2.5em; margin-bottom:0.5em;">404 – Page Not Found</h1>
+    <p style="font-size:1.2em; color:var(--color-text-light); margin-bottom:2em;">Sorry, we couldn’t find that page.<br />Try the menu or return to the <a href="/">homepage</a>.</p>
+    <a href="/" class="button primary">Back to Home</a>
+  </section>
+</Layout>

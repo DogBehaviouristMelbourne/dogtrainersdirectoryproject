@@ -1,0 +1,75 @@
+---
+import Layout from '../layouts/Layout.astro'
+import posts from '../data/blog.json'
+---
+
+<Layout title="Dog Training Blog" description="Tips, gear reviews, behaviour insights and more from real trainers and dog experts.">
+  <section class="container">
+    <h1 class="blog-title">Dog Behaviour Blog</h1>
+
+    <div class="blog-list">
+      {posts.map((post) => (
+        <article class="blog-card">
+          <h2 class="blog-card-title"><a href={`/blog/${post.slug}`}>{post.title}</a></h2>
+          <p class="meta">By {post.author} — {post.date}</p>
+          {post.image && <img src={post.image} alt={`${post.title} - article illustration`} />}
+          <p class="blog-excerpt">{post.excerpt}</p>
+          <a href={`/blog/${post.slug}`} class="blog-readmore">Read more →</a>
+        </article>
+      ))}
+    </div>
+  </section>
+  <style>
+    .blog-title {
+      text-align: center;
+      color: var(--color-accent-teal);
+      font-family: 'Balsamiq Sans', cursive, sans-serif;
+      font-size: 2.2em;
+      margin-bottom: 2rem;
+    }
+    .blog-list {
+      display: grid;
+      gap: 2rem;
+      margin-top: 2rem;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .blog-card {
+      background: var(--color-card-bg-light);
+      padding: 2rem 1.5rem 1.5rem 1.5rem;
+      border-left: 5px solid var(--color-accent-terracotta);
+      border-radius: 12px;
+      box-shadow: var(--shadow-sm);
+      transition: box-shadow 0.2s;
+    }
+    .blog-card:hover {
+      box-shadow: var(--shadow-md);
+    }
+    .blog-card-title {
+      margin-bottom: 0.5rem;
+      color: var(--color-accent-teal);
+      font-size: 1.4em;
+      font-family: 'Balsamiq Sans', cursive, sans-serif;
+    }
+    .meta {
+      font-size: 0.98rem;
+      color: #777;
+      margin-bottom: 1rem;
+    }
+    .blog-excerpt {
+      color: var(--color-text-light);
+      font-size: 1.08em;
+      margin-bottom: 1.2em;
+    }
+    .blog-readmore {
+      color: var(--color-accent-teal);
+      font-weight: 600;
+      text-decoration: underline;
+      font-size: 1.05em;
+    }
+    .blog-readmore:hover {
+      color: var(--color-accent-mustard);
+    }
+  </style>
+</Layout>

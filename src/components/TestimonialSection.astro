@@ -1,0 +1,96 @@
+---
+import testimonials from '../data/testimonials.json'
+---
+
+<section class="testimonial-section">
+  <h2>What Melbourne Dog Owners Are Saying</h2>
+  <div class="testimonials">
+    {testimonials.map((t) => (
+      <blockquote class="testimonial-card">
+        {t.image && t.image.startsWith('/') ? (
+          <img src={t.image} alt={t.name + " photo"} class="testimonial-img" />
+        ) : t.image ? (
+          <span class="testimonial-emoji" role="img" aria-label="User avatar">{t.image}</span>
+        ) : null}
+        <p>"{t.quote}"</p>
+        <footer>— {t.name}, {t.location}</footer>
+      </blockquote>
+    ))}
+  </div>
+</section>
+
+<style>
+.testimonial-section {
+  padding: 2rem 0;
+}
+.testimonials {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+.testimonial-card {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 4px 24px 0 rgba(0,0,0,0.07);
+  padding: 1.5rem 1.25rem;
+  border-radius: 18px;
+  font-size: 1.05rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.7rem;
+  color: #222;
+  transition: transform 0.2s, box-shadow 0.2s;
+  will-change: transform;
+  position: relative;
+  min-height: 180px;
+  /* Floating effect */
+  top: 0;
+}
+.testimonial-card:hover {
+  transform: translateY(-8px) scale(1.03);
+  box-shadow: 0 8px 32px 0 rgba(0,0,0,0.13);
+}
+.testimonial-card p {
+  color: #222;
+  font-size: 1.08rem;
+  line-height: 1.6;
+  margin: 0 0 0.5rem 0;
+}
+.testimonial-card footer {
+  color: #555;
+  font-size: 0.98rem;
+  margin-top: auto;
+}
+.testimonial-img {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 0.5rem;
+  border: 2.5px solid #e0e0e0;
+  box-shadow: 0 2px 8px 0 rgba(0,0,0,0.07);
+  background: #f7f7f7;
+}
+.testimonial-emoji {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+  line-height: 1;
+  font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji', sans-serif;
+  display: inline-block;
+  vertical-align: middle;
+}
+@media (max-width: 600px) {
+  .testimonials {
+    grid-template-columns: 1fr;
+  }
+  .testimonial-card {
+    min-height: 140px;
+    padding: 1.1rem 0.7rem;
+  }
+  .testimonial-img {
+    width: 44px;
+    height: 44px;
+  }
+}
+</style>

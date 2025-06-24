@@ -1,0 +1,93 @@
+[
+    {
+        "type": "tip",
+        "title": "Positive Reinforcement Power",
+        "content": "Always reward desired behaviors immediately! A well-timed treat or praise reinforces what you want your dog to do.",
+        "icon": "paw"
+    },
+    {
+        "type": "fact",
+        "title": "Did You Know?",
+        "content": "Dogs can be trained to detect diseases like cancer and diabetes in humans through their incredible sense of smell!",
+        "icon": "nose"
+    },
+    {
+        "type": "tip",
+        "title": "Socialization is Key",
+        "content": "Expose puppies to new sights, sounds, and experiences early and positively to build a confident, well-adjusted adult dog.",
+        "icon": "friends"
+    },
+    {
+        "type": "fact",
+        "title": "Amazing Hearing",
+        "content": "Dogs can hear sounds at much higher frequencies than humans, which is why they sometimes react to things we can't even perceive.",
+        "icon": "ear"
+    },
+    {
+        "type": "tip",
+        "title": "Consistency is Crucial",
+        "content": "Everyone in the household should use the same commands and rules. Consistency helps your dog learn faster and reduces confusion.",
+        "icon": "consistency"
+    },
+    {
+        "type": "fact",
+        "title": "Wet Noses",
+        "content": "A dog's wet nose helps them absorb scent chemicals, making their sense of smell even more powerful!",
+        "icon": "nose"
+    },
+    {
+        "type": "tip",
+        "title": "Short & Sweet Sessions",
+        "content": "Keep training sessions short (5-10 minutes) and fun, especially for puppies. End on a positive note!",
+        "icon": "clock"
+    },
+    {
+        "type": "fact",
+        "title": "Dreaming Dogs",
+        "content": "Just like humans, dogs dream! You might see their paws twitching or hear soft barks during their sleep.",
+        "icon": "sleep"
+    },
+    {
+        "type": "tip",
+        "title": "Exercise Before Training",
+        "content": "A tired dog is a good student! Light exercise before training helps your dog focus and be more receptive to learning.",
+        "icon": "paw"
+    },
+    {
+        "type": "fact",
+        "title": "Tail Talk",
+        "content": "A wagging tail doesn't always mean happiness. The speed, height, and direction of the wag all communicate different emotions.",
+        "icon": "paw"
+    },
+    {
+        "type": "tip",
+        "title": "Patience Pays Off",
+        "content": "Every dog learns at their own pace. Stay patient and celebrate small victories - they add up to big changes!",
+        "icon": "consistency"
+    },
+    {
+        "type": "fact",
+        "title": "Memory Masters",
+        "content": "Dogs have excellent associative memory and can remember specific events and people for years, especially positive experiences.",
+        "icon": "sleep"
+    },
+    {
+        "type": "tip",
+        "title": "Use High-Value Treats",
+        "content": "For challenging training sessions, use your dog's absolute favorite treats. Save the best rewards for the hardest lessons!",
+        "icon": "paw"
+    },
+    {
+        "type": "fact",
+        "title": "Pack Mentality",
+        "content": "Dogs are naturally social animals who thrive on clear leadership and structure within their family pack.",
+        "icon": "friends"
+    },
+    {
+        "type": "tip",
+        "title": "End on Success",
+        "content": "Always finish training sessions with something your dog knows well. This builds confidence and keeps them eager for the next session.",
+        "icon": "consistency"
+    }
+]
+

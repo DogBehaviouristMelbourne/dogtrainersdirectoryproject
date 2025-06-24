@@ -1,0 +1,231 @@
+---
+import Layout from '../layouts/Layout.astro'
+import SuccessModal from '../components/SuccessModal.astro'
+
+const url = Astro.request.url
+const modalVisible = url.includes('submitted=claim')
+const modalMessage = 'Your request has been submitted. We’ll be in touch soon.'
+---
+
+<Layout title="Update Your Listing">
+  <section class="container">
+    <h1 class="form-title">Update Your Trainer Profile</h1>
+    <form id="claim-form" class="trainer-form" novalidate>
+      <div class="form-row">
+        <label>
+          Trainer Name
+          <input type="text" id="claim-trainer" required aria-label="Trainer name" />
+        </label>
+        <label>
+          Business Name (optional)
+          <input type="text" id="claim-business" aria-label="Business name (optional)" />
+        </label>
+      </div>
+      <label>
+        Your Email
+        <input type="email" id="claim-email" required aria-label="Your email address" />
+      </label>
+      <label>
+        What would you like changed?
+        <textarea id="claim-changes" required aria-label="What would you like changed?" placeholder="Please describe the changes you'd like to make to your listing..."></textarea>
+      </label>
+      <label>
+        Profile Image URL (optional)
+        <input type="url" id="claim-image" aria-label="Profile image URL (optional)" placeholder="https://example.com/your-image.jpg" />
+        <div id="claim-image-preview" class="image-preview" style="display:none; margin-top:0.5em;"></div>
+        <span id="claim-image-error" class="form-error" style="display:none;"></span>
+      </label>
+      <button type="submit" class="button primary" aria-label="Send update request">Send Request</button>
+      <span id="claim-loading" style="display:none; margin-left: 0.5em;">Sending...</span>
+    </form>
+    <p id="claim-status" class="form-error"></p>
+  </section>
+
+  <SuccessModal visible={modalVisible} message={modalMessage} />
+
+  <script type="module">
+    import { supabase } from '../lib/supabaseClient.js'
+
+    const form = document.querySelector('#claim-form')
+    const loading = document.querySelector('#claim-loading')
+    const status = document.querySelector('#claim-status')
+    const imageInput = document.querySelector('#claim-image');
+    const imagePreview = document.getElementById('claim-image-preview');
+    const imageError = document.getElementById('claim-image-error');
+
+    imageInput.addEventListener('input', () => {
+      const url = imageInput.value.trim();
+      if (url && !url.match(/^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)$/i)) {
+        imagePreview.innerHTML = '';
+        imagePreview.style.display = 'none';
+        imageError.textContent = 'Please enter a valid image URL ending in .jpg, .png, .gif, or .webp.';
+        imageError.style.display = 'block';
+      } else if (url) {
+        imagePreview.innerHTML = `<img src="${url}" alt="Profile preview" style="max-width:100px;max-height:100px;border-radius:50%;box-shadow:0 2px 8px #0001;">`;
+        imagePreview.style.display = 'block';
+        imageError.textContent = '';
+        imageError.style.display = 'none';
+      } else {
+        imagePreview.innerHTML = '';
+        imagePreview.style.display = 'none';
+        imageError.textContent = '';
+        imageError.style.display = 'none';
+      }
+    });
+    // Inline validation on submit
+    form?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      let hasError = false;
+      status.textContent = '';
+      // Required fields
+      if (!trainer_name) {
+        status.textContent = 'Trainer name is required.';
+        hasError = true;
+      } else if (!email) {
+        status.textContent = 'Email is required.';
+        hasError = true;
+      } else if (!requested_changes) {
+        status.textContent = 'Please describe what you want changed.';
+        hasError = true;
+      } else if (imageInput.value && !imageInput.value.trim().match(/^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)$/i)) {
+        imageError.textContent = 'Please enter a valid image URL ending in .jpg, .png, .gif, or .webp.';
+        imageError.style.display = 'block';
+        hasError = true;
+      } else {
+        imageError.textContent = '';
+        imageError.style.display = 'none';
+      }
+      if (hasError) return;
+      loading.style.display = 'inline-block';
+
+      const trainer_name = document.querySelector('#claim-trainer').value.trim()
+      const business_name = document.querySelector('#claim-business').value.trim()
+      const email = document.querySelector('#claim-email').value.trim()
+      const requested_changes = document.querySelector('#claim-changes').value.trim()
+      const profile_image_url = document.querySelector('#claim-image').value.trim()
+
+      const { error } = await supabase.from('update_requests').insert({
+        trainer_name,
+        business_name,
+        email,
+        requested_changes: requested_changes + (profile_image_url ? `\nRequested image URL: ${profile_image_url}` : '')
+      })
+
+      loading.style.display = 'none'
+
+      if (error) {
+        status.textContent = '❌ Something went wrong. Please check your input.'
+      } else {
+        window.location.href = window.location.pathname + '?submitted=claim'
+      }
+    })
+  </script>
+</Layout>  <style>
+    .trainer-form {
+      background: var(--color-card-bg-light);
+      border: 1px solid var(--color-border-light);
+      border-radius: 18px;
+      box-shadow: var(--shadow-sm);
+      padding: 2.5rem 2rem 2rem 2rem;
+      max-width: 700px;
+      margin: 2rem auto 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+    .form-title {
+      text-align: center;
+      font-family: 'Balsamiq Sans', cursive, sans-serif;
+      font-size: 2.3em;
+      color: var(--color-accent-teal);
+      margin-bottom: 1.5rem;
+    }
+    .form-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+    }
+    .form-row label {
+      flex: 1 1 220px;
+      display: flex;
+      flex-direction: column;
+      font-weight: 500;
+      color: var(--color-text-light);
+      gap: 0.5rem;
+    }
+    .trainer-form label {
+      display: flex;
+      flex-direction: column;
+      font-weight: 500;
+      color: var(--color-text-light);
+      gap: 0.5rem;
+    }
+    .trainer-form input,
+    .trainer-form textarea {
+      border: 1px solid var(--color-border-light);
+      border-radius: 8px;
+      padding: 0.8em 1em;
+      font-size: 1.05em;
+      background: var(--color-background-light);
+      color: var(--color-text-light);
+      transition: border-color 0.2s, box-shadow 0.2s;
+      font-family: inherit;
+    }
+    .trainer-form input:focus,
+    .trainer-form textarea:focus {
+      outline: none;
+      border-color: var(--color-accent-teal);
+      box-shadow: 0 0 0 2px rgba(90, 155, 156, 0.12);
+    }
+    .trainer-form textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+    .trainer-form button.button.primary {
+      background: var(--color-accent-mustard);
+      color: var(--color-primary-button-text);
+      border: none;
+      border-radius: 8px;
+      padding: 1em 2.2em;
+      font-size: 1.1em;
+      font-weight: 700;
+      box-shadow: var(--shadow-sm);
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+      margin-top: 0.5rem;
+      align-self: flex-end;
+    }
+    .trainer-form button.button.primary:hover {
+      background: var(--color-accent-teal);
+      color: #fff;
+      box-shadow: var(--shadow-md);
+    }
+    .image-preview img {
+      border: 2px solid var(--color-border-light);
+      background: var(--color-background-light);
+      margin-top: 0.2em;
+      max-width: 100px;
+      max-height: 100px;
+      border-radius: 50%;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .form-error {
+      color: var(--color-accent-terracotta);
+      font-size: 0.98em;
+      margin-top: 0.2em;
+      display: block;
+    }
+    @media (max-width: 700px) {
+      .trainer-form {
+        padding: 1.2rem 0.5rem 1.5rem 0.5rem;
+        margin: 1rem auto 0 auto;
+      }
+      .form-row {
+        flex-direction: column;
+        gap: 1rem;
+      }
+      .form-title {
+        font-size: 1.8em;
+      }
+    }
+  </style>

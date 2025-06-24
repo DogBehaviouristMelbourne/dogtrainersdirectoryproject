@@ -1,0 +1,135 @@
+[
+    {
+        "id": "trainer-1",
+        "name": "Pawsitive Steps Training",
+        "location": "Richmond",
+        "categories": ["puppy-training", "behaviour-obedience"],
+        "matchTags": ["puppy", "socialization", "basic-obedience", "positive-reinforcement", "leash-manners", "jumping", "house-training"],
+        "phone": "0412 345 678",
+        "email": "info@pawsitivesteps.com.au",
+        "website": "https://www.pawsitivesteps.com.au",
+        "description": "Specializing in positive reinforcement for puppies under 16 weeks, focusing on early socialization and basic manners. Also offers solutions for common nuisance behaviors like jumping and leash pulling for older dogs. Our gentle approach builds confidence while establishing clear boundaries."
+    },
+    {
+        "id": "trainer-2",
+        "name": "Calm Canine Co.",
+        "location": "Fitzroy",
+        "categories": ["anxiety-stress-management"],
+        "matchTags": ["anxiety", "fear", "trauma", "reactivity", "separation-anxiety", "confidence-building", "counter-conditioning", "desensitization", "positive-reinforcement"],
+        "phone": "0409 876 543",
+        "email": "hello@calmcanine.com.au",
+        "website": "https://www.calmcanine.com.au",
+        "description": "Dedicated to helping dogs overcome fear, anxiety, and trauma. Utilizes gentle counter-conditioning and desensitization techniques to build confidence and reduce stress. Specializes in separation anxiety and reactive behavior modification."
+    },
+    {
+        "id": "trainer-3",
+        "name": "Melbourne Dog Gurus",
+        "location": "St Kilda",
+        "categories": ["behaviour-obedience", "puppy-training"],
+        "matchTags": ["puppy", "basic-obedience", "advanced-obedience", "recall", "leash-manners", "barking", "house-training", "positive-reinforcement"],
+        "phone": "0455 112 233",
+        "email": "contact@melbournedoggurus.com",
+        "website": "https://www.melbournedoggurus.com",
+        "description": "Offering comprehensive obedience classes from puppy kindergarten to advanced recall. Addresses a wide range of behavioral issues including excessive barking and house-soiling. Group and private sessions available."
+    },
+    {
+        "id": "trainer-4",
+        "name": "Inner West Dog Whisperers",
+        "location": "Footscray",
+        "categories": ["anxiety-stress-management", "behaviour-obedience"],
+        "matchTags": ["reactivity", "separation-anxiety", "anxiety", "fear", "basic-obedience", "confidence-building", "positive-reinforcement"],
+        "phone": "0433 445 566",
+        "email": "support@innerwestdogs.com.au",
+        "website": "https://www.innerwestdogs.com.au",
+        "description": "Expert guidance for reactive dogs and those with separation anxiety. Also provides foundational obedience training to build a strong bond and clear communication between dog and owner."
+    },
+    {
+        "id": "trainer-5",
+        "name": "Northside Puppy Academy",
+        "location": "Brunswick",
+        "categories": ["puppy-training"],
+        "matchTags": ["puppy", "socialization", "basic-obedience", "positive-reinforcement", "house-training", "confidence-building"],
+        "phone": "0421 789 012",
+        "email": "academy@northsidepuppy.com.au",
+        "website": "https://www.northsidepuppy.com.au",
+        "description": "Exclusively focused on puppies aged 8-20 weeks. Our structured socialization program introduces young dogs to various environments, sounds, and experiences in a controlled, positive manner. Small class sizes ensure individual attention."
+    },
+    {
+        "id": "trainer-6",
+        "name": "Bayside Behavior Solutions",
+        "location": "Brighton",
+        "categories": ["behaviour-obedience", "anxiety-stress-management"],
+        "matchTags": ["aggression", "reactivity", "fear", "advanced-obedience", "leash-manners", "counter-conditioning", "positive-reinforcement"],
+        "phone": "0398 654 321",
+        "email": "info@baysidebehavior.com.au",
+        "website": "https://www.baysidebehavior.com.au",
+        "description": "Specializes in complex behavioral issues including aggression and severe reactivity. Uses science-based methods to modify problematic behaviors while maintaining the human-animal bond. Certified in advanced behavior modification techniques."
+    },
+    {
+        "id": "trainer-7",
+        "name": "Eastern Suburbs Dog Training",
+        "location": "Hawthorn",
+        "categories": ["behaviour-obedience"],
+        "matchTags": ["basic-obedience", "advanced-obedience", "recall", "leash-manners", "jumping", "barking", "positive-reinforcement"],
+        "phone": "0456 123 789",
+        "email": "training@easternsuburbsdogs.com.au",
+        "website": "https://www.easternsuburbsdogs.com.au",
+        "description": "Traditional obedience training with modern positive reinforcement methods. Offers beginner through advanced classes, focusing on reliable recall, loose leash walking, and impulse control. Perfect for dogs who need structure and consistency."
+    },
+    {
+        "id": "trainer-8",
+        "name": "Gentle Paws Therapy",
+        "location": "Carlton",
+        "categories": ["anxiety-stress-management"],
+        "matchTags": ["trauma", "fear", "anxiety", "confidence-building", "desensitization", "counter-conditioning", "positive-reinforcement"],
+        "phone": "0487 321 654",
+        "email": "therapy@gentlepaws.com.au",
+        "website": "https://www.gentlepaws.com.au",
+        "description": "Therapeutic approach to canine behavioral issues, particularly trauma recovery and phobia treatment. Works with rescue dogs and those with difficult backgrounds. Patience and understanding are at the core of our methodology."
+    },
+    {
+        "id": "trainer-9",
+        "name": "South Melbourne Canine College",
+        "location": "South Melbourne",
+        "categories": ["puppy-training", "behaviour-obedience"],
+        "matchTags": ["puppy", "socialization", "basic-obedience", "advanced-obedience", "positive-reinforcement", "leash-manners", "recall"],
+        "phone": "0412 987 654",
+        "email": "college@southmelbournecanine.com.au",
+        "website": "https://www.southmelbournecanine.com.au",
+        "description": "Comprehensive training programs from puppy foundation courses to advanced obedience certifications. Our structured curriculum ensures progressive learning and long-term success. Experienced instructors with decades of combined experience."
+    },
+    {
+        "id": "trainer-10",
+        "name": "Western Suburbs Dog Academy",
+        "location": "Williamstown",
+        "categories": ["behaviour-obedience", "anxiety-stress-management"],
+        "matchTags": ["basic-obedience", "reactivity", "anxiety", "leash-manners", "confidence-building", "positive-reinforcement"],
+        "phone": "0423 456 789",
+        "email": "academy@westerndogs.com.au",
+        "website": "https://www.westerndogs.com.au",
+        "description": "Serving the western suburbs with comprehensive training solutions. Specializes in reactive dogs and basic obedience. Our outdoor training facility provides real-world distractions for practical learning experiences."
+    },
+    {
+        "id": "trainer-11",
+        "name": "Mindful Mutts Melbourne",
+        "location": "Prahran",
+        "categories": ["anxiety-stress-management"],
+        "matchTags": ["anxiety", "separation-anxiety", "fear", "confidence-building", "desensitization", "positive-reinforcement"],
+        "phone": "0434 567 890",
+        "email": "mindful@mindfulmutt.com.au",
+        "website": "https://www.mindfulmutt.com.au",
+        "description": "Holistic approach to canine anxiety and stress management. Incorporates mindfulness techniques and environmental management alongside traditional behavior modification. Specializes in separation anxiety and noise phobias."
+    },
+    {
+        "id": "trainer-12",
+        "name": "Northern Beaches Dog School",
+        "location": "Coburg",
+        "categories": ["puppy-training", "behaviour-obedience"],
+        "matchTags": ["puppy", "socialization", "basic-obedience", "house-training", "leash-manners", "positive-reinforcement"],
+        "phone": "0445 678 901",
+        "email": "school@northernbeachesdogs.com.au",
+        "website": "https://www.northernbeachesdogs.com.au",
+        "description": "Family-friendly training environment focusing on building strong foundations. Puppy socialization classes and basic obedience for all ages. Emphasis on making training fun and engaging for both dogs and their families."
+    }
+]
+

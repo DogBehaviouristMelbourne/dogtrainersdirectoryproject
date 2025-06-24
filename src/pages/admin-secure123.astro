@@ -1,0 +1,226 @@
+---
+import Layout from '../layouts/Layout.astro'
+---
+
+<Layout title="Admin Dashboard">
+  <section class="container">
+    <h1>Admin Dashboard</h1>
+    
+    <h2>Pending Trainer Submissions</h2>
+    <ul id="pending-list"></ul>
+    
+    <h2>Update or Claim Requests</h2>
+    <ul id="updates-list"></ul>
+    
+    <p id="status"></p>
+  </section>
+
+  <script type="module">
+    import { supabase } from '../lib/supabaseClient.js'
+    
+    console.log('🔗 Supabase client loaded successfully')
+
+    const pendingList = document.getElementById('pending-list')
+    const updatesList = document.getElementById('updates-list')
+    const status = document.getElementById('status')
+
+    async function fetchPending() {
+      const { data, error } = await supabase.from('pending_trainers').select('*, created_at')
+      if (error) return status.textContent = 'Error fetching pending trainers: ' + error.message
+
+      if (data.length === 0) {
+        pendingList.innerHTML = '<li>No pending trainer submissions</li>'
+        return
+      }
+
+      pendingList.innerHTML = ''
+      for (const t of data) {
+        const item = document.createElement('li')
+        item.innerHTML = `
+          <div style="padding: 1rem; border: 1px solid #ccc; margin-bottom: 1rem; border-radius: 8px;">
+            <strong>${t.name}</strong> (${t.suburb})<br/>
+            <p><em>Submitted: ${new Date(t.created_at).toLocaleDateString()}</em></p>
+            <em>${t.email}</em><br/>
+            <p>${t.description || 'No description'}</p>
+            ${t.match_tags ? `Tags: ${t.match_tags.join(', ')}<br/>` : ''}
+            ${t.categories ? `Categories: ${t.categories.join(', ')}<br/>` : ''}
+            
+            <div style="margin-top: 0.5rem;">
+              <button onclick="flagTrainer('${t.id}')" style="background: #ff9800; color: white; border: none; padding: 0.5rem 1rem; margin-right: 0.5rem; border-radius: 4px; cursor: pointer;">⚠️ Flag</button>
+              <button onclick="approve('${t.id}', '${t.name.replace(/'/g, '')}', '${t.suburb}')" style="background: #4CAF50; color: white; border: none; padding: 0.5rem 1rem; margin-right: 0.5rem; border-radius: 4px; cursor: pointer;">✅ Approve</button>
+              <button onclick="reject('${t.id}')" style="background: #f44336; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer;">❌ Reject</button>
+            </div>
+          </div>
+        `
+        pendingList.appendChild(item)
+      }
+    }
+
+    async function fetchUpdateRequests() {
+      const { data, error } = await supabase.from('update_requests').select('*, created_at, admin_notes')
+      if (error) return status.textContent = 'Error fetching update requests: ' + error.message
+
+      if (data.length === 0) {
+        updatesList.innerHTML = '<li>No pending update requests</li>'
+        return
+      }
+
+      updatesList.innerHTML = ''
+      for (const u of data) {
+        const item = document.createElement('li')
+        item.innerHTML = `
+          <div style="padding: 1rem; border: 1px solid #ccc; margin-bottom: 1rem; border-radius: 8px;">
+            <strong>${u.trainer_name || 'Unknown Trainer'}</strong>
+            ${u.business_name ? `(${u.business_name})` : ''}<br/>
+            <p><em>Submitted: ${new Date(u.created_at).toLocaleDateString()}</em></p>
+            <em>${u.email}</em><br/>
+            <p><strong>Requested Changes:</strong></p>
+            <pre style="white-space: pre-wrap; margin-top: 0.5rem;">${u.requested_changes || 'No changes specified'}</pre>
+
+            <label style="display:block; margin-top:0.5rem;">
+              Admin Notes:
+              <textarea id="notes-${u.id}" rows="3" style="width:100%; margin-top:4px;">${u.admin_notes ?? ''}</textarea>
+            </label>
+            <button onclick="saveNote('${u.id}')">💾 Save Note</button>
+            
+            <div style="margin-top: 0.5rem;">
+              <button onclick="markReviewed('${u.id}')" style="background: #4CAF50; color: white; border: none; padding: 0.5rem 1rem; margin-right: 0.5rem; border-radius: 4px; cursor: pointer;">✅ Mark Reviewed</button>
+              <button onclick="rejectUpdate('${u.id}')" style="background: #f44336; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer;">❌ Reject</button>
+            </div>
+          </div>
+        `
+        updatesList.appendChild(item)
+      }
+    }
+
+    window.approve = async (id, name, suburb) => {
+      if (!confirm(`Approve ${name} from ${suburb}?`)) return
+      
+      status.textContent = 'Approving...'
+
+      const { data, error } = await supabase.from('pending_trainers').select('*').eq('id', id).single()
+      if (error) return alert('Fetch failed: ' + error.message)
+
+      const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+
+      const { error: insertError } = await supabase.from('trainers').insert({
+        ...data,
+        slug,
+        status: 'approved'
+      })
+
+      if (insertError) return alert('Insert failed: ' + insertError.message)
+
+      const { error: deleteError } = await supabase.from('pending_trainers').delete().eq('id', id)
+      if (deleteError) return alert('Delete failed: ' + deleteError.message)
+
+      status.textContent = 'Approved successfully!'
+      setTimeout(() => status.textContent = '', 3000)
+      fetchPending()
+    }
+
+    window.reject = async (id) => {
+      if (!confirm('Are you sure you want to reject this submission?')) return
+      
+      status.textContent = 'Rejecting...'
+      const { error } = await supabase.from('pending_trainers').delete().eq('id', id)
+      if (error) return alert('Rejection failed: ' + error.message)
+      
+      status.textContent = 'Rejected successfully!'
+      setTimeout(() => status.textContent = '', 3000)
+      fetchPending()
+    }
+
+    window.markReviewed = async (id) => {
+      if (!confirm('Mark this update request as reviewed?')) return
+      
+      status.textContent = 'Marking as reviewed...'
+      const { error } = await supabase
+        .from('update_requests')
+        .update({
+          is_reviewed: true,
+          reviewed_by: 'manual_admin'
+        })
+        .eq('id', id)
+
+      if (error) {
+        alert('Failed to mark as reviewed.')
+        return
+      }
+      
+      status.textContent = 'Marked as reviewed!'
+      setTimeout(() => status.textContent = '', 3000)
+      fetchUpdateRequests()
+    }
+
+    window.rejectUpdate = async (id) => {
+      if (!confirm('Are you sure you want to reject this update request?')) return
+      
+      status.textContent = 'Rejecting update request...'
+      const { error } = await supabase.from('update_requests').delete().eq('id', id)
+      if (error) return alert('Rejection failed: ' + error.message)
+      
+      status.textContent = 'Update request rejected!'
+      setTimeout(() => status.textContent = '', 3000)
+      fetchUpdateRequests()
+    }
+
+    window.saveNote = async (id) => {
+      const note = document.getElementById(`notes-${id}`).value.trim()
+      const { error } = await supabase
+        .from('update_requests')
+        .update({ admin_notes: note })
+        .eq('id', id)
+      if (error) alert('Failed to save note.')
+    }
+
+    window.flagTrainer = async (id) => {
+      const { error } = await supabase
+        .from('pending_trainers')
+        .update({ is_flagged: true })
+        .eq('id', id)
+
+      if (error) {
+        alert('Failed to flag entry.')
+        return
+      }
+
+      fetchPending()
+    }
+
+    // Load data on page load
+    fetchPending()
+    fetchUpdateRequests()
+  </script>
+
+  <style>
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    #status {
+      font-weight: bold;
+      margin-top: 1rem;
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 2rem;
+    }
+
+    h2 {
+      color: #555;
+      margin-top: 2rem;
+      margin-bottom: 1rem;
+      border-bottom: 2px solid #eee;
+      padding-bottom: 0.5rem;
+    }
+  </style>
+</Layout>
