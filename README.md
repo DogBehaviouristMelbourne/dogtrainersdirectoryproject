@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # 🐾 Dog Trainers Directory Melbourne
 
 A behaviour-first, community-powered directory for certified dog trainers and services in Melbourne, Australia.
@@ -56,6 +55,192 @@ Env vars are stored in `.env`:
 VITE_SUPABASE_URL=your_supabase_project_url
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
+
+---
+
+## 🚀 Deployment & Integration Guide
+
+### Recommended Hosting Platform: **Vercel** ⭐
+**Why Vercel?**
+- ✅ **Perfect for Astro** - Native support and optimizations
+- ✅ **GitHub Integration** - Automatic deployments on push
+- ✅ **Edge Functions** - Global CDN and serverless functions
+- ✅ **Free Tier** - Generous limits for small to medium projects
+- ✅ **Custom Domains** - Easy DNS management
+- ✅ **Analytics** - Built-in performance monitoring
+
+**Alternative Options:**
+- **Netlify** - Similar features, great for static sites
+- **Cloudflare Pages** - Excellent performance, global edge network
+- **GitHub Pages** - Free but limited (static only, no serverless)
+
+### 🔗 Step-by-Step Integration
+
+#### 1. **Supabase Setup**
+```bash
+# 1. Create account at https://supabase.com
+# 2. Create new project
+# 3. Go to Settings > API
+# 4. Copy your Project URL and anon/public key
+```
+
+**Database Tables to Create:**
+```sql
+-- Run these in Supabase SQL Editor
+CREATE TABLE trainers (
+  id BIGSERIAL PRIMARY KEY,
+  name TEXT NOT NULL,
+  email TEXT,
+  phone TEXT,
+  suburb TEXT,
+  description TEXT,
+  categories TEXT[],
+  profile_image_url TEXT,
+  website TEXT,
+  slug TEXT UNIQUE,
+  review_count INTEGER DEFAULT 0,
+  average_rating DECIMAL(3,2) DEFAULT 0,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE pending_trainers (
+  id BIGSERIAL PRIMARY KEY,
+  name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  phone TEXT,
+  suburb TEXT,
+  description TEXT,
+  categories TEXT[],
+  website TEXT,
+  is_flagged BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE update_requests (
+  id BIGSERIAL PRIMARY KEY,
+  trainer_name TEXT NOT NULL,
+  trainer_email TEXT NOT NULL,
+  current_info TEXT,
+  requested_changes TEXT NOT NULL,
+  admin_notes TEXT,
+  is_reviewed BOOLEAN DEFAULT FALSE,
+  reviewed_by TEXT,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE contact_messages (
+  id BIGSERIAL PRIMARY KEY,
+  name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  subject TEXT,
+  message TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE newsletter_subscribers (
+  id BIGSERIAL PRIMARY KEY,
+  email TEXT UNIQUE NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+```
+
+#### 2. **GitHub to Vercel Deployment**
+```bash
+# 1. Push your code to GitHub (already done! ✅)
+# 2. Go to https://vercel.com
+# 3. Sign in with GitHub
+# 4. Click "Import Project"
+# 5. Select your repository: DogBehaviouristMelbourne/dogtrainersdirectoryproject
+# 6. Configure project settings:
+```
+
+**Vercel Project Settings:**
+```bash
+Framework Preset: Astro
+Build Command: npm run build
+Output Directory: dist
+Install Command: npm install
+```
+
+#### 3. **Environment Variables Setup**
+In Vercel Dashboard > Settings > Environment Variables:
+```env
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key-here
+```
+
+#### 4. **Custom Domain Setup**
+```bash
+# In Vercel Dashboard > Settings > Domains
+# 1. Add your domain: dogtrainersdirectory.com.au
+# 2. Configure DNS records (Vercel provides instructions)
+# 3. SSL certificate is automatically generated
+```
+
+#### 5. **Automatic Deployments**
+✅ **Already configured!** Every push to `main` branch will:
+- Trigger automatic build
+- Deploy to production
+- Update your live site
+- Run build-time checks
+
+### 🔧 Development Workflow
+
+```bash
+# Local development
+git checkout -b feature/new-feature
+# Make changes
+git add .
+git commit -m "Add new feature"
+git push origin feature/new-feature
+# Create PR on GitHub
+# Merge to main → Auto-deploy to production
+```
+
+### 📊 Monitoring & Analytics
+
+**Vercel Analytics** (Built-in):
+- Page views and performance
+- Core Web Vitals
+- Geographic distribution
+
+**Optional Additions:**
+- **Google Analytics** - Add GA4 tracking code
+- **Cloudflare Analytics** - If using Cloudflare DNS
+- **Supabase Analytics** - Database query monitoring
+
+### 🔒 Security Considerations
+
+**Supabase Security:**
+```sql
+-- Enable Row Level Security
+ALTER TABLE trainers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE pending_trainers ENABLE ROW LEVEL SECURITY;
+
+-- Public read access for trainers
+CREATE POLICY "Public read access" ON trainers FOR SELECT USING (true);
+
+-- Restrict write access
+CREATE POLICY "Authenticated write" ON pending_trainers FOR INSERT 
+  WITH CHECK (auth.role() = 'anon');
+```
+
+**Environment Variables:**
+- ✅ Never commit `.env` files
+- ✅ Use Vercel's environment variables
+- ✅ Separate staging/production environments
+
+### 🚀 Go Live Checklist
+
+- [ ] Supabase project created and configured
+- [ ] Database tables created
+- [ ] Environment variables set in Vercel
+- [ ] Domain name configured
+- [ ] SSL certificate active
+- [ ] Test all forms and functionality
+- [ ] Admin dashboard accessible
+- [ ] Analytics tracking active
+- [ ] Backup and monitoring set up
 
 ---
 
