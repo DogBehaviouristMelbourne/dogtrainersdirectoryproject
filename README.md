@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 🐾 Dog Trainers Directory Melbourne
 
 A behaviour-first, community-powered directory for certified dog trainers and services in Melbourne, Australia.
@@ -156,8 +157,6 @@ Update Requests:
 ---
 
 ## 🧾 License
-
 All rights reserved © 2025  
 Dog Trainers Directory Melbourne  
 Built with ❤️ by [you]
-
