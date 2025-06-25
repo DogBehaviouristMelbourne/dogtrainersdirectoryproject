@@ -25,9 +25,12 @@ const isActive = (href: string) => currentPath === href ? 'active' : '';
 
 <header class="site-header sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-gray-200">
     <!-- Logo with explicit home link -->
-    <a href="/" class="logo flex items-center gap-2" aria-label="Dog Trainers Directory - Home">
-        <img src="/favicon.svg" alt="Dog Trainers Directory logo" class="h-8 w-8" />
-        <span class="font-bold">Dog Trainers Directory</span>
+    <a href="/" class="logo" aria-label="Dog Trainers Directory - Home">
+        <img src="/favicon.svg" alt="Dog Trainers Directory logo" class="logo-img" />
+        <div class="logo-text">
+            <span class="logo-main">Dog Trainers</span>
+            <span class="logo-sub">Directory</span>
+        </div>
         <span class="sr-only">Home</span>
     </a>
 

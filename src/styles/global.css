@@ -629,3 +629,93 @@ select:focus-visible {
     transform: scale(1.1) rotate(var(--float-rotation));
 }
 
+/* Preferences Panel Improvements */
+:root {
+    --font-scale: 1;
+}
+
+body {
+    font-size: calc(var(--font-size-base) * var(--font-scale));
+}
+
+.preferences-panel {
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 1000;
+}
+
+.preferences-panel .preferences-toggle {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    background: var(--color-accent-teal);
+    color: white;
+    border: none;
+    cursor: pointer;
+    box-shadow: var(--shadow-lg);
+    transition: all 0.2s ease;
+}
+
+.preferences-panel .preferences-content {
+    position: absolute;
+    bottom: 100%;
+    right: 0;
+    width: 280px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    background: var(--bg-color);
+    border-radius: 1rem;
+    box-shadow: var(--shadow-lg);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+}
+
+.preferences-panel.active .preferences-content {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.preferences-panel .preference-group {
+    margin-bottom: 1.5rem;
+}
+
+.preferences-panel label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.preferences-panel .slider-group {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.preferences-panel input[type="range"] {
+    flex: 1;
+    height: 2px;
+    background: var(--color-accent-teal);
+    border-radius: 2px;
+    -webkit-appearance: none;
+}
+
+.preferences-panel input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    background: var(--color-accent-teal);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.preferences-panel .neu-button.small {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.9rem;
+    min-width: 2.5rem;
+}
+
