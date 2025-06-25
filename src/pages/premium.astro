@@ -1,0 +1,463 @@
+---
+// src/pages/premium.astro
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<Layout title="Premium Trainer Listing" description="Upgrade to a featured listing and get more visibility for your dog training services in Melbourne.">
+    <Header />
+    
+    <main id="main-content">
+        <section class="premium-page">
+            <div class="container">
+                <div class="page-header">
+                    <h1>Get Featured & Stand Out</h1>
+                    <p class="page-subtitle">Premium listings appear first in search results and get up to 5x more visibility</p>
+                </div>
+
+                <!-- Benefits Section -->
+                <section class="benefits-section">
+                    <h2>Why Go Premium?</h2>
+                    <div class="benefits-grid">
+                        <div class="benefit-card">
+                            <div class="benefit-icon">🔝</div>
+                            <h3>Top Placement</h3>
+                            <p>Your listing appears first in all relevant searches and category filters</p>
+                        </div>
+                        <div class="benefit-card">
+                            <div class="benefit-icon">⭐</div>
+                            <h3>Featured Badge</h3>
+                            <p>Stand out with an eye-catching "Featured" badge on your trainer card</p>
+                        </div>
+                        <div class="benefit-card">
+                            <div class="benefit-icon">📈</div>
+                            <h3>5x More Views</h3>
+                            <p>Premium listings receive significantly more profile views and inquiries</p>
+                        </div>
+                        <div class="benefit-card">
+                            <div class="benefit-icon">🎯</div>
+                            <h3>Premium Styling</h3>
+                            <p>Enhanced card design with gold border and gradient background</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Pricing Section -->
+                <section class="pricing-section">
+                    <h2>Simple, Transparent Pricing</h2>
+                    <div class="pricing-grid">
+                        <div class="pricing-card">
+                            <div class="plan-header">
+                                <h3>Monthly</h3>
+                                <div class="price">
+                                    <span class="currency">$</span>
+                                    <span class="amount">29</span>
+                                    <span class="period">/month</span>
+                                </div>
+                            </div>
+                            <ul class="plan-features">
+                                <li>✅ Top placement in search results</li>
+                                <li>✅ Featured badge</li>
+                                <li>✅ Premium card styling</li>
+                                <li>✅ Cancel anytime</li>
+                            </ul>
+                            <button class="button primary plan-button" data-plan="monthly" data-price="2900">
+                                Start Monthly Plan
+                            </button>
+                        </div>
+
+                        <div class="pricing-card popular">
+                            <div class="popular-badge">Most Popular</div>
+                            <div class="plan-header">
+                                <h3>Quarterly</h3>
+                                <div class="price">
+                                    <span class="currency">$</span>
+                                    <span class="amount">75</span>
+                                    <span class="period">/3 months</span>
+                                </div>
+                                <div class="savings">Save $12</div>
+                            </div>
+                            <ul class="plan-features">
+                                <li>✅ Everything in Monthly</li>
+                                <li>✅ 14% savings</li>
+                                <li>✅ Priority support</li>
+                                <li>✅ Performance analytics</li>
+                            </ul>
+                            <button class="button primary plan-button" data-plan="quarterly" data-price="7500">
+                                Start Quarterly Plan
+                            </button>
+                        </div>
+
+                        <div class="pricing-card">
+                            <div class="plan-header">
+                                <h3>Yearly</h3>
+                                <div class="price">
+                                    <span class="currency">$</span>
+                                    <span class="amount">275</span>
+                                    <span class="period">/year</span>
+                                </div>
+                                <div class="savings">Save $73</div>
+                            </div>
+                            <ul class="plan-features">
+                                <li>✅ Everything in Quarterly</li>
+                                <li>✅ 21% savings</li>
+                                <li>✅ Monthly performance reports</li>
+                                <li>✅ Featured in newsletters</li>
+                            </ul>
+                            <button class="button primary plan-button" data-plan="yearly" data-price="27500">
+                                Start Yearly Plan
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- FAQ Section -->
+                <section class="faq-section">
+                    <h2>Frequently Asked Questions</h2>
+                    <div class="faq-grid">
+                        <div class="faq-item">
+                            <h3>How quickly will my listing be featured?</h3>
+                            <p>Your listing will be featured immediately after successful payment processing, typically within 5 minutes.</p>
+                        </div>
+                        <div class="faq-item">
+                            <h3>Can I cancel my subscription?</h3>
+                            <p>Yes! You can cancel anytime. Your listing will remain featured until the end of your current billing period.</p>
+                        </div>
+                        <div class="faq-item">
+                            <h3>What payment methods do you accept?</h3>
+                            <p>We accept all major credit cards, debit cards, and digital wallets through our secure Stripe payment processing.</p>
+                        </div>
+                        <div class="faq-item">
+                            <h3>How many featured spots are available?</h3>
+                            <p>We limit featured listings to 10 per suburb/category combination to ensure quality and visibility for all premium members.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- CTA Section -->
+                <section class="cta-section">
+                    <div class="cta-content">
+                        <h2>Ready to Get More Clients?</h2>
+                        <p>Join hundreds of successful trainers who've boosted their business with premium listings</p>
+                        <a href="#pricing-section" class="button primary large">Choose Your Plan</a>
+                    </div>
+                </section>
+            </div>
+        </section>
+    </main>
+    
+    <Footer />
+</Layout>
+
+<script type="module">
+import { supabase } from '../lib/supabaseClient.js'
+
+document.addEventListener('DOMContentLoaded', () => {
+    const planButtons = document.querySelectorAll('.plan-button');
+    
+    planButtons.forEach(button => {
+        button.addEventListener('click', async (e) => {
+            const plan = e.target.dataset.plan;
+            const price = parseInt(e.target.dataset.price);
+            
+            // Disable button during processing
+            e.target.disabled = true;
+            e.target.textContent = 'Processing...';
+            
+            try {
+                // Here we'll redirect to Stripe Checkout
+                // For now, just log the selection
+                console.log(`Selected plan: ${plan}, price: ${price}`);
+                
+                // Redirect to payment processing page
+                window.location.href = `/premium/checkout?plan=${plan}&price=${price}`;
+                
+            } catch (error) {
+                console.error('Error processing payment:', error);
+                alert('There was an error processing your request. Please try again.');
+                
+                // Re-enable button
+                e.target.disabled = false;
+                e.target.textContent = `Start ${plan.charAt(0).toUpperCase() + plan.slice(1)} Plan`;
+            }
+        });
+    });
+});
+</script>
+
+<style>
+    .premium-page {
+        padding: 3rem 0;
+        min-height: 70vh;
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 4rem;
+    }
+
+    .page-header h1 {
+        font-size: 3.5em;
+        color: var(--color-text-light);
+        margin-bottom: 1rem;
+        background: linear-gradient(135deg, var(--color-accent-mustard), var(--color-accent-teal));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .page-subtitle {
+        font-size: 1.3em;
+        color: var(--color-text-light);
+        opacity: 0.8;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    /* Benefits Section */
+    .benefits-section {
+        margin-bottom: 5rem;
+    }
+
+    .benefits-section h2 {
+        text-align: center;
+        margin-bottom: 3rem;
+        font-size: 2.5em;
+    }
+
+    .benefits-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 2rem;
+    }
+
+    .benefit-card {
+        background: var(--color-card-bg-light);
+        border: 1px solid var(--color-border-light);
+        border-radius: 12px;
+        padding: 2rem;
+        text-align: center;
+        box-shadow: var(--shadow-sm);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .benefit-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .benefit-icon {
+        font-size: 3em;
+        margin-bottom: 1rem;
+    }
+
+    .benefit-card h3 {
+        margin-bottom: 1rem;
+        color: var(--color-text-light);
+    }
+
+    .benefit-card p {
+        color: var(--color-text-light);
+        opacity: 0.8;
+    }
+
+    /* Pricing Section */
+    .pricing-section {
+        margin-bottom: 5rem;
+    }
+
+    .pricing-section h2 {
+        text-align: center;
+        margin-bottom: 3rem;
+        font-size: 2.5em;
+    }
+
+    .pricing-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 2rem;
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    .pricing-card {
+        background: var(--color-card-bg-light);
+        border: 2px solid var(--color-border-light);
+        border-radius: 16px;
+        padding: 2.5rem;
+        text-align: center;
+        position: relative;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .pricing-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    }
+
+    .pricing-card.popular {
+        border-color: var(--color-accent-mustard);
+        background: linear-gradient(135deg, 
+            var(--color-card-bg-light) 0%, 
+            color-mix(in srgb, var(--color-accent-mustard) 3%, var(--color-card-bg-light)) 100%
+        );
+    }
+
+    .popular-badge {
+        position: absolute;
+        top: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--color-accent-mustard);
+        color: var(--color-text-light);
+        padding: 0.5em 1.5em;
+        border-radius: 20px;
+        font-size: 0.9em;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(232, 185, 79, 0.3);
+    }
+
+    .plan-header h3 {
+        font-size: 1.5em;
+        margin-bottom: 1rem;
+        color: var(--color-text-light);
+    }
+
+    .price {
+        margin-bottom: 0.5rem;
+    }
+
+    .currency {
+        font-size: 1.2em;
+        vertical-align: top;
+        color: var(--color-text-light);
+    }
+
+    .amount {
+        font-size: 3em;
+        font-weight: 700;
+        color: var(--color-text-light);
+    }
+
+    .period {
+        font-size: 1em;
+        color: var(--color-text-light);
+        opacity: 0.7;
+    }
+
+    .savings {
+        color: var(--color-accent-teal);
+        font-weight: 600;
+        font-size: 0.9em;
+        margin-bottom: 1.5rem;
+    }
+
+    .plan-features {
+        list-style: none;
+        padding: 0;
+        margin: 2rem 0;
+        text-align: left;
+    }
+
+    .plan-features li {
+        padding: 0.5rem 0;
+        color: var(--color-text-light);
+    }
+
+    .plan-button {
+        width: 100%;
+        margin-top: 1.5rem;
+        padding: 1rem 2rem;
+        font-size: 1.1em;
+    }
+
+    /* FAQ Section */
+    .faq-section {
+        margin-bottom: 5rem;
+    }
+
+    .faq-section h2 {
+        text-align: center;
+        margin-bottom: 3rem;
+        font-size: 2.5em;
+    }
+
+    .faq-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+    }
+
+    .faq-item {
+        background: var(--color-card-bg-light);
+        border: 1px solid var(--color-border-light);
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .faq-item h3 {
+        margin-bottom: 1rem;
+        color: var(--color-text-light);
+        font-size: 1.2em;
+    }
+
+    .faq-item p {
+        color: var(--color-text-light);
+        opacity: 0.8;
+        line-height: 1.6;
+    }
+
+    /* CTA Section */
+    .cta-section {
+        background: linear-gradient(135deg, var(--color-accent-teal), var(--color-accent-mustard));
+        border-radius: 16px;
+        padding: 4rem 2rem;
+        text-align: center;
+        color: white;
+    }
+
+    .cta-content h2 {
+        margin-bottom: 1rem;
+        color: white;
+        font-size: 2.5em;
+    }
+
+    .cta-content p {
+        font-size: 1.2em;
+        margin-bottom: 2rem;
+        opacity: 0.9;
+    }
+
+    .button.large {
+        padding: 1.2em 3em;
+        font-size: 1.2em;
+        background: white;
+        color: var(--color-text-light);
+    }
+
+    .button.large:hover {
+        background: var(--color-background-light);
+        transform: translateY(-3px);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .page-header h1 {
+            font-size: 2.5em;
+        }
+        
+        .pricing-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .benefits-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .faq-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>

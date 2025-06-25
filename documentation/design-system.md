@@ -341,77 +341,92 @@ All components are designed for mobile devices first, with progressive enhanceme
 
 ## Implementation Guidelines
 
-### CSS Custom Properties
+### Modern UI Components
 
-All design system values are implemented as CSS custom properties for easy maintenance and theming:
+#### Neumorphic Cards
+- Soft, realistic shadows using layered box-shadows
+- Subtle gradients for depth perception
+- Interactive states with smooth transitions
+- Accessible contrast ratios maintained
+- Mobile-optimized shadow effects
 
-```css
-:root {
-  --color-primary: #5A9B9C;
-  --color-secondary: #E8B94F;
-  --color-accent: #D4704A;
-  --font-primary: 'Inter', sans-serif;
-  --font-secondary: 'Balsamiq Sans', cursive;
-  --spacing-unit: 0.5rem;
-  --border-radius: 8px;
-}
-```
+#### Floating Elements
+- Subtle background animations
+- Performance-optimized transforms
+- Reduced motion alternatives
+- Mobile-first implementation
+- Graceful degradation
 
-### Component Naming
+#### Micro-animations
+- Hover state transitions
+- Focus state indicators
+- Loading state animations
+- Success/error feedback
+- Touch interaction feedback
 
-**BEM Methodology:**
-- Block: Component name (e.g., `.trainer-card`)
-- Element: Component part (e.g., `.trainer-card__title`)
-- Modifier: Variation (e.g., `.trainer-card--featured`)
+### Typography System
 
-### File Organization
+#### Responsive Typography
+- Mobile-first font sizing
+- Fluid scaling between breakpoints
+- Minimum legible sizes enforced
+- Line-height optimization
+- Letter-spacing adjustments
 
-**CSS Structure:**
-- Global variables and resets
-- Typography definitions
-- Component-specific styles
-- Utility classes for common patterns
+#### Expressive Typography
+- Gradient text effects
+- Animated heading transitions
+- Weight variations for emphasis
+- Proper contrast maintenance
+- Fallback styles defined
 
-**Asset Organization:**
-- Icons in SVG format for scalability
-- Images optimized for web delivery
-- Consistent naming conventions for easy maintenance
+### User Controls
 
-## Quality Assurance
+#### Preference Management
+- Font size adjustments
+- Motion reduction options
+- Contrast controls
+- Theme switching
+- Audio preferences
 
-### Design Review Checklist
+#### Accessibility Controls
+- Focus style options
+- Text spacing controls
+- Color scheme selection
+- Animation controls
+- Sound controls
 
-**Visual Consistency:**
-- Color usage matches design system
-- Typography follows established hierarchy
-- Spacing adheres to defined scale
-- Interactive elements use consistent patterns
+### Component Architecture
 
-**Accessibility Verification:**
-- Color contrast meets standards
-- Focus indicators are visible
-- Content is keyboard accessible
-- Screen reader compatibility verified
+#### Performance Optimization
+- Efficient CSS selectors
+- Minimal nesting
+- Reusable utility classes
+- Strategic component splitting
+- Asset loading strategy
 
-**Responsive Behavior:**
-- Components adapt appropriately across breakpoints
-- Content remains readable at all sizes
-- Interactive elements maintain usability
-- Performance remains optimal on all devices
+#### Maintainability
+- BEM naming convention
+- CSS custom properties
+- Component documentation
+- Style guide integration
+- Testing procedures
 
-### Maintenance Guidelines
+### Quality Standards
 
-**Regular Reviews:**
-- Quarterly design system audits
-- User feedback integration
-- Performance impact assessment
-- Accessibility compliance verification
+#### Accessibility Requirements
+- WCAG 2.1 AA compliance
+- Keyboard navigation
+- Screen reader support
+- High contrast support
+- Motion sensitivity
 
-**Update Procedures:**
-- Version control for design system changes
-- Documentation updates for modifications
-- Team communication for implementation changes
-- Testing requirements for system updates
+#### Performance Targets
+- Sub-2s page loads
+- Minimal layout shift
+- Efficient animations
+- Optimized assets
+- Caching strategy
 
 This design system guide provides the foundation for maintaining visual consistency and brand integrity across all aspects of the Dog Trainers Directory Melbourne website while supporting future growth and enhancement opportunities.
 

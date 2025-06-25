@@ -1,13 +1,69 @@
 ---
 const { message, visible } = Astro.props;
 ---
+
 {visible && (
-  <div class="success-modal">
+  <div 
+    class="success-modal" 
+    role="dialog" 
+    aria-modal="true" 
+    aria-labelledby="modal-title"
+    tabindex="-1"
+  >
+    <div class="modal-backdrop" onclick="closeModal()"></div>
     <div class="modal-box">
+      <h3 id="modal-title">Success!</h3>
       <p>{message}</p>
+      <button 
+        type="button" 
+        class="modal-close-btn" 
+        onclick="closeModal()"
+        aria-label="Close success message"
+      >
+        ✕
+      </button>
     </div>
   </div>
 )}
+
+<script>
+  function closeModal() {
+    const modal = document.querySelector('.success-modal') as HTMLElement;
+    if (modal) {
+      modal.style.display = 'none';
+    }
+  }
+
+  // Trap focus within modal
+  function trapFocus(event: KeyboardEvent) {
+    const modal = document.querySelector('.success-modal') as HTMLElement;
+    if (!modal || modal.style.display === 'none') return;
+    
+    const focusableElements = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+    const firstElement = focusableElements[0] as HTMLElement;
+    const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+
+    if (event.key === 'Tab') {
+      if (event.shiftKey) {
+        if (document.activeElement === firstElement) {
+          lastElement.focus();
+          event.preventDefault();
+        }
+      } else {
+        if (document.activeElement === lastElement) {
+          firstElement.focus();
+          event.preventDefault();
+        }
+      }
+    }
+
+    if (event.key === 'Escape') {
+      closeModal();
+    }
+  }
+
+  document.addEventListener('keydown', trapFocus);
+</script>
 
 <style>
 .success-modal {
@@ -17,15 +73,50 @@ const { message, visible } = Astro.props;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 50;
+  z-index: 9999;
 }
+
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: transparent;
+}
+
 .modal-box {
-  background: white;
-  color: #111;
-  padding: 1.5rem;
-  border-radius: 8px;
+  background: var(--color-card-bg-light);
+  color: var(--color-text-light);
+  padding: 2rem;
+  border-radius: 12px;
   font-weight: 500;
-  min-width: 250px;
+  min-width: 300px;
+  max-width: 90vw;
   text-align: center;
+  position: relative;
+  box-shadow: var(--shadow-lg);
+}
+
+.modal-box h3 {
+  margin: 0 0 1rem 0;
+  color: var(--color-accent-teal);
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.75rem;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--color-text-light);
+  cursor: pointer;
+  padding: 0.25rem;
+  line-height: 1;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.modal-close-btn:hover,
+.modal-close-btn:focus {
+  opacity: 1;
 }
 </style>

@@ -254,10 +254,12 @@ import trainersData from '../data/trainers.json';
     const calculateMatches = () => {
         // Collect all user tags from answers
         const userTags = [];
+        const userPreferences = {};
         
         Object.keys(userAnswers).forEach(questionId => {
             const question = quizQuestions.find(q => q.id === questionId);
             const answer = userAnswers[questionId];
+            userPreferences[questionId] = answer;
             
             if (Array.isArray(answer)) {
                 answer.forEach(value => {
@@ -270,18 +272,87 @@ import trainersData from '../data/trainers.json';
             }
         });
         
-        // Score trainers based on tag matches
+        console.log('User tags collected:', userTags);
+        console.log('User preferences:', userPreferences);
+        
+        // Score trainers based on category matches and specializations
         const scoredTrainers = trainersData.map(trainer => {
-            const matchingTags = trainer.matchTags.filter(tag => userTags.includes(tag));
-            const score = matchingTags.length;
-            return { ...trainer, score, matchingTags };
+            let score = 0;
+            const matchingReasons = [];
+            
+            // Check categories match
+            const trainerCategories = trainer.categories || [];
+            const tagMatches = userTags.filter(tag => 
+                trainerCategories.some(cat => cat.toLowerCase().includes(tag.toLowerCase()))
+            );
+            score += tagMatches.length * 2; // Weight category matches highly
+            
+            // Check specific preferences
+            if (userPreferences.age === 'puppy' && 
+                trainerCategories.some(cat => cat.toLowerCase().includes('puppy'))) {
+                score += 3;
+                matchingReasons.push('Puppy training specialist');
+            }
+            
+            if (userPreferences.primary_concern === 'anxiety' && 
+                trainerCategories.some(cat => cat.toLowerCase().includes('anxiety') || cat.toLowerCase().includes('behaviour'))) {
+                score += 3;
+                matchingReasons.push('Anxiety and behavior specialist');
+            }
+            
+            if (userPreferences.primary_concern === 'aggression' && 
+                trainerCategories.some(cat => cat.toLowerCase().includes('behaviour') || cat.toLowerCase().includes('aggression'))) {
+                score += 3;
+                matchingReasons.push('Behavioral modification expert');
+            }
+            
+            if (userPreferences.primary_concern === 'obedience' && 
+                trainerCategories.some(cat => cat.toLowerCase().includes('obedience'))) {
+                score += 2;
+                matchingReasons.push('Obedience training expert');
+            }
+            
+            // Location preference bonus
+            if (userPreferences.location && trainer.suburb && 
+                trainer.suburb.toLowerCase().includes(userPreferences.location.toLowerCase())) {
+                score += 1;
+                matchingReasons.push('Located in your preferred area');
+            }
+            
+            // Premium trainers get a small boost
+            if (trainer.premium_status === 'active') {
+                score += 0.5;
+            }
+            
+            // Rating bonus
+            if (trainer.rating && trainer.rating >= 4.5) {
+                score += 1;
+                matchingReasons.push('Highly rated trainer');
+            }
+            
+            return { 
+                ...trainer, 
+                score, 
+                matchingReasons,
+                tagMatches: tagMatches.length 
+            };
         });
         
         // Sort by score and return top matches
-        return scoredTrainers
+        const topMatches = scoredTrainers
             .filter(trainer => trainer.score > 0)
-            .sort((a, b) => b.score - a.score)
-            .slice(0, 3); // Top 3 matches
+            .sort((a, b) => {
+                // Premium trainers with equal scores come first
+                if (Math.abs(a.score - b.score) < 0.1) {
+                    if (a.premium_status === 'active' && b.premium_status !== 'active') return -1;
+                    if (b.premium_status === 'active' && a.premium_status !== 'active') return 1;
+                }
+                return b.score - a.score;
+            })
+            .slice(0, 3);
+            
+        console.log('Top matches:', topMatches);
+        return topMatches;
     };
 
     const showResults = (matches) => {
@@ -293,35 +364,93 @@ import trainersData from '../data/trainers.json';
         if (matches.length === 0) {
             resultsContainer.innerHTML = `
                 <div class="no-matches">
+                    <img src="/images/sad-dog-404.png" alt="No matches found" class="no-matches-img" />
+                    <h3>Still searching for your perfect match!</h3>
                     <p>We couldn't find specific matches based on your answers, but don't worry! All our trainers are qualified to help.</p>
-                    <a href="/trainers" class="button primary">Browse All Trainers</a>
+                    <div class="no-matches-actions">
+                        <button onclick="retakeQuiz()" class="button secondary">Try Quiz Again</button>
+                        <a href="/trainers" class="button primary">Browse All Trainers</a>
+                    </div>
                 </div>
             `;
             return;
         }
         
-        resultsContainer.innerHTML = matches.map((trainer, index) => `
-            <div class="match-card ${index === 0 ? 'best-match' : ''}">
-                ${index === 0 ? '<div class="best-match-badge">🏆 Best Match</div>' : ''}
-                <h4>${trainer.name}</h4>
-                <p class="match-location">${trainer.location}</p>
-                <div class="match-score">
-                    <span class="score-label">Match Score:</span>
-                    <div class="score-bar">
-                        <div class="score-fill" style="width: ${(trainer.score / 5) * 100}%"></div>
-                    </div>
-                    <span class="score-text">${trainer.score}/5</span>
+        resultsContainer.innerHTML = `
+            <div class="matches-intro">
+                <h3>🎯 We've Found Your Perfect Matches!</h3>
+                <p>Based on your answers, these trainers are best suited to help with your specific needs:</p>
+            </div>
+            <div class="matches-grid">
+                ${matches.map((trainer, index) => `
+                    <article class="trainer-match-card ${trainer.premium_status === 'active' ? 'premium-match' : ''} ${index === 0 ? 'best-match' : ''}">
+                        ${index === 0 ? '<div class="best-match-badge">🏆 Best Match</div>' : ''}
+                        ${trainer.premium_status === 'active' ? '<div class="premium-badge">Featured Pro</div>' : ''}
+                        
+                        <div class="trainer-match-header">
+                            <img 
+                                src="${trainer.profile_image_url || '/images/sad-dog-404.png'}" 
+                                alt="${trainer.name}"
+                                class="trainer-avatar"
+                                loading="lazy"
+                                width="80" height="80"
+                                onerror="this.src='/images/sad-dog-404.png'"
+                            >
+                            <div class="trainer-match-info">
+                                <h4>${trainer.name}</h4>
+                                <p class="trainer-location">📍 ${trainer.suburb || trainer.location}</p>
+                                ${trainer.rating ? `
+                                    <div class="trainer-rating">
+                                        <span class="stars">${'★'.repeat(Math.round(trainer.rating))}</span>
+                                        <span class="rating-text">${trainer.rating.toFixed(1)} ${trainer.review_count ? `(${trainer.review_count} reviews)` : ''}</span>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                        
+                        <div class="match-score">
+                            <span class="score-label">Match Score:</span>
+                            <div class="score-bar" role="progressbar" aria-valuenow="${(trainer.score / 5) * 100}" aria-valuemin="0" aria-valuemax="100">
+                                <div class="score-fill" style="width: ${(trainer.score / 5) * 100}%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="match-reasons">
+                            <h5>Why they're a great match:</h5>
+                            <ul>
+                                ${trainer.matchingReasons.map(reason => `
+                                    <li><span class="check-icon">✓</span> ${reason}</li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                        
+                        ${trainer.categories ? `
+                            <div class="trainer-specialties">
+                                <h5>Specializations:</h5>
+                                <div class="specialty-tags">
+                                    ${trainer.categories.map(cat => `
+                                        <span class="specialty-tag">${cat}</span>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                        
+                        <div class="trainer-match-actions">
+                            <a href="/trainers/${trainer.id || trainer.name.toLowerCase().replace(/\s+/g, '-')}" class="button primary">View Full Profile</a>
+                            ${trainer.email ? `<a href="mailto:${trainer.email}" class="button secondary">Contact Now</a>` : ''}
+                            ${trainer.phone ? `<a href="tel:${trainer.phone}" class="contact-link">📞 ${trainer.phone}</a>` : ''}
+                        </div>
+                    </article>
+                `).join('')}
+            </div>
+            <div class="matches-footer">
+                <p>Want to explore more options?</p>
+                <div class="matches-footer-actions">
+                    <button onclick="retakeQuiz()" class="button secondary">Retake Quiz</button>
+                    <a href="/trainers" class="button primary">Browse All Trainers</a>
                 </div>
-                <p class="match-description">${trainer.description}</p>
-                <div class="match-tags">
-                    ${trainer.matchingTags.slice(0, 3).map(tag => 
-                        `<span class="match-tag">${tag}</span>`
-                    ).join('')}
-                </div>
-                <div class="match-contact">
-                    ${trainer.phone ? `<a href="tel:${trainer.phone}" class="contact-link">📞 ${trainer.phone}</a>` : ''}
-                    ${trainer.email ? `<a href="mailto:${trainer.email}" class="contact-link">✉️ Email</a>` : ''}
-                    ${trainer.website ? `<a href="${trainer.website}" target="_blank" class="contact-link">🌐 Website</a>` : ''}
+            </div>
+        `;
                 </div>
             </div>
         `).join('');
@@ -628,6 +757,232 @@ import trainersData from '../data/trainers.json';
         display: flex;
         justify-content: center;
         gap: 1rem;
+    }
+
+    /* Enhanced Quiz Results Styling */
+    .matches-intro {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .matches-intro h3 {
+        font-size: 1.8em;
+        color: var(--color-accent-teal);
+        margin-bottom: 0.5rem;
+    }
+
+    .matches-grid {
+        display: grid;
+        gap: 2rem;
+        margin: 2rem 0;
+    }
+
+    @media (min-width: 768px) {
+        .matches-grid {
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+    }
+
+    .trainer-match-card {
+        background: var(--color-card-bg-light);
+        border: 1px solid var(--color-border-light);
+        border-radius: 12px;
+        padding: 1.5rem;
+        position: relative;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .trainer-match-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .best-match {
+        border: 2px solid var(--color-accent-mustard);
+    }
+
+    .premium-match {
+        border: 2px solid var(--color-accent-teal);
+    }
+
+    .best-match-badge,
+    .premium-badge {
+        position: absolute;
+        top: -12px;
+        right: 1rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+
+    .best-match-badge {
+        background: var(--color-accent-mustard);
+        color: var(--color-text-light);
+    }
+
+    .premium-badge {
+        background: var(--color-accent-teal);
+        color: white;
+    }
+
+    .trainer-match-header {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .trainer-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid var(--color-border-light);
+    }
+
+    .trainer-match-info {
+        flex: 1;
+    }
+
+    .trainer-match-info h4 {
+        font-size: 1.4em;
+        margin: 0 0 0.5rem 0;
+        color: var(--color-text-light);
+    }
+
+    .trainer-location {
+        font-size: 0.95em;
+        color: var(--color-text-light);
+        opacity: 0.8;
+    }
+
+    .trainer-rating {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+
+    .stars {
+        color: var(--color-accent-mustard);
+    }
+
+    .rating-text {
+        font-size: 0.9em;
+        opacity: 0.8;
+    }
+
+    .match-score {
+        margin: 1rem 0;
+    }
+
+    .score-label {
+        display: block;
+        font-size: 0.9em;
+        margin-bottom: 0.25rem;
+    }
+
+    .score-bar {
+        height: 8px;
+        background: var(--color-border-light);
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .score-fill {
+        height: 100%;
+        background: var(--color-accent-teal);
+        border-radius: 4px;
+        transition: width 0.3s ease;
+    }
+
+    .match-reasons {
+        margin: 1.5rem 0;
+    }
+
+    .match-reasons h5 {
+        font-size: 1em;
+        margin-bottom: 0.75rem;
+    }
+
+    .match-reasons ul {
+        list-style: none;
+        padding: 0;
+    }
+
+    .match-reasons li {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+        font-size: 0.95em;
+    }
+
+    .check-icon {
+        color: var(--color-accent-teal);
+        font-weight: bold;
+    }
+
+    .trainer-specialties {
+        margin: 1.5rem 0;
+    }
+
+    .specialty-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+
+    .specialty-tag {
+        background: var(--color-border-light);
+        color: var(--color-text-light);
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+    }
+
+    .trainer-match-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+
+    .matches-footer {
+        text-align: center;
+        margin-top: 3rem;
+    }
+
+    .matches-footer-actions {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    /* No matches styling */
+    .no-matches {
+        text-align: center;
+        padding: 3rem 1rem;
+    }
+
+    .no-matches-img {
+        max-width: 200px;
+        margin: 0 auto 2rem;
+        opacity: 0.7;
+    }
+
+    .no-matches h3 {
+        color: var(--color-accent-teal);
+        margin-bottom: 1rem;
+    }
+
+    .no-matches-actions {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 2rem;
     }
 
     /* Responsive Design */

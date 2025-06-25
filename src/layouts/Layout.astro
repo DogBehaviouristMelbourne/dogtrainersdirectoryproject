@@ -1,6 +1,7 @@
 ---
 // src/layouts/Layout.astro
-import '../styles/global.css'; // Import your global styles
+import '../styles/global.css';
+import UserPreferences from '../components/UserPreferences.astro';
 
 interface Props {
     title: string;
@@ -20,6 +21,14 @@ const { title, description = "Find expert dog trainers in Melbourne. Connect wit
     <title>{title} | Dog Trainers Directory Melbourne</title>
     <meta name="description" content={description}>
     
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#5a9b9c">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Dog Trainers">
+    <link rel="apple-touch-icon" href="/favicon.png">
+    <link rel="manifest" href="/manifest.json">
+
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
@@ -39,6 +48,19 @@ const { title, description = "Find expert dog trainers in Melbourne. Connect wit
 
     <!-- Light/Dark Mode Script -->
     <script is:inline>
+        // Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('Service Worker registered:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Service Worker registration failed:', error);
+                    });
+            });
+        }
+
         // This script runs before the page renders to prevent FOUC (Flash of Unstyled Content)
         const getThemePreference = () => {
             if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
@@ -67,6 +89,7 @@ const { title, description = "Find expert dog trainers in Melbourne. Connect wit
 <body>
     <a href="#main-content" class="skip-link">Skip to main content</a>
     <slot /> <!-- This is where your page content will be injected -->
+    <UserPreferences />
     <!-- Cloudflare Web Analytics -->
     <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "29712a3600a64cf39255d209b0c50f6b"}'></script>
     <!-- End Cloudflare Web Analytics -->

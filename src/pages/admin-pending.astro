@@ -1,0 +1,51 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { createClient } from '@supabase/supabase-js';
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY
+);
+const { data: pending, error } = await supabase
+  .from('pending_trainers')
+  .select('*')
+  .order('submitted_at', { ascending: false });
+---
+<Layout title="Pending Trainer Submissions">
+  <section class="container">
+    <h1>Pending Trainer Submissions</h1>
+    {error && <p style="color:red">Error loading submissions.</p>}
+    {pending && pending.length === 0 && <p>No pending submissions.</p>}
+    {pending && pending.length > 0 && (
+      <table style="width:100%;margin-top:2em;border-collapse:collapse;">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Suburb</th>
+            <th>Categories</th>
+            <th>Tags</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Website</th>
+            <th>Description</th>
+            <th>Submitted</th>
+          </tr>
+        </thead>
+        <tbody>
+          {pending.map(entry => (
+            <tr>
+              <td>{entry.name}</td>
+              <td>{entry.suburb}</td>
+              <td>{entry.categories?.join(', ')}</td>
+              <td>{entry.match_tags?.join(', ')}</td>
+              <td>{entry.email}</td>
+              <td>{entry.phone}</td>
+              <td>{entry.website}</td>
+              <td>{entry.description}</td>
+              <td>{entry.submitted_at && new Date(entry.submitted_at).toLocaleString()}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    )}
+  </section>
+</Layout>

@@ -29,6 +29,85 @@
     --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
     --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
     --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+
+    /* Neumorphic Effects */
+    --shadow-neu-light: 6px 6px 12px rgba(0, 0, 0, 0.05),
+                      -6px -6px 12px rgba(255, 255, 255, 0.9);
+    --shadow-neu-dark: 6px 6px 12px rgba(0, 0, 0, 0.2),
+                     -6px -6px 12px rgba(255, 255, 255, 0.03);
+    --shadow-neu-inset-light: inset 2px 2px 5px rgba(0, 0, 0, 0.05),
+                           inset -2px -2px 5px rgba(255, 255, 255, 0.9);
+    --shadow-neu-inset-dark: inset 2px 2px 5px rgba(0, 0, 0, 0.2),
+                          inset -2px -2px 5px rgba(255, 255, 255, 0.03);
+
+    /* Animation Curves */
+    --transition-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    --transition-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+    --animation-duration-fast: 150ms;
+    --animation-duration-base: 300ms;
+    --animation-duration-slow: 500ms;
+
+    /* Floating Elements */
+    --float-offset: 0.5rem;
+    --float-rotation: 2deg;
+    
+    /* Enhanced Accessibility */
+    --reduced-motion: var(--user-reduced-motion, none);
+    --high-contrast: var(--user-high-contrast, normal);
+    --font-scale: var(--user-font-scale, 1);
+
+    /* Block Layouts */
+    --section-spacing: clamp(3rem, 8vw, 8rem);
+    --content-width: min(100% - 2rem, var(--container-xl));
+    --block-padding: clamp(2rem, 4vw, 4rem);
+    
+    /* 3D Effects */
+    --perspective: 1000px;
+    --rotate-y: rotateY(var(--rotation, 0deg));
+    --scale: scale(var(--scale-factor, 1));
+    
+    /* Card Styles */
+    --card-radius: 1rem;
+    --card-padding: clamp(1rem, 2vw, 2rem);
+    --card-gap: clamp(1rem, 2vw, 2rem);
+
+    /* Responsive Typography Scale */
+    --font-size-xs: 0.75rem;    /* 12px */
+    --font-size-sm: 0.875rem;   /* 14px */
+    --font-size-base: 1rem;     /* 16px */
+    --font-size-lg: 1.125rem;   /* 18px */
+    --font-size-xl: 1.25rem;    /* 20px */
+    --font-size-2xl: 1.5rem;    /* 24px */
+    --font-size-3xl: 1.75rem;   /* 28px */
+    --font-size-4xl: 2rem;      /* 32px */
+
+    /* Spacing Scale */
+    --space-1: 0.25rem;         /* 4px */
+    --space-2: 0.5rem;          /* 8px */
+    --space-3: 0.75rem;         /* 12px */
+    --space-4: 1rem;            /* 16px */
+    --space-6: 1.5rem;          /* 24px */
+    --space-8: 2rem;            /* 32px */
+    --space-12: 3rem;           /* 48px */
+
+    /* Container Widths */
+    --container-sm: 640px;
+    --container-md: 768px;
+    --container-lg: 1024px;
+    --container-xl: 1280px;
+
+    /* Mobile-first Grid */
+    --grid-cols-1: repeat(1, minmax(0, 1fr));
+    --grid-cols-2: repeat(2, minmax(0, 1fr));
+    --grid-cols-3: repeat(3, minmax(0, 1fr));
+    --grid-cols-4: repeat(4, minmax(0, 1fr));
+    
+    /* Interactive Elements */
+    --tap-target-min: 44px;     /* Minimum tap target size */
+    --border-radius-sm: 0.25rem;
+    --border-radius-md: 0.375rem;
+    --border-radius-lg: 0.5rem;
+    --border-radius-full: 9999px;
 }
 
 .dark-mode {
@@ -69,16 +148,50 @@ main {
     margin-top: 2rem;
 }
 
+/* Mobile-first Typography */
 h1, h2, h3, h4, h5, h6 {
-    font-family: 'Balsamiq Sans', cursive; /* Headings */
+    font-family: 'Balsamiq Sans', cursive;
     color: var(--color-text-light);
     line-height: 1.2;
     margin-bottom: 0.5em;
 }
 
-h1 { font-size: 2.8em; }
-h2 { font-size: 2.2em; }
-h3 { font-size: 1.8em; }
+/* Mobile sizes */
+h1 { 
+    font-size: var(--font-size-3xl); /* 28px */
+    line-height: 1.1;
+}
+
+h2 { 
+    font-size: var(--font-size-2xl); /* 24px */
+    line-height: 1.2;
+}
+
+h3 { 
+    font-size: var(--font-size-xl); /* 20px */
+    line-height: 1.3;
+}
+
+h4 {
+    font-size: var(--font-size-lg); /* 18px */
+    line-height: 1.4;
+}
+
+/* Tablet and up */
+@media (min-width: 768px) {
+    h1 { font-size: var(--font-size-4xl); } /* 32px */
+    h2 { font-size: var(--font-size-3xl); } /* 28px */
+    h3 { font-size: var(--font-size-2xl); } /* 24px */
+    h4 { font-size: var(--font-size-xl); }  /* 20px */
+}
+
+/* Desktop and up */
+@media (min-width: 1024px) {
+    h1 { font-size: 2.8em; }  /* ~44px */
+    h2 { font-size: 2.2em; }  /* ~35px */
+    h3 { font-size: 1.8em; }  /* ~28px */
+    h4 { font-size: 1.4em; }  /* ~22px */
+}
 
 /* --------------------------------------------------- */
 /* 3. Basic Resets & Global Styles */
@@ -182,7 +295,19 @@ button.secondary:active {
 .container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 1.5rem;
+    padding: 0 1rem;
+}
+
+@media (min-width: 768px) {
+    .container {
+        padding: 0 1.5rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .container {
+        padding: 0 2rem;
+    }
 }
 
 .text-center {
@@ -217,6 +342,41 @@ button.secondary:active {
 
 .grid-cols-auto {
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+/* Ensure multi-column layouts stack on mobile */
+.specialisations-grid,
+.features-grid,
+.footer-content {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+    .specialisations-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 768px) {
+    .specialisations-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .features-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 1024px) {
+    .features-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .footer-content {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    }
 }
 
 /* Responsive utilities */
@@ -274,6 +434,16 @@ textarea:focus {
     outline-offset: 2px;
 }
 
+/* Focus visible improvements */
+.button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+    outline: 2px solid var(--color-accent-teal);
+    outline-offset: 2px;
+}
+
 /* Skip to main content link for accessibility */
 .skip-link {
     position: absolute;
@@ -314,16 +484,148 @@ textarea:focus {
     transform: scale(1.15);
 }
 
-/* Screen reader only text */
-.sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
+/* Image optimization classes */
+.responsive-img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Loading states */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--color-border-light);
+    border-top: 2px solid var(--color-accent-teal);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    display: inline-block;
+    margin-right: 0.5rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Error states */
+.error-message {
+    color: #dc2626;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    padding: 0.75rem;
+    border-radius: 0.375rem;
+    margin: 0.5rem 0;
+}
+
+.dark-mode .error-message {
+    color: #fca5a5;
+    background: #450a0a;
+    border-color: #7f1d1d;
+}
+
+/* No results state */
+.no-results {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--color-text-light);
+    opacity: 0.8;
+}
+
+.no-results img {
+    max-width: 200px;
+    height: auto;
+    margin: 0 auto 1rem;
+    opacity: 0.6;
+}
+
+/* Modern Micro-animations */
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(var(--float-offset)); }
+    100% { transform: translateY(0px); }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+/* Interactive Elements */
+.interactive {
+    transition: transform var(--animation-duration-base) var(--transition-smooth),
+                box-shadow var(--animation-duration-base) var(--transition-smooth);
+}
+
+.interactive:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+/* Floating Elements */
+.float-animation {
+    animation: float 3s ease-in-out infinite;
+    animation-play-state: var(--reduced-motion, running);
+}
+
+/* Neumorphic Elements */
+.neu-card {
+    background: var(--color-card-bg-light);
+    border-radius: var(--card-radius);
+    box-shadow: var(--shadow-neu-light);
+    transition: transform var(--animation-duration-base) var(--transition-smooth),
+                box-shadow var(--animation-duration-base) var(--transition-smooth);
+}
+
+.dark-mode .neu-card {
+    box-shadow: var(--shadow-neu-dark);
+}
+
+.neu-card:hover {
+    transform: translateY(-4px) scale(1.02);
+}
+
+/* 3D Card Effect */
+.card-3d {
+    transform-style: preserve-3d;
+    perspective: var(--perspective);
+    transition: transform var(--animation-duration-base) var(--transition-smooth);
+}
+
+.card-3d:hover {
+    --rotation: 5deg;
+    transform: var(--rotate-y);
+}
+
+/* Expressive Typography */
+.text-gradient {
+    background: linear-gradient(135deg, 
+        var(--color-accent-teal),
+        var(--color-accent-mustard));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: shimmer 3s linear infinite;
+    background-size: 200% 100%;
+}
+
+.text-animated {
+    display: inline-block;
+    transition: transform var(--animation-duration-base) var(--transition-bounce);
+}
+
+.text-animated:hover {
+    transform: scale(1.1) rotate(var(--float-rotation));
 }
 

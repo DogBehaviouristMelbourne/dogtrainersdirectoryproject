@@ -1,0 +1,424 @@
+---
+import Layout from '../layouts/Layout.astro'
+---
+
+<Layout title="Admin Dashboard">
+  <section class="container">
+    <div id="admin-content">
+      <h1>Loading...</h1>
+      <p>Checking authentication...</p>
+    </div>
+  </section>
+
+  <script type="module">
+    async function initAdmin() {
+      try {
+        console.log('Starting admin initialization...')
+        
+        // Import Supabase from CDN
+        const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm')
+        
+        console.log('Supabase imported successfully')
+        
+        const supabaseUrl = 'https://fauysecbxlrzypyzifqw.supabase.co'
+        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZhdXlzZWNieGxyenlweXppZnF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0ODk4MTEsImV4cCI6MjA2NjA2NTgxMX0.LgkpF5cpgdRuN1mLeiYZEBC_DtkR3ONas__Z2-m3nEg'
+        
+        const supabase = createClient(supabaseUrl, supabaseAnonKey)
+        
+        console.log('Supabase client created')
+
+        // Get the admin key from URL parameters
+        const urlParams = new URLSearchParams(window.location.search)
+        const providedKey = urlParams.get('key')
+        const expectedKey = 'dogtrainer2025admin'
+        
+        const adminContent = document.getElementById('admin-content')
+        
+        console.log('Client-side URL:', window.location.href)
+        console.log('Client-side search:', window.location.search)
+        console.log('Provided key:', providedKey)
+        console.log('Expected key:', expectedKey)
+        console.log('Keys match:', providedKey === expectedKey)
+
+        if (providedKey === expectedKey) {
+          console.log('Authentication successful, loading dashboard...')
+          await loadAdminDashboard()
+        } else {
+          console.log('Authentication failed, showing access denied')
+          showAccessDenied()
+        }
+
+        async function loadAdminDashboard() {
+          try {
+            adminContent.innerHTML = '<h1>Loading pending submissions...</h1>'
+            
+            console.log('Fetching pending trainers...')
+            const { data: pending, error } = await supabase
+              .from('pending_trainers')
+              .select('*')
+
+            console.log('Supabase response:', { pending, error })
+
+            if (error) {
+              console.error('Error fetching pending trainers:', error)
+              adminContent.innerHTML = `
+                <h1>Error</h1>
+                <p>Failed to load pending submissions: ${error.message}</p>
+                <p>Check the browser console for more details.</p>
+              `
+              return
+            }
+
+            if (pending && pending.length > 0) {
+              console.log(`Found ${pending.length} pending trainers`)
+              renderPendingTrainers(pending)
+            } else {
+              console.log('No pending trainers found')
+              adminContent.innerHTML = `
+                <h1>Pending Trainer Submissions</h1>
+                <p>No pending trainers to review.</p>
+                <div style="margin-top: 2rem; padding: 1rem; background: #f0f0f0; border-radius: 4px;">
+                  <h3>Database Connection Status:</h3>
+                  <p>✅ Successfully connected to Supabase</p>
+                  <p>✅ Query executed without errors</p>
+                  <p>📝 No pending submissions found in database</p>
+                  
+                  <h4>Next Steps:</h4>
+                  <ul>
+                    <li><a href="/submit" target="_blank">Test the submission form</a> to create a pending submission</li>
+                    <li><button onclick="createTestSubmission()" style="background: #007acc; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; margin-right: 0.5rem;">Create Test Submission</button></li>
+                    <li><button onclick="setupDatabase()" style="background: #4CAF50; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer;">Setup Database Tables</button></li>
+                  </ul>
+                  
+                  <div style="margin-top: 1rem; padding: 1rem; background: #fff3cd; border-radius: 4px; border-left: 4px solid #ffc107;">
+                    <h5>⚠️ Database Setup Required</h5>
+                    <p>If you're getting column errors, you may need to set up your database tables first. Click "Setup Database Tables" above or run the SQL script in <code>database/setup.sql</code> in your Supabase SQL Editor.</p>
+                  </div>
+                </div>
+              `
+            }
+          } catch (err) {
+            console.error('Error in loadAdminDashboard:', err)
+            adminContent.innerHTML = `
+              <h1>Error</h1>
+              <p>An unexpected error occurred: ${err.message}</p>
+              <p>Check the browser console for more details.</p>
+            `
+          }
+        }
+
+        function renderPendingTrainers(pending) {
+          console.log('Rendering pending trainers...')
+          const pendingHtml = pending.map(trainer => `
+            <li class="pending-card">
+              <h2>${trainer.name || 'No name provided'}</h2>
+              <p><strong>Suburb:</strong> ${trainer.suburb || 'Not specified'}</p>
+              <p><strong>Email:</strong> ${trainer.email || 'Not provided'}</p>
+              ${trainer.phone ? `<p><strong>Phone:</strong> ${trainer.phone}</p>` : ''}
+              ${trainer.website ? `<p><strong>Website:</strong> ${trainer.website}</p>` : ''}
+              <p><strong>Description:</strong> ${trainer.description || 'No description provided'}</p>
+              ${trainer.match_tags && trainer.match_tags.length > 0 ? `<p><strong>Tags:</strong> ${trainer.match_tags.join(', ')}</p>` : ''}
+              ${trainer.categories && trainer.categories.length > 0 ? `<p><strong>Categories:</strong> ${trainer.categories.join(', ')}</p>` : ''}
+              ${trainer.profile_image ? `<p><strong>Profile Image:</strong> <img src="${trainer.profile_image}" alt="Profile" style="max-width: 100px; height: auto;" /></p>` : ''}
+              ${trainer.why_choose_me ? `<p><strong>Why Choose Me:</strong> ${trainer.why_choose_me}</p>` : ''}
+              ${trainer.social_links ? `<p><strong>Social Links:</strong> ${Object.entries(trainer.social_links).map(([platform, url]) => `${platform}: ${url}`).join(', ')}</p>` : ''}
+              <p><strong>Submitted:</strong> ${new Date(trainer.created_at).toLocaleDateString()}</p>
+              <div class="action-buttons">
+                <button class="approve-btn" onclick="approveTrainer('${trainer.id}')">✅ Approve</button>
+                <button class="reject-btn" onclick="rejectTrainer('${trainer.id}')">❌ Reject</button>
+              </div>
+            </li>
+          `).join('')
+
+          adminContent.innerHTML = `
+            <h1>Pending Trainer Submissions (${pending.length})</h1>
+            <ul style="list-style: none; padding: 0;">
+              ${pendingHtml}
+            </ul>
+          `
+        }
+
+        function showAccessDenied() {
+          adminContent.innerHTML = `
+            <h1>Access Denied</h1>
+            <p>You must supply a valid admin key to access this page.</p>
+            <p>Usage: <code>/admin?key=your-admin-key</code></p>
+            
+            <div style="background: #f0f0f0; padding: 1rem; margin: 1rem 0; border-radius: 4px;">
+              <h3>Debug Info:</h3>
+              <p><strong>Current URL:</strong> ${window.location.href}</p>
+              <p><strong>Search params:</strong> ${window.location.search || 'NONE'}</p>
+              <p><strong>Provided Key:</strong> ${providedKey || 'NOT PROVIDED'}</p>
+              <p><strong>Expected Key:</strong> ${expectedKey}</p>
+              <p><strong>Keys Match:</strong> ${providedKey === expectedKey ? 'YES' : 'NO'}</p>
+              
+              <h4>Try this:</h4>
+              <p>Copy this URL and paste it in your address bar:</p>
+              <input type="text" value="${window.location.origin}/admin?key=${expectedKey}" style="width: 100%; padding: 0.5rem; margin: 0.5rem 0;" readonly onclick="this.select()" />
+            </div>
+          `
+        }
+
+        // Global functions for approve/reject buttons
+        window.approveTrainer = async function(id) {
+          if (!confirm('Approve this trainer submission?')) return
+          
+          try {
+            console.log('Approving trainer:', id)
+            
+            // Get the pending trainer data
+            const { data: trainerData, error: fetchError } = await supabase
+              .from('pending_trainers')
+              .select('*')
+              .eq('id', id)
+              .single()
+
+            if (fetchError || !trainerData) {
+              alert('Failed to fetch trainer data: ' + (fetchError?.message || 'Not found'))
+              return
+            }
+
+            // Generate slug from name
+            const slug = trainerData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+
+            // Insert into trainers table
+            const { error: insertError } = await supabase.from('trainers').insert({
+              name: trainerData.name,
+              suburb: trainerData.suburb,
+              email: trainerData.email,
+              phone: trainerData.phone,
+              website: trainerData.website,
+              description: trainerData.description,
+              match_tags: trainerData.match_tags,
+              categories: trainerData.categories,
+              profile_image: trainerData.profile_image,
+              why_choose_me: trainerData.why_choose_me,
+              social_links: trainerData.social_links,
+              slug: slug,
+              status: 'approved'
+            })
+
+            if (insertError) {
+              alert('Failed to approve trainer: ' + insertError.message)
+              return
+            }
+
+            // Remove from pending table
+            const { error: deleteError } = await supabase
+              .from('pending_trainers')
+              .delete()
+              .eq('id', id)
+
+            if (deleteError) {
+              alert('Trainer approved but failed to remove from pending: ' + deleteError.message)
+            } else {
+              alert('Trainer approved successfully!')
+            }
+
+            // Reload the dashboard
+            await loadAdminDashboard()
+          } catch (err) {
+            console.error('Error approving trainer:', err)
+            alert('Error approving trainer: ' + err.message)
+          }
+        }
+
+        window.rejectTrainer = async function(id) {
+          if (!confirm('Are you sure you want to reject and delete this trainer submission?')) return
+          
+          try {
+            console.log('Rejecting trainer:', id)
+            
+            const { error } = await supabase
+              .from('pending_trainers')
+              .delete()
+              .eq('id', id)
+
+            if (error) {
+              alert('Failed to reject trainer: ' + error.message)
+            } else {
+              alert('Trainer submission rejected.')
+              await loadAdminDashboard()
+            }
+          } catch (err) {
+            console.error('Error rejecting trainer:', err)
+            alert('Error rejecting trainer: ' + err.message)
+          }
+        }
+
+        window.createTestSubmission = async function() {
+          try {
+            console.log('Creating test submission...')
+            
+            // First, let's check what columns exist in the table
+            const { data: existingData, error: checkError } = await supabase
+              .from('pending_trainers')
+              .select('*')
+              .limit(1)
+            
+            console.log('Table check result:', { existingData, checkError })
+            
+            // Simple test data that should work with basic table structure
+            const testData = {
+              name: 'Test Dog Trainer',
+              suburb: 'Melbourne CBD',
+              email: 'test@example.com',
+              description: 'Professional dog trainer specializing in puppy training and obedience. Years of experience helping Melbourne dogs and their owners.'
+            }
+
+            const { data, error } = await supabase
+              .from('pending_trainers')
+              .insert(testData)
+              .select()
+
+            if (error) {
+              alert('Failed to create test submission: ' + error.message)
+              console.error('Insert error:', error)
+              console.log('Available columns might be limited. Try creating the table first or check your database schema.')
+            } else {
+              alert('Test submission created successfully!')
+              console.log('Test submission created:', data)
+              await loadAdminDashboard()
+            }
+          } catch (err) {
+            console.error('Error creating test submission:', err)
+            alert('Error creating test submission: ' + err.message)
+          }
+        }
+
+        window.setupDatabase = async function() {
+          if (!confirm('This will create the necessary database tables. Continue?')) return
+          
+          try {
+            console.log('Setting up database tables...')
+            
+            // Create pending_trainers table
+            const createTableSQL = `
+              CREATE TABLE IF NOT EXISTS pending_trainers (
+                id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+                name TEXT NOT NULL,
+                suburb TEXT NOT NULL,
+                email TEXT NOT NULL,
+                phone TEXT,
+                website TEXT,
+                description TEXT NOT NULL,
+                categories TEXT[],
+                match_tags TEXT[],
+                profile_image TEXT,
+                why_choose_me TEXT,
+                social_links JSONB,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+              );
+            `
+            
+            const { data, error } = await supabase.rpc('exec_sql', { sql: createTableSQL })
+            
+            if (error) {
+              alert('Database setup failed: ' + error.message + '\\n\\nPlease run the SQL script in database/setup.sql manually in your Supabase SQL Editor.')
+              console.error('Database setup error:', error)
+            } else {
+              alert('Database tables created successfully! You can now create test submissions.')
+              console.log('Database setup successful:', data)
+            }
+          } catch (err) {
+            console.error('Error setting up database:', err)
+            alert('Error setting up database: ' + err.message + '\\n\\nPlease run the SQL script in database/setup.sql manually in your Supabase SQL Editor.')
+          }
+        }
+
+      } catch (error) {
+        console.error('Failed to initialize admin:', error)
+        document.getElementById('admin-content').innerHTML = `
+          <h1>Initialization Error</h1>
+          <p>Failed to load admin dashboard: ${error.message}</p>
+          <p>Check the browser console for more details.</p>
+        `
+      }
+    }
+
+    // Initialize when page loads
+    initAdmin()
+  </script>
+
+  <style>
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    h1 {
+      color: var(--primary-color);
+      margin-bottom: 2rem;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .pending-card {
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      background: #fefefe;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .pending-card h2 {
+      color: var(--primary-color);
+      margin-bottom: 1rem;
+      font-size: 1.5rem;
+    }
+
+    .pending-card p {
+      margin-bottom: 0.5rem;
+      line-height: 1.5;
+    }
+
+    .pending-card strong {
+      color: var(--text-color);
+    }
+
+    .action-buttons {
+      margin-top: 1rem;
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .approve-btn, .reject-btn {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background-color 0.3s ease;
+    }
+
+    .approve-btn {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    .approve-btn:hover {
+      background-color: #45a049;
+    }
+
+    .reject-btn {
+      background-color: #f44336;
+      color: white;
+    }
+
+    .reject-btn:hover {
+      background-color: #da190b;
+    }
+
+    code {
+      background-color: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 3px;
+      font-family: 'Courier New', monospace;
+    }
+  </style>
+</Layout>

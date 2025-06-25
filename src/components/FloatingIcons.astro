@@ -1,0 +1,92 @@
+---
+const icons = [
+    { src: '/public/images/icons/paw.svg', alt: 'Paw icon', delay: 0 },
+    { src: '/public/images/icons/ear.svg', alt: 'Ear icon', delay: 1 },
+    { src: '/public/images/icons/nose.svg', alt: 'Nose icon', delay: 2 },
+    { src: '/public/images/icons/friends.svg', alt: 'Friends icon', delay: 3 },
+    { src: '/public/images/icons/consistency.svg', alt: 'Consistency icon', delay: 4 }
+];
+---
+
+<div class="floating-icons" aria-hidden="true">
+    {icons.map(icon => (
+        <img 
+            src={icon.src} 
+            alt={icon.alt}
+            class="floating-icon"
+            style={`animation-delay: ${icon.delay}s;`}
+            width="32"
+            height="32"
+            loading="lazy"
+        />
+    ))}
+</div>
+
+<style>
+.floating-icons {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    overflow: hidden;
+}
+
+.floating-icon {
+    position: absolute;
+    opacity: 0.1;
+    animation: floatAround 20s linear infinite;
+    animation-play-state: var(--reduced-motion, running);
+}
+
+.floating-icon:nth-child(1) { top: 10%; left: 5%; }
+.floating-icon:nth-child(2) { top: 20%; right: 15%; }
+.floating-icon:nth-child(3) { bottom: 30%; left: 20%; }
+.floating-icon:nth-child(4) { bottom: 15%; right: 10%; }
+.floating-icon:nth-child(5) { top: 50%; left: 50%; }
+
+@keyframes floatAround {
+    0% {
+        transform: translate(0, 0) rotate(0deg) scale(1);
+        opacity: 0.1;
+    }
+    25% {
+        transform: translate(100px, 50px) rotate(90deg) scale(1.2);
+        opacity: 0.15;
+    }
+    50% {
+        transform: translate(50px, 100px) rotate(180deg) scale(1);
+        opacity: 0.1;
+    }
+    75% {
+        transform: translate(-50px, 50px) rotate(270deg) scale(0.8);
+        opacity: 0.05;
+    }
+    100% {
+        transform: translate(0, 0) rotate(360deg) scale(1);
+        opacity: 0.1;
+    }
+}
+
+@keyframes glow {
+    0%, 100% { filter: brightness(1) blur(0px); }
+    50% { filter: brightness(1.2) blur(2px); }
+}
+
+.floating-icon {
+    animation: floatAround 20s linear infinite, glow 4s ease-in-out infinite;
+    animation-play-state: var(--reduced-motion, running);
+    transition: all 0.3s ease;
+}
+
+.floating-icon:hover {
+    animation-play-state: paused;
+    transform: scale(1.5);
+    opacity: 0.3;
+    filter: brightness(1.5);
+}
+
+.dark-mode .floating-icon {
+    opacity: 0.15;
+    filter: brightness(0.8);
+}
+</style>

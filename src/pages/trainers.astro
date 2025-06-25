@@ -4,13 +4,14 @@ import Layout from '../layouts/Layout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import TrainerCard from '../components/TrainerCard.astro';
+import FloatingIcons from '../components/FloatingIcons.astro';
 import trainersData from '../data/trainers.json';
 
 // Use static data for build, with client-side Supabase loading for production
 const trainers = trainersData;
 
-const suburbs = [...new Set(trainers.map(t => t.suburb || t.location))].filter(Boolean).sort();
-const categories = [...new Set(trainers.flatMap(t => t.categories ?? []))].sort();
+const suburbs = [...new Set(trainers.map((t: any) => t.suburb || t.location))].filter(Boolean).sort();
+const categories = [...new Set(trainers.flatMap((t: any) => t.categories ?? []))].sort();
 ---
 
 <Layout title="Find Dog Trainers in Melbourne" description="Browse certified dog trainers in Melbourne. Filter by specialization, location, and more to find the perfect match for your dog.">
@@ -18,6 +19,7 @@ const categories = [...new Set(trainers.flatMap(t => t.categories ?? []))].sort(
     
     <main id="main-content">
         <section class="trainers-page">
+            <FloatingIcons />
             <div class="container">
                 <div class="page-header">
                     <h1>Find Your Perfect Dog Trainer</h1>
@@ -61,6 +63,7 @@ const categories = [...new Set(trainers.flatMap(t => t.categories ?? []))].sort(
                 <div class="sort-controls" style="margin-bottom:1.5rem;display:flex;align-items:center;gap:1em;">
                   <label for="sort-select" style="font-weight:500;">Sort by:</label>
                   <select id="sort-select" aria-label="Sort trainers">
+                    <option value="featured">Featured First</option>
                     <option value="name">Name (A-Z)</option>
                     <option value="suburb">Suburb (A-Z)</option>
                     <option value="reviews">Most Reviewed</option>
@@ -182,7 +185,12 @@ const categories = [...new Set(trainers.flatMap(t => t.categories ?? []))].sort(
           review_count: trainer.review_count,
           social_links: trainer.social_links,
           avg_rating: trainer.avg_rating || trainer.rating,
-          average_rating: trainer.average_rating || trainer.rating
+          average_rating: trainer.average_rating || trainer.rating,
+          // Premium fields
+          premium_status: trainer.premium_status || 'inactive',
+          premium_start_date: trainer.premium_start_date,
+          premium_end_date: trainer.premium_end_date,
+          premium_plan: trainer.premium_plan || 'none'
         }));
         console.log(`Loaded ${cardsData.length} trainers from Supabase`);
         console.log('Sample trainer data:', cardsData[0]);
@@ -244,9 +252,10 @@ const categories = [...new Set(trainers.flatMap(t => t.categories ?? []))].sort(
       const reviewCount = trainer.review_count;
       const categories = (trainer.categories || []).join(', ');
       const slug = trainer.slug || trainer.name.toLowerCase().replace(/\s+/g, '-');
+      const isPremium = trainer.premium_status === 'active';
       
       const cardHTML = `
-        <article class="trainer-card" 
+        <article class="trainer-card ${isPremium ? 'premium-card' : ''}" 
           data-suburb="${trainer.suburb || ''}"
           data-cats="${(trainer.categories || []).join(',')}"
           data-name="${trainer.name.toLowerCase()}"
@@ -254,6 +263,8 @@ const categories = [...new Set(trainers.flatMap(t => t.categories ?? []))].sort(
           tabindex="0"
           role="group"
           aria-label="Trainer card for ${trainer.name}">
+          
+          ${isPremium ? '<div class="premium-badge">Featured</div>' : ''}
           
           <img src="${trainer.profile_image_url || '/images/sad-dog-404.png'}" 
                alt="${trainer.name}" 
@@ -365,11 +376,33 @@ const categories = [...new Set(trainers.flatMap(t => t.categories ?? []))].sort(
     function sortTrainers() {
       const sortBy = sortSelect.value;
       if (sortBy === 'name') {
-        filtered.sort((a, b) => a.name.localeCompare(b.name));
+        filtered.sort((a, b) => {
+          // Premium trainers first, then alphabetical
+          if (a.premium_status === 'active' && b.premium_status !== 'active') return -1;
+          if (b.premium_status === 'active' && a.premium_status !== 'active') return 1;
+          return a.name.localeCompare(b.name);
+        });
       } else if (sortBy === 'suburb') {
-        filtered.sort((a, b) => (a.suburb || a.location || '').localeCompare(b.suburb || b.location || ''));
+        filtered.sort((a, b) => {
+          // Premium trainers first, then by suburb
+          if (a.premium_status === 'active' && b.premium_status !== 'active') return -1;
+          if (b.premium_status === 'active' && a.premium_status !== 'active') return 1;
+          return (a.suburb || a.location || '').localeCompare(b.suburb || b.location || '');
+        });
       } else if (sortBy === 'reviews') {
-        filtered.sort((a, b) => (b.review_count || 0) - (a.review_count || 0));
+        filtered.sort((a, b) => {
+          // Premium trainers first, then by review count
+          if (a.premium_status === 'active' && b.premium_status !== 'active') return -1;
+          if (b.premium_status === 'active' && a.premium_status !== 'active') return 1;
+          return (b.review_count || 0) - (a.review_count || 0);
+        });
+      } else if (sortBy === 'featured') {
+        filtered.sort((a, b) => {
+          // Premium first, then regular trainers
+          if (a.premium_status === 'active' && b.premium_status !== 'active') return -1;
+          if (b.premium_status === 'active' && a.premium_status !== 'active') return 1;
+          return a.name.localeCompare(b.name);
+        });
       }
     }
 
@@ -447,25 +480,47 @@ const categories = [...new Set(trainers.flatMap(t => t.categories ?? []))].sort(
 </script>
 <style>
     .trainers-page {
-        padding: 3rem 0;
+        padding: var(--space-4) 0;
         min-height: 70vh;
+    }
+
+    @media (min-width: 768px) {
+        .trainers-page {
+            padding: var(--space-12) 0;
+        }
     }
 
     .page-header {
         text-align: center;
-        margin-bottom: 3rem;
+        margin-bottom: var(--space-8);
+        padding: 0 var(--space-4);
+    }
+
+    @media (min-width: 768px) {
+        .page-header {
+            margin-bottom: var(--space-12);
+            padding: 0;
+        }
     }
 
     .page-header h1 {
-        font-size: 3em;
+        font-size: var(--font-size-3xl);
         color: var(--color-text-light);
-        margin-bottom: 1rem;
+        margin-bottom: var(--space-4);
+    }
+
+    @media (min-width: 768px) {
+        .page-header h1 {
+            font-size: var(--font-size-4xl);
+        }
     }
 
     .page-subtitle {
-        font-size: 1.2em;
+        font-size: var(--font-size-lg);
         color: var(--color-text-light);
         opacity: 0.8;
+        max-width: 600px;
+        margin: 0 auto;
     }
 
     /* Search Controls */
@@ -591,7 +646,7 @@ const categories = [...new Set(trainers.flatMap(t => t.categories ?? []))].sort(
     .sort-controls select:focus {
       outline: none;
       border-color: var(--color-accent-teal);
-      box-shadow: 0 0 0 2px rgba(90, 155, 156, 0.12);
+      box-shadow: 0 0 0 2px rgba(90,155,156,0.12);
     }
 
     /* Results Info */
@@ -617,28 +672,187 @@ const categories = [...new Set(trainers.flatMap(t => t.categories ?? []))].sort(
         animation: resultsFadeIn 0.5s ease-out;
     }
 
+    /* Mobile-first trainer cards grid */
+    #trainer-list {
+        display: grid;
+        gap: var(--space-4);
+        grid-template-columns: 1fr;
+        padding: 0 var(--space-4);
+    }
+
+    /* 2 cards per row from 360px */
+    @media (min-width: 360px) {
+        #trainer-list {
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--space-3);
+        }
+    }
+
+    /* 3 cards per row from 768px */
+    @media (min-width: 768px) {
+        #trainer-list {
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--space-4);
+            padding: 0;
+        }
+    }
+
+    /* 4 cards per row from 1024px */
+    @media (min-width: 1024px) {
+        #trainer-list {
+            grid-template-columns: repeat(4, 1fr);
+            gap: var(--space-6);
+        }
+    }
+
+    /* Trainer card styles */
+    .trainer-card {
+        background: var(--color-card-bg-light);
+        border-radius: var(--card-radius);
+        padding: var(--card-padding);
+        box-shadow: var(--shadow-neu-light);
+        transition: all var(--animation-duration-base) var(--transition-smooth);
+        display: flex;
+        flex-direction: column;
+        transform-style: preserve-3d;
+        perspective: var(--perspective);
+    }
+    
+    .dark-mode .trainer-card {
+        box-shadow: var(--shadow-neu-dark);
+    }
+    
+    .trainer-card:hover {
+        transform: translateY(-8px) var(--rotate-y);
+        --rotation: 5deg;
+    }
+    
+    .trainer-card:active {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-neu-inset-light);
+    }
+    
+    .dark-mode .trainer-card:active {
+        box-shadow: var(--shadow-neu-inset-dark);
+    }
+
+    @media (min-width: 768px) {
+        .trainer-card {
+            padding: var(--space-4);
+        }
+    }
+
+    .trainer-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .trainer-card h3 {
+        font-size: var(--font-size-lg);
+        margin: var(--space-2) 0;
+    }
+
+    @media (min-width: 768px) {
+        .trainer-card h3 {
+            font-size: var(--font-size-xl);
+        }
+    }
+
+    .trainer-card img {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    @media (min-width: 768px) {
+        .trainer-card img {
+            width: 80px;
+            height: 80px;
+        }
+    }
+
+    /* Filter controls for mobile */
+    .search-controls {
+        padding: 0 var(--space-4);
+        margin-bottom: var(--space-6);
+    }
+
+    @media (min-width: 768px) {
+        .search-controls {
+            padding: 0;
+            margin-bottom: var(--space-8);
+        }
+    }
+
+    .search-bar input {
+        width: 100%;
+        height: var(--tap-target-min);
+        padding: var(--space-2) var(--space-3);
+        border: 1px solid var(--color-border-light);
+        border-radius: var(--border-radius-md);
+        font-size: var(--font-size-base);
+    }
+
+    .category-filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-2);
+        margin: var(--space-4) 0;
+    }
+
+    .category-button {
+        height: var(--tap-target-min);
+        padding: var(--space-2) var(--space-4);
+        border: 1px solid var(--color-border-light);
+        border-radius: var(--border-radius-full);
+        background: var(--color-card-bg-light);
+        font-size: var(--font-size-sm);
+        transition: all 0.2s ease;
+    }
+
+    @media (min-width: 768px) {
+        .category-button {
+            font-size: var(--font-size-base);
+        }
+    }
+
+    .category-button.active {
+        background: var(--color-accent-teal);
+        color: white;
+        border-color: var(--color-accent-teal);
+    }
+
     /* No Results */
     .no-results {
         text-align: center;
-        padding: 4rem 2rem;
-        color: var(--color-text-light);
+        padding: var(--space-8) var(--space-4);
     }
 
     .no-results img {
-        margin-bottom: 2rem;
-        opacity: 0.8;
+        max-width: 160px;
+        height: auto;
+        margin: 0 auto var(--space-4);
+        opacity: 0.7;
+    }
+
+    @media (min-width: 768px) {
+        .no-results img {
+            max-width: 200px;
+        }
     }
 
     .no-results h3 {
-        font-size: 2em;
-        margin-bottom: 1rem;
-        color: var(--color-text-light);
+        font-size: var(--font-size-xl);
+        margin-bottom: var(--space-3);
     }
 
     .no-results p {
-        font-size: 1.1em;
+        font-size: var(--font-size-base);
+        color: var(--color-text-light);
         opacity: 0.8;
-        margin-bottom: 2rem;
+        max-width: 400px;
+        margin: 0 auto var(--space-4);
     }
 
     /* Pagination */
@@ -663,6 +877,35 @@ const categories = [...new Set(trainers.flatMap(t => t.categories ?? []))].sort(
       background: var(--color-accent-teal);
       color: #fff;
       border-color: var(--color-accent-teal);
+    }
+
+    /* Mobile-friendly pagination */
+    .pagination-controls {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: var(--space-2);
+        padding: var(--space-6) var(--space-4);
+    }
+
+    .pagination-btn {
+        min-width: var(--tap-target-min);
+        height: var(--tap-target-min);
+        padding: var(--space-2) var(--space-3);
+        border: 1px solid var(--color-border-light);
+        border-radius: var(--border-radius-md);
+        background: var(--color-card-bg-light);
+        font-size: var(--font-size-base);
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .pagination-btn.active {
+        background: var(--color-accent-teal);
+        color: white;
+        border-color: var(--color-accent-teal);
     }
 
     /* Responsive Design */
@@ -745,6 +988,97 @@ const categories = [...new Set(trainers.flatMap(t => t.categories ?? []))].sort(
 
     .skeleton-text {
         height: 0.875rem;
+        width: 90%;
+    }
+
+    .skeleton-text.short {
+        width: 60%;
+    }
+
+    /* Mobile-optimized loading states */
+    #loading-skeleton {
+        display: grid;
+        gap: var(--space-4);
+        grid-template-columns: 1fr;
+        padding: 0 var(--space-4);
+    }
+
+    @media (min-width: 360px) {
+        #loading-skeleton {
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--space-3);
+        }
+    }
+
+    @media (min-width: 768px) {
+        #loading-skeleton {
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--space-4);
+            padding: 0;
+        }
+    }
+
+    .skeleton-card {
+        background: var(--color-card-bg-light);
+        border: 1px solid var(--color-border-light);
+        border-radius: var(--border-radius-lg);
+        padding: var(--space-3);
+        height: 200px;
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2);
+    }
+
+    @media (min-width: 768px) {
+        .skeleton-card {
+            padding: var(--space-4);
+            height: 240px;
+        }
+    }
+
+    .skeleton-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(90deg, var(--color-border-light) 25%, #f0f0f0 50%, var(--color-border-light) 75%);
+        background-size: 200% 100%;
+        animation: skeleton-shimmer 1.5s infinite;
+    }
+
+    @media (min-width: 768px) {
+        .skeleton-avatar {
+            width: 80px;
+            height: 80px;
+        }
+    }
+
+    .skeleton-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2);
+    }
+
+    .skeleton-line {
+        height: 12px;
+        border-radius: var(--border-radius-sm);
+        background: linear-gradient(90deg, var(--color-border-light) 25%, #f0f0f0 50%, var(--color-border-light) 75%);
+        background-size: 200% 100%;
+        animation: skeleton-shimmer 1.5s infinite;
+    }
+
+    .skeleton-title {
+        height: 20px;
+        width: 70%;
+    }
+
+    .skeleton-subtitle {
+        height: 16px;
+        width: 50%;
+    }
+
+    .skeleton-text {
+        height: 12px;
         width: 90%;
     }
 

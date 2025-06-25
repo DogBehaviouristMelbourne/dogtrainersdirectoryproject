@@ -1,0 +1,293 @@
+---
+---
+
+<div class="preferences-panel" id="preferences-panel">
+    <button class="preferences-toggle neu-button" aria-label="Toggle preferences panel">
+        <span class="icon">⚙️</span>
+    </button>
+    
+    <div class="preferences-content neu-card">
+        <h3>Comfort Settings</h3>
+        
+        <div class="preference-group">
+            <label for="font-size">Text Size</label>
+            <div class="slider-group">
+                <button class="neu-button small" onclick="adjustFontSize(-0.1)">A-</button>
+                <input 
+                    type="range" 
+                    id="font-size" 
+                    min="0.8" 
+                    max="1.4" 
+                    step="0.1" 
+                    value="1"
+                    aria-label="Adjust font size"
+                >
+                <button class="neu-button small" onclick="adjustFontSize(0.1)">A+</button>
+            </div>
+        </div>
+        
+        <div class="preference-group">
+            <label for="motion-toggle">Reduced Motion</label>
+            <label class="switch">
+                <input type="checkbox" id="motion-toggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+        
+        <div class="preference-group">
+            <label for="contrast-toggle">High Contrast</label>
+            <label class="switch">
+                <input type="checkbox" id="contrast-toggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+        
+        <div class="preference-group">
+            <label for="theme-select">Color Theme</label>
+            <select id="theme-select" class="neu-select">
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+                <option value="auto">System</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentFontSize = 1;
+    const root = document.documentElement;
+    
+    // Toggle panel
+    const panel = document.getElementById('preferences-panel');
+    const toggle = panel.querySelector('.preferences-toggle');
+    toggle.addEventListener('click', () => {
+        panel.classList.toggle('open');
+    });
+    
+    // Font size adjustment
+    function adjustFontSize(change) {
+        const input = document.getElementById('font-size');
+        currentFontSize = Math.max(0.8, Math.min(1.4, currentFontSize + change));
+        input.value = currentFontSize;
+        updateFontSize();
+    }
+    
+    document.getElementById('font-size').addEventListener('input', (e) => {
+        currentFontSize = parseFloat(e.target.value);
+        updateFontSize();
+    });
+    
+    function updateFontSize() {
+        root.style.setProperty('--user-font-scale', currentFontSize);
+        localStorage.setItem('user-font-scale', currentFontSize);
+    }
+    
+    // Motion preference
+    document.getElementById('motion-toggle').addEventListener('change', (e) => {
+        root.style.setProperty('--user-reduced-motion', e.target.checked ? 'paused' : 'running');
+        localStorage.setItem('user-reduced-motion', e.target.checked);
+    });
+    
+    // Contrast preference
+    document.getElementById('contrast-toggle').addEventListener('change', (e) => {
+        root.style.setProperty('--user-high-contrast', e.target.checked ? 'high' : 'normal');
+        localStorage.setItem('user-high-contrast', e.target.checked);
+    });
+    
+    // Theme preference
+    document.getElementById('theme-select').addEventListener('change', (e) => {
+        const theme = e.target.value;
+        if (theme === 'dark') {
+            document.documentElement.classList.add('dark-mode');
+            localStorage.setItem('theme', 'dark');
+        } else if (theme === 'light') {
+            document.documentElement.classList.remove('dark-mode');
+            localStorage.setItem('theme', 'light');
+        } else {
+            localStorage.removeItem('theme');
+            if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                document.documentElement.classList.add('dark-mode');
+            } else {
+                document.documentElement.classList.remove('dark-mode');
+            }
+        }
+    });
+    
+    // Load saved preferences
+    window.addEventListener('DOMContentLoaded', () => {
+        const savedFontScale = localStorage.getItem('user-font-scale');
+        if (savedFontScale) {
+            currentFontSize = parseFloat(savedFontScale);
+            document.getElementById('font-size').value = currentFontSize;
+            updateFontSize();
+        }
+        
+        const savedMotion = localStorage.getItem('user-reduced-motion');
+        if (savedMotion) {
+            document.getElementById('motion-toggle').checked = savedMotion === 'true';
+            root.style.setProperty('--user-reduced-motion', savedMotion === 'true' ? 'paused' : 'running');
+        }
+        
+        const savedContrast = localStorage.getItem('user-high-contrast');
+        if (savedContrast) {
+            document.getElementById('contrast-toggle').checked = savedContrast === 'true';
+            root.style.setProperty('--user-high-contrast', savedContrast === 'true' ? 'high' : 'normal');
+        }
+        
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            document.getElementById('theme-select').value = savedTheme;
+        }
+    });
+</script>
+
+<style>
+.preferences-panel {
+    position: fixed;
+    right: var(--space-4);
+    bottom: var(--space-4);
+    z-index: 1000;
+}
+
+.preferences-toggle {
+    width: var(--tap-target-min);
+    height: var(--tap-target-min);
+    border-radius: 50%;
+    border: none;
+    background: var(--color-accent-teal);
+    color: white;
+    cursor: pointer;
+    box-shadow: var(--shadow-neu-light);
+    transition: transform var(--animation-duration-base) var(--transition-smooth);
+}
+
+.dark-mode .preferences-toggle {
+    box-shadow: var(--shadow-neu-dark);
+}
+
+.preferences-toggle:hover {
+    transform: rotate(45deg);
+}
+
+.preferences-content {
+    position: absolute;
+    bottom: 100%;
+    right: 0;
+    margin-bottom: var(--space-4);
+    padding: var(--space-4);
+    width: 300px;
+    background: var(--color-card-bg-light);
+    border-radius: var(--card-radius);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: all var(--animation-duration-base) var(--transition-smooth);
+}
+
+.preferences-panel.open .preferences-content {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.preference-group {
+    margin: var(--space-4) 0;
+}
+
+.preference-group label {
+    display: block;
+    margin-bottom: var(--space-2);
+    font-weight: 500;
+}
+
+.slider-group {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.neu-button {
+    padding: var(--space-2) var(--space-4);
+    border: none;
+    border-radius: var(--border-radius-md);
+    background: var(--color-card-bg-light);
+    box-shadow: var(--shadow-neu-light);
+    cursor: pointer;
+    transition: all var(--animation-duration-base) var(--transition-smooth);
+}
+
+.dark-mode .neu-button {
+    box-shadow: var(--shadow-neu-dark);
+}
+
+.neu-button:active {
+    box-shadow: var(--shadow-neu-inset-light);
+}
+
+.dark-mode .neu-button:active {
+    box-shadow: var(--shadow-neu-inset-dark);
+}
+
+.neu-button.small {
+    padding: var(--space-1) var(--space-2);
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--color-border-light);
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: var(--color-accent-teal);
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+.neu-select {
+    width: 100%;
+    padding: var(--space-2);
+    border: none;
+    border-radius: var(--border-radius-md);
+    background: var(--color-card-bg-light);
+    box-shadow: var(--shadow-neu-inset-light);
+    cursor: pointer;
+}
+
+.dark-mode .neu-select {
+    box-shadow: var(--shadow-neu-inset-dark);
+}
+</style>

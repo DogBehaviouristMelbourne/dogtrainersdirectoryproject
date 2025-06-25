@@ -1,0 +1,30 @@
+---
+const url = new URL(Astro.request.url)
+const testKey = url.searchParams.get('key')
+---
+
+<html>
+<head>
+    <title>URL Debug Test</title>
+</head>
+<body>
+    <h1>URL Parameter Test</h1>
+    <p><strong>Full URL:</strong> {url.href}</p>
+    <p><strong>Key parameter:</strong> {testKey || 'NOT FOUND'}</p>
+    <p><strong>All search params:</strong></p>
+    <ul>
+        {Array.from(url.searchParams.entries()).map(([key, value]) => (
+            <li>{key}: {value}</li>
+        ))}
+    </ul>
+    
+    <hr />
+    
+    <p>Try these test links:</p>
+    <ul>
+        <li><a href="/test-url?key=dogtrainer2025admin">Test with key parameter</a></li>
+        <li><a href="/test-url?test=hello">Test with different parameter</a></li>
+        <li><a href="/admin?key=dogtrainer2025admin">Go to admin with key</a></li>
+    </ul>
+</body>
+</html>
