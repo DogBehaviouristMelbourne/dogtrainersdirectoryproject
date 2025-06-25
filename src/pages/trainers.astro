@@ -398,16 +398,22 @@ const categories = [...new Set(trainers.flatMap(t => t.categories ?? []))].sort(
       const categoryButtons = document.querySelectorAll('.category-button');
       const suburbSelectElement = document.getElementById('suburbFilter');
       
+      console.log('Setting up event listeners...');
+      console.log('Found category buttons:', categoryButtons.length);
+      
       searchInput.addEventListener('input', (event) => {
         currentSearchTerm = event.target.value.trim().toLowerCase();
         applyFilters();
       });
       
-      categoryButtons.forEach(button => {
+      categoryButtons.forEach((button, index) => {
+        console.log(`Adding click listener to button ${index}:`, button.textContent);
         button.addEventListener('click', (event) => {
+          console.log('Category button clicked:', event.target.textContent);
           categoryButtons.forEach(btn => btn.classList.remove('active'));
           event.target.classList.add('active');
           currentCategory = event.target.dataset.category;
+          console.log('New category:', currentCategory);
           applyFilters();
         });
       });
@@ -434,45 +440,6 @@ const categories = [...new Set(trainers.flatMap(t => t.categories ?? []))].sort(
       };
     }
 
-    // Set up event listeners for dynamic elements
-    const categoryButtons = document.querySelectorAll('.category-button');
-    const suburbSelectElement = document.getElementById('suburbFilter');
-    
-    searchInput.addEventListener('input', (event) => {
-      currentSearchTerm = event.target.value.trim().toLowerCase();
-      applyFilters();
-    });
-    
-    categoryButtons.forEach(button => {
-      button.addEventListener('click', (event) => {
-        categoryButtons.forEach(btn => btn.classList.remove('active'));
-        event.target.classList.add('active');
-        currentCategory = event.target.dataset.category;
-        applyFilters();
-      });
-    });
-    
-    suburbSelectElement.addEventListener('change', (event) => {
-      currentSuburb = event.target.value;
-      applyFilters();
-    });
-    
-    sortSelect.addEventListener('change', () => {
-      sortTrainers();
-      renderPage(currentPage);
-    });
-    
-    window.clearFilters = () => {
-      currentSearchTerm = '';
-      currentCategory = '';
-      currentSuburb = '';
-      searchInput.value = '';
-      suburbSelectElement.value = '';
-      categoryButtons.forEach(btn => btn.classList.remove('active'));
-      categoryButtons[0].classList.add('active');
-      applyFilters();
-    };
-    
     // Initial render - set up event listeners first, then apply filters
     setupEventListeners();
     applyFilters();
@@ -545,37 +512,42 @@ const categories = [...new Set(trainers.flatMap(t => t.categories ?? []))].sort(
     }
 
     .category-button {
-        background-color: var(--color-background-light);
+        background-color: transparent;
         color: var(--color-text-light);
         border: 1px solid var(--color-border-light);
-        padding: 0.6em 1.2em;
-        border-radius: 20px;
+        padding: 0.8em 1.5em;
+        border-radius: 8px;
         font-size: 0.9em;
-        font-weight: 500;
+        font-weight: 600;
+        font-family: 'Inter', sans-serif;
+        cursor: pointer;
         transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
         will-change: transform;
     }
 
     .category-button:hover {
-        background-color: var(--color-accent-teal);
-        color: white;
-        border-color: var(--color-accent-teal);
+        background-color: var(--color-border-light);
         transform: translateY(-3px);
-        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.08);
     }
 
     .category-button:active {
         transform: translateY(0);
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        background-color: color-mix(in srgb, var(--color-accent-teal) 90%, black);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        background-color: color-mix(in srgb, var(--color-border-light) 90%, black);
     }
 
     .category-button.active {
-        background-color: var(--color-accent-mustard);
+        background-color: var(--color-primary-button-bg);
         color: var(--color-primary-button-text);
-        border-color: var(--color-accent-mustard);
+        border-color: var(--color-primary-button-bg);
         font-weight: 600;
         box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .category-button.active:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
     }
 
     .suburb-filter {
