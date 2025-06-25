@@ -177,12 +177,15 @@ const categories = [...new Set(trainers.flatMap(t => t.categories ?? []))].sort(
           email: trainer.email,
           website: trainer.website,
           description: trainer.description || trainer.why_choose_me,
-          profile_image: trainer.profile_image,
+          profile_image_url: trainer.profile_image || trainer.profile_image_url,
           rating: trainer.rating,
           review_count: trainer.review_count,
-          social_links: trainer.social_links
+          social_links: trainer.social_links,
+          avg_rating: trainer.avg_rating || trainer.rating,
+          average_rating: trainer.average_rating || trainer.rating
         }));
         console.log(`Loaded ${cardsData.length} trainers from Supabase`);
+        console.log('Sample trainer data:', cardsData[0]);
       } else {
         throw new Error('No Supabase data available');
       }
@@ -212,6 +215,18 @@ const categories = [...new Set(trainers.flatMap(t => t.categories ?? []))].sort(
     const pagination = document.getElementById('pagination-controls');
     const resultsCount = document.getElementById('results-count');
     const skeletonLoader = document.getElementById('loading-skeleton');
+    
+    console.log('DOM elements found:');
+    console.log('trainerList:', trainerList);
+    console.log('pagination:', pagination);
+    console.log('resultsCount:', resultsCount);
+    console.log('skeletonLoader:', skeletonLoader);
+    
+    if (!trainerList) {
+      console.error('trainer-list element not found!');
+      return;
+    }
+    
     let currentSearchTerm = '';
     let currentCategory = '';
     let currentSuburb = '';
@@ -223,12 +238,14 @@ const categories = [...new Set(trainers.flatMap(t => t.categories ?? []))].sort(
     skeletonLoader.style.display = 'grid';
 
     function createTrainerCardHTML(trainer) {
-      const rating = trainer.avg_rating || trainer.average_rating;
+      console.log('Creating card for trainer:', trainer.name, trainer);
+      
+      const rating = trainer.avg_rating || trainer.average_rating || trainer.rating;
       const reviewCount = trainer.review_count;
       const categories = (trainer.categories || []).join(', ');
       const slug = trainer.slug || trainer.name.toLowerCase().replace(/\s+/g, '-');
       
-      return `
+      const cardHTML = `
         <article class="trainer-card" 
           data-suburb="${trainer.suburb || ''}"
           data-cats="${(trainer.categories || []).join(',')}"
@@ -238,12 +255,12 @@ const categories = [...new Set(trainers.flatMap(t => t.categories ?? []))].sort(
           role="group"
           aria-label="Trainer card for ${trainer.name}">
           
-          <img src="${trainer.profile_image_url || '/images/dog-placeholder.svg'}" 
+          <img src="${trainer.profile_image_url || '/images/sad-dog-404.png'}" 
                alt="${trainer.name}" 
                loading="lazy" 
                width="80" height="80" 
                style="border-radius: 50%; object-fit: cover; margin-bottom: 0.5em;"
-               onerror="this.src='/images/dog-placeholder.svg'" />
+               onerror="this.src='/images/sad-dog-404.png'" />
           
           <h3>${trainer.name}</h3>
           
@@ -267,9 +284,16 @@ const categories = [...new Set(trainers.flatMap(t => t.categories ?? []))].sort(
           </div>
         </article>
       `;
+      
+      console.log('Generated HTML length:', cardHTML.length);
+      return cardHTML;
     }
 
     function renderPage(page) {
+      console.log('renderPage called with page:', page);
+      console.log('filtered data length:', filtered.length);
+      console.log('cardsData length:', cardsData.length);
+      
       // Hide skeleton loader once we start rendering
       skeletonLoader.style.display = 'none';
       
@@ -277,23 +301,39 @@ const categories = [...new Set(trainers.flatMap(t => t.categories ?? []))].sort(
       const start = (page - 1) * perPage;
       const end = start + perPage;
       const pageData = filtered.slice(start, end);
+      
+      console.log('pageData for page', page, ':', pageData.length, 'items');
+      console.log('First trainer:', pageData[0]);
+      
       if (pageData.length === 0) {
+        console.log('No data to show, showing no-results');
         document.getElementById('no-results').style.display = 'block';
         pagination.innerHTML = '';
         return;
       } else {
         if (document.getElementById('no-results')) document.getElementById('no-results').style.display = 'none';
       }
-      pageData.forEach(trainer => {
-        const div = document.createElement('div');
-        div.innerHTML = createTrainerCardHTML(trainer);
-        trainerList.appendChild(div.firstChild);
+      
+      pageData.forEach((trainer, index) => {
+        console.log(`Rendering trainer ${index}:`, trainer.name);
+        try {
+          const div = document.createElement('div');
+          const cardHTML = createTrainerCardHTML(trainer);
+          console.log(`Card HTML for ${trainer.name}:`, cardHTML.substring(0, 100) + '...');
+          div.innerHTML = cardHTML;
+          trainerList.appendChild(div.firstChild);
+        } catch (error) {
+          console.error(`Error rendering trainer ${trainer.name}:`, error);
+        }
       });
+      
       renderPagination();
       resultsCount.textContent =
         filtered.length === cardsData.length
           ? `Showing ${filtered.length} trainers`
           : `Showing ${filtered.length} of ${cardsData.length} trainers`;
+      
+      console.log('Render complete. trainerList children:', trainerList.children.length);
     }
 
     function renderPagination() {
