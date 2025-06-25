@@ -4,22 +4,23 @@ const ReactiveTypography = {
     timeBasedAdjustments() {
         const hour = new Date().getHours();
         const root = document.documentElement;
+        const userScale = parseFloat(localStorage.getItem('userFontScale') || '1');
         
         // Evening/Night (6 PM - 5 AM): Slightly larger, more spaced for easier reading
         if (hour >= 18 || hour < 5) {
-            root.style.setProperty('--font-size-base', '1.05rem');
+            root.style.setProperty('--font-size-base', `${1.05 * userScale}rem`);
             root.style.setProperty('--line-height-base', '1.7');
             root.style.setProperty('--letter-spacing-base', '0.01em');
         }
         // Morning (5 AM - 11 AM): Standard size, crisp
         else if (hour >= 5 && hour < 11) {
-            root.style.setProperty('--font-size-base', '1rem');
+            root.style.setProperty('--font-size-base', `${1 * userScale}rem`);
             root.style.setProperty('--line-height-base', '1.6');
             root.style.setProperty('--letter-spacing-base', '0');
         }
         // Afternoon (11 AM - 6 PM): Slightly more compact
         else {
-            root.style.setProperty('--font-size-base', '0.98rem');
+            root.style.setProperty('--font-size-base', `${0.98 * userScale}rem`);
             root.style.setProperty('--line-height-base', '1.5');
             root.style.setProperty('--letter-spacing-base', '-0.01em');
         }
