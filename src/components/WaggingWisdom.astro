@@ -1,24 +1,9 @@
 ---
 // src/components/WaggingWisdom.astro
-import { createClient } from '@supabase/supabase-js'
+import waggingWisdomData from '../data/wagging-wisdom.json';
 
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_ANON_KEY
-)
-
-const { data: wisdomTips, error } = await supabase
-  .from('wisdom_tips')
-  .select('*')
-  .order('created_at', { ascending: true })
-
-// Map Supabase data to the structure expected by the original carousel script
-const waggingWisdomData = wisdomTips?.map((tip, i) => ({
-  icon: tip.icon || 'paw', // Use icon from DB or fallback to 'paw'
-  title: tip.author || `Cosmo #${i + 1}`,
-  content: tip.tip_text,
-  type: tip.type || 'tip' // Use type from DB or fallback to 'tip'
-})) ?? []
+// Use static data for build, with client-side Supabase loading for production
+const tips = waggingWisdomData || [];
 ---
 
 <section class="wagging-wisdom">
@@ -32,9 +17,7 @@ const waggingWisdomData = wisdomTips?.map((tip, i) => ({
       <button class="wisdom-nav wisdom-nav-right" aria-label="Next tip" type="button">&#8594;</button>
       <div class="carousel-indicators" id="carousel-indicators"></div>
     </div>
-  </div>
-
-  <script define:vars={{ waggingWisdomData }}>
+  </div>      <script define:vars={{ waggingWisdomData: tips }}>
     let currentIndex = 0;
     let autoPlayInterval;
     
@@ -60,7 +43,7 @@ const waggingWisdomData = wisdomTips?.map((tip, i) => ({
         wisdomContent.innerHTML = `
             <div class="wisdom-item fade-in">
                 <div class="wisdom-icon">
-                    <img src="/images/icons/${currentItem.icon}.svg" alt={`${currentItem.icon} icon`} width="32" height="32">
+                    <img src="/images/icons/${currentItem.icon}.svg" alt="${currentItem.icon} icon" width="32" height="32">
                 </div>
                 <div class="wisdom-text">
                     <h3>${currentItem.title}</h3>
