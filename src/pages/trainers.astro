@@ -169,15 +169,15 @@ const categories = [...new Set(trainers.flatMap(t => t.categories ?? []))].sort(
         cardsData = supabaseTrainers.map(trainer => ({
           id: trainer.id,
           name: trainer.name,
-          location: trainer.suburb || trainer.location,
-          suburb: trainer.suburb || trainer.location,
+          location: trainer.suburb || trainer.address,
+          suburb: trainer.suburb,
           categories: trainer.categories || [],
           matchTags: trainer.match_tags || [],
           phone: trainer.phone,
           email: trainer.email,
           website: trainer.website,
-          description: trainer.description || trainer.why_choose_me,
-          profile_image_url: trainer.profile_image || trainer.profile_image_url,
+          description: trainer.description,
+          profile_image_url: trainer.profile_image_url,
           rating: trainer.rating,
           review_count: trainer.review_count,
           social_links: trainer.social_links,
@@ -195,7 +195,7 @@ const categories = [...new Set(trainers.flatMap(t => t.categories ?? []))].sort(
     }
     
     // Update dynamic filters based on loaded data
-    const dynamicSuburbs = [...new Set(cardsData.map(t => t.suburb || t.location))].filter(Boolean).sort();
+    const dynamicSuburbs = [...new Set(cardsData.map(t => t.suburb).filter(Boolean))].sort();
     const dynamicCategories = [...new Set(cardsData.flatMap(t => t.categories ?? []))].sort();
     
     // Update suburb filter options
@@ -321,7 +321,13 @@ const categories = [...new Set(trainers.flatMap(t => t.categories ?? []))].sort(
           const cardHTML = createTrainerCardHTML(trainer);
           console.log(`Card HTML for ${trainer.name}:`, cardHTML.substring(0, 100) + '...');
           div.innerHTML = cardHTML;
-          trainerList.appendChild(div.firstChild);
+          
+          // Ensure we have a valid element to append
+          if (div.firstElementChild) {
+            trainerList.appendChild(div.firstElementChild);
+          } else {
+            console.error(`No valid element created for trainer ${trainer.name}`);
+          }
         } catch (error) {
           console.error(`Error rendering trainer ${trainer.name}:`, error);
         }
@@ -387,6 +393,47 @@ const categories = [...new Set(trainers.flatMap(t => t.categories ?? []))].sort(
       renderPage(currentPage);
     }
 
+    // Set up event listeners for dynamic elements AFTER they are created
+    function setupEventListeners() {
+      const categoryButtons = document.querySelectorAll('.category-button');
+      const suburbSelectElement = document.getElementById('suburbFilter');
+      
+      searchInput.addEventListener('input', (event) => {
+        currentSearchTerm = event.target.value.trim().toLowerCase();
+        applyFilters();
+      });
+      
+      categoryButtons.forEach(button => {
+        button.addEventListener('click', (event) => {
+          categoryButtons.forEach(btn => btn.classList.remove('active'));
+          event.target.classList.add('active');
+          currentCategory = event.target.dataset.category;
+          applyFilters();
+        });
+      });
+      
+      suburbSelectElement.addEventListener('change', (event) => {
+        currentSuburb = event.target.value;
+        applyFilters();
+      });
+      
+      sortSelect.addEventListener('change', () => {
+        sortTrainers();
+        renderPage(currentPage);
+      });
+      
+      window.clearFilters = () => {
+        currentSearchTerm = '';
+        currentCategory = '';
+        currentSuburb = '';
+        searchInput.value = '';
+        suburbSelectElement.value = '';
+        categoryButtons.forEach(btn => btn.classList.remove('active'));
+        categoryButtons[0].classList.add('active');
+        applyFilters();
+      };
+    }
+
     // Set up event listeners for dynamic elements
     const categoryButtons = document.querySelectorAll('.category-button');
     const suburbSelectElement = document.getElementById('suburbFilter');
@@ -426,7 +473,8 @@ const categories = [...new Set(trainers.flatMap(t => t.categories ?? []))].sort(
       applyFilters();
     };
     
-    // Initial render
+    // Initial render - set up event listeners first, then apply filters
+    setupEventListeners();
     applyFilters();
   });
 </script>
