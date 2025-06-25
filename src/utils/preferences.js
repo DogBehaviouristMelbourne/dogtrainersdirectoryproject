@@ -1,9 +1,21 @@
-// Preferences Panel Management
+// Simple preferences management
 document.addEventListener('DOMContentLoaded', () => {
     const panel = document.getElementById('preferences-panel');
+    const toggle = document.querySelector('.preferences-toggle');
     const content = document.getElementById('preferences-content');
-    const toggle = panel?.querySelector('.preferences-toggle');
-    const fontSlider = document.getElementById('font-size');
+
+    // Theme handling
+    const themeSelect = document.getElementById('theme-select');
+    const savedTheme = localStorage.getItem('theme') || 'auto';
+    if (themeSelect) {
+        themeSelect.value = savedTheme;
+        themeSelect.addEventListener('change', (e) => {
+            const target = e.target as HTMLSelectElement;
+            const theme = target.value;
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+        });
+    }
 
     // Handle click outside
     document.addEventListener('click', (e) => {

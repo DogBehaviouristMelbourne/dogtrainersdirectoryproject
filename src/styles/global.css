@@ -20,8 +20,10 @@
     --color-accent-terracotta: #d18a7d; /* Terra Cotta Blush */
 
     /* General UI Colors */
-    --color-primary-button-bg: var(--color-accent-mustard);
-    --color-primary-button-text: var(--color-text-light);
+    --color-primary-button-bg: #f4c550;  /* Brighter mustard for buttons */
+    --color-secondary-button-bg: #ffffff;
+    --color-primary-button-text: #2a2a2a;
+    --color-secondary-button-text: #2a2a2a;
     --color-link: var(--color-accent-teal);
     --color-link-hover: var(--color-accent-mustard);
 

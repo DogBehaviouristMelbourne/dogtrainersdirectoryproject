@@ -4,9 +4,8 @@ import ThemeToggle from './ThemeToggle.astro';
 import SoundToggle from './SoundToggle.astro'; // Import SoundToggle
 import '../styles/header.css';
 
-// Define navigation links with explicit Home link
+// Define navigation links (Home is handled by logo)
 const navLinks = [
-    { name: 'Home', href: '/' },
     { name: 'Find a Trainer', href: '/trainers' },
     { name: 'About Us', href: '/about' },
     { name: 'For Trainers', href: '/for-trainers' },
@@ -24,14 +23,13 @@ const isActive = (href: string) => currentPath === href ? 'active' : '';
 ---
 
 <header class="site-header sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-gray-200">
-    <!-- Logo with explicit home link -->
-    <a href="/" class="logo" aria-label="Dog Trainers Directory - Home">
-        <img src="/favicon.svg" alt="Dog Trainers Directory logo" class="logo-img" />
+    <!-- Logo serving as home link -->
+    <a href="/" class="logo" aria-label="Return to Dog Trainers Directory Homepage">
+        <img src="/favicon.svg" alt="" class="logo-img" aria-hidden="true" />
         <div class="logo-text">
             <span class="logo-main">Dog Trainers</span>
             <span class="logo-sub">Directory</span>
         </div>
-        <span class="sr-only">Home</span>
     </a>
 
     <!-- Desktop Navigation -->
@@ -56,16 +54,20 @@ const isActive = (href: string) => currentPath === href ? 'active' : '';
         <span class="line line-bottom"></span>
     </button>
 
-    <!-- Mobile Navigation Overlay -->
-    <div class="mobile-nav-overlay">
-        <nav>
+    <!-- Mobile Navigation Menu -->
+    <div class="mobile-menu" id="mobile-menu">
+        <nav class="mobile-nav">
             {navLinks.map(link => (
-                <a href={link.href} class={isActive(link.href)} aria-current={currentPath === link.href ? 'page' : undefined}>
+                <a 
+                    href={link.href} 
+                    class={`mobile-nav-link ${isActive(link.href)}`} 
+                    aria-current={currentPath === link.href ? 'page' : undefined}
+                >
                     {link.name}
                 </a>
             ))}
         </nav>
-        <!-- Toggles for Mobile (inside overlay) -->
+        <!-- Toggles for Mobile -->
         <div class="toggles-wrapper mobile-only">
             <ThemeToggle />
             <SoundToggle />
@@ -74,48 +76,33 @@ const isActive = (href: string) => currentPath === href ? 'active' : '';
 </header>
 
 <script is:inline>
-    const burgerButton = document.querySelector('.burger-button');
-    const mobileNavOverlay = document.querySelector('.mobile-nav-overlay');
-    const body = document.body;
+    document.addEventListener('DOMContentLoaded', () => {
+        const burgerButton = document.querySelector('.burger-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const body = document.body;
 
-    // Get the position of the burger button to animate clip-path from there
-    const setClipPathOrigin = () => {
-        const rect = burgerButton.getBoundingClientRect();
-        // Calculate center of the burger button relative to viewport
-        const x = rect.left + rect.width / 2;
-        const y = rect.top + rect.height / 2;
-        mobileNavOverlay.style.setProperty('--clip-x', `${x}px`);
-        mobileNavOverlay.style.setProperty('--clip-y', `${y}px`);
-    };
-
-    // Set initial origin on load
-    setClipPathOrigin();
-    // Recalculate on resize to ensure correct animation origin
-    window.addEventListener('resize', setClipPathOrigin);
-
-    burgerButton.addEventListener('click', () => {
-        const isOpen = mobileNavOverlay.classList.contains('open');
-
-        if (isOpen) {
-            // Close menu
-            mobileNavOverlay.classList.remove('open');
-            burgerButton.classList.remove('open');
-            body.classList.remove('menu-open');
-        } else {
-            // Open menu
-            setClipPathOrigin(); // Recalculate just before opening
-            mobileNavOverlay.classList.add('open');
-            burgerButton.classList.add('open');
-            body.classList.add('menu-open');
+        function toggleMenu() {
+            const isOpen = burgerButton.classList.contains('active');
+            burgerButton.classList.toggle('active');
+            mobileMenu.classList.toggle('active');
+            body.style.overflow = isOpen ? '' : 'hidden';
         }
-    });
 
-    // Close menu when a link is clicked (for SPA-like navigation)
-    mobileNavOverlay.querySelectorAll('a').forEach(link => {
-        link.addEventListener('click', () => {
-            mobileNavOverlay.classList.remove('open');
-            burgerButton.classList.remove('open');
-            body.classList.remove('menu-open');
+        // Toggle menu on burger click
+        burgerButton?.addEventListener('click', toggleMenu);
+
+        // Close menu when clicking a link
+        mobileMenu?.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                toggleMenu();
+            });
+        });
+
+        // Close menu when pressing Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && mobileMenu.classList.contains('active')) {
+                toggleMenu();
+            }
         });
     });
 </script>

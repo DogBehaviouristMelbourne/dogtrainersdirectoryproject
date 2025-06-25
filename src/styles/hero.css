@@ -1,0 +1,200 @@
+/* Hero Section Styles */
+.hero-section {
+    height: 100vh;
+    padding: 0;
+    margin: 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-content {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    position: relative;
+}
+
+.hero-text {
+    position: absolute;
+    top: 0.75rem;
+    left: 1.25rem;
+    z-index: 2;
+    max-width: 85%;
+}
+
+.hero-text h1 {
+    font-size: 2.5rem;
+    font-weight: 900;
+    line-height: 1.15;
+    margin: 0;
+    color: var(--color-text-dark);
+    text-align: left;
+    letter-spacing: -0.02em;
+}
+
+.hero-subtitle {
+    display: none;
+}
+
+.hero-image {
+    flex: 1;
+    width: 100%;
+    height: 80vh;
+    position: relative;
+    margin-top: 2.5rem;
+}
+
+.hero-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    object-position: center 20%;
+}
+
+.hero-actions {
+    position: absolute;
+    bottom: 1.75rem;
+    left: 1.25rem;
+    right: 1.25rem;
+    display: flex;
+    gap: 1.25rem;
+    z-index: 2;
+}
+
+.hero-actions .button {
+    flex: 1;
+    padding: 1.25rem 1rem;
+    font-size: 1.0625rem;
+    border-radius: 14px;
+    text-align: center;
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    letter-spacing: -0.01em;
+}
+
+.hero-actions .button.primary {
+    background: var(--color-primary-button-bg);
+    color: var(--color-primary-button-text);
+}
+
+.hero-actions .button.secondary {
+    background: var(--color-secondary-button-bg);
+    color: var(--color-secondary-button-text);
+    border: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.hero-stats {
+    position: absolute;
+    bottom: 7.5rem;
+    left: 1.25rem;
+    right: 1.25rem;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    padding: 1.75rem 1.5rem;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+    z-index: 2;
+}
+
+.stat {
+    text-align: center;
+}
+
+.stat-number {
+    display: block;
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--color-accent-teal);
+    margin-bottom: 0.375rem;
+}
+
+.stat-label {
+    display: block;
+    font-size: 0.9375rem;
+    color: var(--color-text-light);
+    opacity: 0.85;
+    line-height: 1.2;
+    font-weight: 500;
+}
+
+/* iPhone 16 and similar mobile screens */
+@media (max-width: 428px) {
+    .hero-section {
+        min-height: 100vh;
+        padding-top: 0;
+    }
+
+    .hero-content {
+        padding-top: var(--space-4);
+        gap: var(--space-4);
+    }
+
+    .hero-text h1 {
+        font-size: var(--font-size-2xl);
+        padding: 0 var(--space-2);
+    }
+
+    .hero-subtitle {
+        font-size: var(--font-size-base);
+        padding: 0 var(--space-2);
+        margin-bottom: var(--space-4);
+    }
+
+    .hero-image {
+        width: 90%;
+        margin-top: -var(--space-4);
+    }
+
+    .hero-actions {
+        flex-direction: column;
+        padding: 0 var(--space-4);
+        gap: var(--space-2);
+    }
+
+    .hero-stats {
+        margin: 0 var(--space-4);
+    }
+
+    .stat-number {
+        font-size: var(--font-size-xl);
+    }
+
+    .stat-label {
+        font-size: var(--font-size-xs);
+    }
+}
+
+/* Button Styles */
+.button {
+    display: inline-block;
+    padding: var(--space-3) var(--space-6);
+    border-radius: 2rem;
+    font-weight: 600;
+    text-align: center;
+    transition: all var(--animation-duration-base) var(--transition-smooth);
+    width: 100%;
+    max-width: 300px;
+}
+
+.button.primary {
+    background: var(--color-primary-button-bg);
+    color: var(--color-primary-button-text);
+    box-shadow: var(--shadow-neu-light);
+}
+
+.button.secondary {
+    background: transparent;
+    border: 2px solid var(--color-primary-button-bg);
+    color: var(--color-text-light);
+}
+
+.button:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
