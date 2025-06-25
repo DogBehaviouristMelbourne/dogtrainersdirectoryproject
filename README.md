@@ -2,6 +2,10 @@
 
 A behaviour-first, community-powered directory for certified dog trainers and services in Melbourne, Australia.
 
+![Build Status](https://github.com/DogBehaviouristMelbourne/dogtrainersdirectoryproject/workflows/🚀%20Build%20and%20Deploy/badge.svg)
+[![Accessibility](https://img.shields.io/badge/Accessibility-WCAG%202.1%20AA-green)](https://www.w3.org/WAI/WCAG21/quickref/)
+[![Performance](https://img.shields.io/badge/Performance-Optimized-brightgreen)](https://web.dev/performance-scoring/)
+
 ---
 
 ## 🌐 Website

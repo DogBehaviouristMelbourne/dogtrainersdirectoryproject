@@ -149,9 +149,9 @@ const categories = [...new Set(trainers.flatMap(t => t.categories ?? []))].sort(
     <Footer />
 </Layout>
 
-<script define:vars={{ suburbs, categories }}>
+<script define:vars={{ suburbs, categories, trainers }}>
   window.addEventListener('DOMContentLoaded', () => {
-    const cardsData = JSON.parse(JSON.stringify({trainers})).map(t => t); // Deep copy for filtering
+    const cardsData = JSON.parse(JSON.stringify(trainers)).map(t => t); // Deep copy for filtering
     let filtered = cardsData;
     let currentPage = 1;
     const perPage = 12;
@@ -171,6 +171,53 @@ const categories = [...new Set(trainers.flatMap(t => t.categories ?? []))].sort(
     // Show skeleton loader initially
     skeletonLoader.style.display = 'grid';
 
+    function createTrainerCardHTML(trainer) {
+      const rating = trainer.avg_rating || trainer.average_rating;
+      const reviewCount = trainer.review_count;
+      const categories = (trainer.categories || []).join(', ');
+      const slug = trainer.slug || trainer.name.toLowerCase().replace(/\s+/g, '-');
+      
+      return `
+        <article class="trainer-card" 
+          data-suburb="${trainer.suburb || ''}"
+          data-cats="${(trainer.categories || []).join(',')}"
+          data-name="${trainer.name.toLowerCase()}"
+          data-desc="${(trainer.description || '').toLowerCase()}"
+          tabindex="0"
+          role="group"
+          aria-label="Trainer card for ${trainer.name}">
+          
+          <img src="${trainer.profile_image_url || '/images/dog-placeholder.svg'}" 
+               alt="${trainer.name}" 
+               loading="lazy" 
+               width="80" height="80" 
+               style="border-radius: 50%; object-fit: cover; margin-bottom: 0.5em;"
+               onerror="this.src='/images/dog-placeholder.svg'" />
+          
+          <h3>${trainer.name}</h3>
+          
+          ${rating ? `
+            <div class="trainer-rating">
+              <span class="star">★</span> ${rating.toFixed(1)}
+              ${reviewCount ? `<span class="review-count">(${reviewCount} review${reviewCount > 1 ? 's' : ''})</span>` : ''}
+            </div>
+          ` : ''}
+          
+          <p class="trainer-location">${trainer.suburb || trainer.location || ''}</p>
+          
+          ${categories ? `<div class="trainer-categories">${categories}</div>` : ''}
+          
+          ${trainer.description ? `<p class="trainer-description">${trainer.description}</p>` : ''}
+          
+          <div class="trainer-contact">
+            ${trainer.phone ? `<span class="trainer-phone">📞 ${trainer.phone}</span>` : ''}
+            ${trainer.email ? `<span class="trainer-email">✉️ Contact</span>` : ''}
+            ${trainer.website ? `<span class="trainer-website">🌐 Website</span>` : ''}
+          </div>
+        </article>
+      `;
+    }
+
     function renderPage(page) {
       // Hide skeleton loader once we start rendering
       skeletonLoader.style.display = 'none';
@@ -188,7 +235,7 @@ const categories = [...new Set(trainers.flatMap(t => t.categories ?? []))].sort(
       }
       pageData.forEach(trainer => {
         const div = document.createElement('div');
-        div.innerHTML = `<TrainerCard trainer='${JSON.stringify(trainer)}' />`;
+        div.innerHTML = createTrainerCardHTML(trainer);
         trainerList.appendChild(div.firstChild);
       });
       renderPagination();
