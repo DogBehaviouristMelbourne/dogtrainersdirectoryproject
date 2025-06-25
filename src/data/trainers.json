@@ -1,135 +1,1498 @@
 [
-    {
-        "id": "trainer-1",
-        "name": "Pawsitive Steps Training",
-        "location": "Richmond",
-        "categories": ["puppy-training", "behaviour-obedience"],
-        "matchTags": ["puppy", "socialization", "basic-obedience", "positive-reinforcement", "leash-manners", "jumping", "house-training"],
-        "phone": "0412 345 678",
-        "email": "info@pawsitivesteps.com.au",
-        "website": "https://www.pawsitivesteps.com.au",
-        "description": "Specializing in positive reinforcement for puppies under 16 weeks, focusing on early socialization and basic manners. Also offers solutions for common nuisance behaviors like jumping and leash pulling for older dogs. Our gentle approach builds confidence while establishing clear boundaries."
-    },
-    {
-        "id": "trainer-2",
-        "name": "Calm Canine Co.",
-        "location": "Fitzroy",
-        "categories": ["anxiety-stress-management"],
-        "matchTags": ["anxiety", "fear", "trauma", "reactivity", "separation-anxiety", "confidence-building", "counter-conditioning", "desensitization", "positive-reinforcement"],
-        "phone": "0409 876 543",
-        "email": "hello@calmcanine.com.au",
-        "website": "https://www.calmcanine.com.au",
-        "description": "Dedicated to helping dogs overcome fear, anxiety, and trauma. Utilizes gentle counter-conditioning and desensitization techniques to build confidence and reduce stress. Specializes in separation anxiety and reactive behavior modification."
-    },
-    {
-        "id": "trainer-3",
-        "name": "Melbourne Dog Gurus",
-        "location": "St Kilda",
-        "categories": ["behaviour-obedience", "puppy-training"],
-        "matchTags": ["puppy", "basic-obedience", "advanced-obedience", "recall", "leash-manners", "barking", "house-training", "positive-reinforcement"],
-        "phone": "0455 112 233",
-        "email": "contact@melbournedoggurus.com",
-        "website": "https://www.melbournedoggurus.com",
-        "description": "Offering comprehensive obedience classes from puppy kindergarten to advanced recall. Addresses a wide range of behavioral issues including excessive barking and house-soiling. Group and private sessions available."
-    },
-    {
-        "id": "trainer-4",
-        "name": "Inner West Dog Whisperers",
-        "location": "Footscray",
-        "categories": ["anxiety-stress-management", "behaviour-obedience"],
-        "matchTags": ["reactivity", "separation-anxiety", "anxiety", "fear", "basic-obedience", "confidence-building", "positive-reinforcement"],
-        "phone": "0433 445 566",
-        "email": "support@innerwestdogs.com.au",
-        "website": "https://www.innerwestdogs.com.au",
-        "description": "Expert guidance for reactive dogs and those with separation anxiety. Also provides foundational obedience training to build a strong bond and clear communication between dog and owner."
-    },
-    {
-        "id": "trainer-5",
-        "name": "Northside Puppy Academy",
-        "location": "Brunswick",
-        "categories": ["puppy-training"],
-        "matchTags": ["puppy", "socialization", "basic-obedience", "positive-reinforcement", "house-training", "confidence-building"],
-        "phone": "0421 789 012",
-        "email": "academy@northsidepuppy.com.au",
-        "website": "https://www.northsidepuppy.com.au",
-        "description": "Exclusively focused on puppies aged 8-20 weeks. Our structured socialization program introduces young dogs to various environments, sounds, and experiences in a controlled, positive manner. Small class sizes ensure individual attention."
-    },
-    {
-        "id": "trainer-6",
-        "name": "Bayside Behavior Solutions",
-        "location": "Brighton",
-        "categories": ["behaviour-obedience", "anxiety-stress-management"],
-        "matchTags": ["aggression", "reactivity", "fear", "advanced-obedience", "leash-manners", "counter-conditioning", "positive-reinforcement"],
-        "phone": "0398 654 321",
-        "email": "info@baysidebehavior.com.au",
-        "website": "https://www.baysidebehavior.com.au",
-        "description": "Specializes in complex behavioral issues including aggression and severe reactivity. Uses science-based methods to modify problematic behaviors while maintaining the human-animal bond. Certified in advanced behavior modification techniques."
-    },
-    {
-        "id": "trainer-7",
-        "name": "Eastern Suburbs Dog Training",
-        "location": "Hawthorn",
-        "categories": ["behaviour-obedience"],
-        "matchTags": ["basic-obedience", "advanced-obedience", "recall", "leash-manners", "jumping", "barking", "positive-reinforcement"],
-        "phone": "0456 123 789",
-        "email": "training@easternsuburbsdogs.com.au",
-        "website": "https://www.easternsuburbsdogs.com.au",
-        "description": "Traditional obedience training with modern positive reinforcement methods. Offers beginner through advanced classes, focusing on reliable recall, loose leash walking, and impulse control. Perfect for dogs who need structure and consistency."
-    },
-    {
-        "id": "trainer-8",
-        "name": "Gentle Paws Therapy",
-        "location": "Carlton",
-        "categories": ["anxiety-stress-management"],
-        "matchTags": ["trauma", "fear", "anxiety", "confidence-building", "desensitization", "counter-conditioning", "positive-reinforcement"],
-        "phone": "0487 321 654",
-        "email": "therapy@gentlepaws.com.au",
-        "website": "https://www.gentlepaws.com.au",
-        "description": "Therapeutic approach to canine behavioral issues, particularly trauma recovery and phobia treatment. Works with rescue dogs and those with difficult backgrounds. Patience and understanding are at the core of our methodology."
-    },
-    {
-        "id": "trainer-9",
-        "name": "South Melbourne Canine College",
-        "location": "South Melbourne",
-        "categories": ["puppy-training", "behaviour-obedience"],
-        "matchTags": ["puppy", "socialization", "basic-obedience", "advanced-obedience", "positive-reinforcement", "leash-manners", "recall"],
-        "phone": "0412 987 654",
-        "email": "college@southmelbournecanine.com.au",
-        "website": "https://www.southmelbournecanine.com.au",
-        "description": "Comprehensive training programs from puppy foundation courses to advanced obedience certifications. Our structured curriculum ensures progressive learning and long-term success. Experienced instructors with decades of combined experience."
-    },
-    {
-        "id": "trainer-10",
-        "name": "Western Suburbs Dog Academy",
-        "location": "Williamstown",
-        "categories": ["behaviour-obedience", "anxiety-stress-management"],
-        "matchTags": ["basic-obedience", "reactivity", "anxiety", "leash-manners", "confidence-building", "positive-reinforcement"],
-        "phone": "0423 456 789",
-        "email": "academy@westerndogs.com.au",
-        "website": "https://www.westerndogs.com.au",
-        "description": "Serving the western suburbs with comprehensive training solutions. Specializes in reactive dogs and basic obedience. Our outdoor training facility provides real-world distractions for practical learning experiences."
-    },
-    {
-        "id": "trainer-11",
-        "name": "Mindful Mutts Melbourne",
-        "location": "Prahran",
-        "categories": ["anxiety-stress-management"],
-        "matchTags": ["anxiety", "separation-anxiety", "fear", "confidence-building", "desensitization", "positive-reinforcement"],
-        "phone": "0434 567 890",
-        "email": "mindful@mindfulmutt.com.au",
-        "website": "https://www.mindfulmutt.com.au",
-        "description": "Holistic approach to canine anxiety and stress management. Incorporates mindfulness techniques and environmental management alongside traditional behavior modification. Specializes in separation anxiety and noise phobias."
-    },
-    {
-        "id": "trainer-12",
-        "name": "Northern Beaches Dog School",
-        "location": "Coburg",
-        "categories": ["puppy-training", "behaviour-obedience"],
-        "matchTags": ["puppy", "socialization", "basic-obedience", "house-training", "leash-manners", "positive-reinforcement"],
-        "phone": "0445 678 901",
-        "email": "school@northernbeachesdogs.com.au",
-        "website": "https://www.northernbeachesdogs.com.au",
-        "description": "Family-friendly training environment focusing on building strong foundations. Puppy socialization classes and basic obedience for all ages. Emphasis on making training fun and engaging for both dogs and their families."
-    }
+  {
+    "id": "38665ce5-dca5-42b0-9d42-114f1f716d9f",
+    "name": "Act of Dog",
+    "suburb": "Abbotsford",
+    "address": "Abbotsford VIC 3067",
+    "categories": [
+      "anxiety-stress-management"
+    ],
+    "match_tags": [
+      "anxiety",
+      "fear",
+      "reactivity",
+      "separation-anxiety"
+    ],
+    "description": "Act of Dog is a dedicated anxiety stress management specialist based in Abbotsford.",
+    "phone": null,
+    "email": null,
+    "website": "https://actofdog.com.au/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=AO&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.630503+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "8894ea58-3cf8-4d08-843e-f114e10b7818",
+    "name": "Alex Edwards (Refine Your Canine)",
+    "suburb": "Wandong",
+    "address": "Wandong VIC 3758",
+    "categories": [
+      "behaviour-obedience"
+    ],
+    "match_tags": [
+      "confidence-building",
+      "manners",
+      "obedience"
+    ],
+    "description": "Alex Edwards (Refine Your Canine) is a dedicated behaviour obedience specialist based in Wandong.",
+    "phone": null,
+    "email": null,
+    "website": "https://www.refineyourcanine.com.au/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=AE&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.628251+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "ed0b5f38-179a-4096-9e42-02e651b3a6ee",
+    "name": "Bark and Bond",
+    "suburb": "South Melbourne",
+    "address": "South Melbourne VIC 3205",
+    "categories": [
+      "anxiety-stress-management"
+    ],
+    "match_tags": [
+      "anxiety",
+      "fear",
+      "reactivity",
+      "separation-anxiety"
+    ],
+    "description": "Bark and Bond is a dedicated anxiety stress management specialist based in South Melbourne.",
+    "phone": null,
+    "email": null,
+    "website": "https://barkandbond.com.au/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=BA&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.630786+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "96d5f8eb-2cf1-4e40-8ca1-3aa956f0b360",
+    "name": "Bark Busters Mornington",
+    "suburb": "Rosebud",
+    "address": "Rosebud VIC 3939",
+    "categories": [
+      "behaviour-obedience"
+    ],
+    "match_tags": [
+      "confidence-building",
+      "manners",
+      "obedience"
+    ],
+    "description": "Bark Busters Mornington is a dedicated behaviour obedience specialist based in Rosebud.",
+    "phone": null,
+    "email": null,
+    "website": "https://barkbusters.com.au/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=BB&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.629549+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "b07affde-3150-425d-8cee-16aa89f8a435",
+    "name": "Bark Smart",
+    "suburb": "Camberwell",
+    "address": "Camberwell VIC 3124",
+    "categories": [
+      "behaviour-obedience"
+    ],
+    "match_tags": [
+      "confidence-building",
+      "manners",
+      "obedience"
+    ],
+    "description": "Bark Smart is a dedicated behaviour obedience specialist based in Camberwell.",
+    "phone": null,
+    "email": null,
+    "website": "https://barksmart.com.au/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=BS&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.631003+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "fb428b86-3d88-4109-a9e2-4f284afcacde",
+    "name": "Basil Theofanides (Command Dog Training School)",
+    "suburb": "Blackburn",
+    "address": "Blackburn VIC 3130",
+    "categories": [
+      "puppy-training",
+      "behaviour-obedience",
+      "anxiety-stress-management"
+    ],
+    "match_tags": [
+      "anxiety",
+      "confidence-building",
+      "fear",
+      "house-training",
+      "manners",
+      "obedience",
+      "puppy",
+      "reactivity",
+      "separation-anxiety",
+      "socialization"
+    ],
+    "description": "Fair Trading Award-winning school established in 1989 by Nationally Accredited Trainer & Assessor, Basil Theofanides. Has 4 venues in Melbourne, including a state-of-the-art indoor training facility at Hoochy Poochy Doggy Day-care Abbotsford. All programs are structured and fully guaranteed.",
+    "phone": "03 9877 6522",
+    "email": null,
+    "website": "https://dogtraining.com.au/",
+    "facebook": "Facebook: https://www.facebook.com/CommandDogTrainingSchool/",
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=BT&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.631814+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "841acff7-2063-48d2-82b6-03b0c497de43",
+    "name": "BCDTS (Bayside Companion Dog Training School)",
+    "suburb": "Bentleigh",
+    "address": "Bentleigh VIC 3204",
+    "categories": [
+      "behaviour-obedience"
+    ],
+    "match_tags": [
+      "confidence-building",
+      "manners",
+      "obedience"
+    ],
+    "description": "BCDTS (Bayside Companion Dog Training School) is a dedicated behaviour obedience specialist based in Bentleigh.",
+    "phone": null,
+    "email": null,
+    "website": "https://baysidedogs.org.au/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=B(&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.628876+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "c6935f25-7614-4a45-a167-fc9ff0aca4bb",
+    "name": "Brigitte’s Dog School",
+    "suburb": "Melton",
+    "address": "Melton VIC 3337",
+    "categories": [
+      "puppy-training",
+      "behaviour-obedience"
+    ],
+    "match_tags": [
+      "confidence-building",
+      "house-training",
+      "manners",
+      "obedience",
+      "puppy",
+      "socialization"
+    ],
+    "description": "Fun group sessions and assistance dog training in a positive environment, specializing in puppy and obedience classes.",
+    "phone": "1300 78 22 49",
+    "email": null,
+    "website": "https://brigittesdogschool.com.au/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=BD&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.631982+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "c9475d2b-d4ca-4c23-8f4b-b4ad5910af47",
+    "name": "Canine Code",
+    "suburb": "Brighton",
+    "address": "Brighton VIC 3186",
+    "categories": [
+      "puppy-training"
+    ],
+    "match_tags": [
+      "house-training",
+      "puppy",
+      "socialization"
+    ],
+    "description": "Natural canine-behaviour focused training and human-dog relationship building.",
+    "phone": "0400 354 092",
+    "email": null,
+    "website": "https://caninecode.com.au/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=CC&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.631335+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "677ff01b-2fc5-43e2-b97f-45470974ee39",
+    "name": "Canine Companion",
+    "suburb": "Balwyn",
+    "address": "Balwyn VIC 3103",
+    "categories": [
+      "anxiety-stress-management"
+    ],
+    "match_tags": [
+      "anxiety",
+      "fear",
+      "reactivity",
+      "separation-anxiety"
+    ],
+    "description": "Canine Companion is a dedicated anxiety stress management specialist based in Balwyn.",
+    "phone": null,
+    "email": null,
+    "website": "https://caninecompanion.com.au/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=CC&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.630966+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "e93fbaf6-c549-44f1-9780-04e72e732ff6",
+    "name": "Canine Connection",
+    "suburb": "Blackburn South",
+    "address": "Blackburn South VIC 3130",
+    "categories": [
+      "behaviour-obedience"
+    ],
+    "match_tags": [
+      "confidence-building",
+      "manners",
+      "obedience"
+    ],
+    "description": "Canine Connection is a dedicated behaviour obedience specialist based in Blackburn South.",
+    "phone": null,
+    "email": null,
+    "website": "https://canineconnection.com.au/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=CC&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.6307+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "7688ac53-cb03-42be-8f79-c6e584857fe3",
+    "name": "DeltaDogz",
+    "suburb": "Docklands",
+    "address": "Docklands VIC 3008",
+    "categories": [
+      "behaviour-obedience"
+    ],
+    "match_tags": [
+      "confidence-building",
+      "manners",
+      "obedience"
+    ],
+    "description": "DeltaDogz is a dedicated behaviour obedience specialist based in Docklands.",
+    "phone": null,
+    "email": null,
+    "website": "https://deltadogz.com.au/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=D&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.630297+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "1abf3019-7d4b-4d86-b72c-9ec1ac421528",
+    "name": "Direct K9 Services",
+    "suburb": "Port Melbourne",
+    "address": "Port Melbourne VIC 3207",
+    "categories": [
+      "behaviour-obedience"
+    ],
+    "match_tags": [
+      "confidence-building",
+      "manners",
+      "obedience"
+    ],
+    "description": "Direct K9 Services is a dedicated behaviour obedience specialist based in Port Melbourne.",
+    "phone": null,
+    "email": null,
+    "website": "https://directk9services.com.au/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=DK&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.629756+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "f7181460-a6c6-49af-b14b-9ccc54d5426b",
+    "name": "Dog Manners",
+    "suburb": "Toorak",
+    "address": "Toorak VIC 3142",
+    "categories": [
+      "behaviour-obedience"
+    ],
+    "match_tags": [
+      "confidence-building",
+      "manners",
+      "obedience"
+    ],
+    "description": "Dog Manners is a dedicated behaviour obedience specialist based in Toorak.",
+    "phone": null,
+    "email": null,
+    "website": "https://dogmanners.com.au/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=DM&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.630923+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "fe64fb50-a34a-48a8-bf27-ae45d07b52a5",
+    "name": "Doggie Manners",
+    "suburb": "Collingwood",
+    "address": "Collingwood VIC 3066",
+    "categories": [
+      "puppy-training",
+      "behaviour-obedience"
+    ],
+    "match_tags": [
+      "confidence-building",
+      "house-training",
+      "manners",
+      "obedience",
+      "puppy",
+      "socialization"
+    ],
+    "description": "Doggie Manners is a dedicated puppy training, behaviour obedience specialist based in Collingwood.",
+    "phone": null,
+    "email": null,
+    "website": "https://www.doggiemanners.com.au/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=DM&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.631665+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "060ffe44-3325-438c-ae47-fca16a4edb53",
+    "name": "Doggy Discipline",
+    "suburb": "Hampton",
+    "address": "Hampton VIC 3188",
+    "categories": [
+      "behaviour-obedience"
+    ],
+    "match_tags": [
+      "confidence-building",
+      "manners",
+      "obedience"
+    ],
+    "description": "Doggy Discipline is a dedicated behaviour obedience specialist based in Hampton.",
+    "phone": null,
+    "email": null,
+    "website": "https://doggydiscipline.com.au/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=DD&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.631172+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "144d7b25-21e7-41a7-b95b-bdc8c99cd04a",
+    "name": "Doggy Dojo",
+    "suburb": "Richmond",
+    "address": "Richmond VIC 3121",
+    "categories": [
+      "behaviour-obedience"
+    ],
+    "match_tags": [
+      "confidence-building",
+      "manners",
+      "obedience"
+    ],
+    "description": "Doggy Dojo is a dedicated behaviour obedience specialist based in Richmond.",
+    "phone": null,
+    "email": null,
+    "website": "https://doggydojo.com.au/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=DD&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.630549+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "dc8d6243-7859-4356-a66b-8b4e76f486fe",
+    "name": "Dr. Gaille Perry (Animal Behaviour Australia)",
+    "suburb": "Toorak",
+    "address": "Toorak VIC 3142",
+    "categories": [
+      "anxiety-stress-management"
+    ],
+    "match_tags": [
+      "anxiety",
+      "fear",
+      "reactivity",
+      "separation-anxiety"
+    ],
+    "description": "Dr. Gaille Perry (Animal Behaviour Australia) is a dedicated anxiety stress management specialist based in Toorak.",
+    "phone": null,
+    "email": null,
+    "website": "https://animalbehaviour.com.au/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=DG&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.630265+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "f34aa6b7-a936-4fd8-a1f6-743b0fb5d3b3",
+    "name": "Eloise (Rock Dog Training)",
+    "suburb": "Lalor",
+    "address": "Lalor VIC 3075",
+    "categories": [
+      "puppy-training"
+    ],
+    "match_tags": [
+      "house-training",
+      "puppy",
+      "socialization"
+    ],
+    "description": "Eloise (Rock Dog Training) is a dedicated puppy training specialist based in Lalor.",
+    "phone": null,
+    "email": null,
+    "website": "https://rockdogtraining.com.au/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=E(&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.628165+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "33010e23-a8be-4aad-acea-d6e75652bb1a",
+    "name": "Good Dog Behaviour (Tim)",
+    "suburb": "North Melbourne",
+    "address": "North Melbourne VIC 3051",
+    "categories": [
+      "behaviour-obedience"
+    ],
+    "match_tags": [
+      "confidence-building",
+      "manners",
+      "obedience"
+    ],
+    "description": "Good Dog Behaviour (Tim) is a dedicated behaviour obedience specialist based in North Melbourne.",
+    "phone": null,
+    "email": null,
+    "website": "https://gooddog.com.au/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=GD&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.63013+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "cebdb6c7-c111-4b80-8a50-e73c0da7437d",
+    "name": "Grace",
+    "suburb": "Ballarat",
+    "address": "Ballarat VIC 3350",
+    "categories": [
+      "behaviour-obedience"
+    ],
+    "match_tags": [
+      "confidence-building",
+      "manners",
+      "obedience"
+    ],
+    "description": "Serving regional Ballarat with expert obedience training.",
+    "phone": null,
+    "email": null,
+    "website": null,
+    "facebook": "Facebook: https://www.facebook.com/GraceDogTraining/",
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=G&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.631508+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "d6af3201-470e-46a7-9b2b-4c4cc6d3327f",
+    "name": "Hanrob Pet Hotels",
+    "suburb": "Tullamarine",
+    "address": "Tullamarine VIC 3000",
+    "categories": [
+      "behaviour-obedience"
+    ],
+    "match_tags": [
+      "confidence-building",
+      "manners",
+      "obedience"
+    ],
+    "description": "Hanrob Pet Hotels is a dedicated behaviour obedience specialist based in Tullamarine.",
+    "phone": "1300 348 764",
+    "email": null,
+    "website": "https://www.hanrob.com.au/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=HP&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.629809+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "ee65374d-1242-4a41-8e1e-6ba875f20413",
+    "name": "Happy Hounds",
+    "suburb": "West Footscray",
+    "address": "West Footscray VIC 3012",
+    "categories": [
+      "puppy-training"
+    ],
+    "match_tags": [
+      "house-training",
+      "puppy",
+      "socialization"
+    ],
+    "description": "Happy Hounds is a dedicated puppy training specialist based in West Footscray.",
+    "phone": null,
+    "email": null,
+    "website": "https://happyhounds.com.au/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=HH&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.630759+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "702310c1-6a00-4fe0-82f2-ced39147b89a",
+    "name": "Heeling Hounds",
+    "suburb": "Sorrento",
+    "address": "Sorrento VIC 3943",
+    "categories": [
+      "behaviour-obedience"
+    ],
+    "match_tags": [
+      "confidence-building",
+      "manners",
+      "obedience"
+    ],
+    "description": "Heeling Hounds is a dedicated behaviour obedience specialist based in Sorrento.",
+    "phone": "0403 869 291",
+    "email": null,
+    "website": "https://heelinghounds.com.au/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=HH&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.629073+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "00294740-fc02-4778-a68a-9ce8aeb5b4a4",
+    "name": "Helping Hounds",
+    "suburb": "Mount Martha",
+    "address": "Mount Martha VIC 3934",
+    "categories": [
+      "behaviour-obedience"
+    ],
+    "match_tags": [
+      "confidence-building",
+      "manners",
+      "obedience"
+    ],
+    "description": "Helping Hounds is a dedicated behaviour obedience specialist based in Mount Martha.",
+    "phone": null,
+    "email": null,
+    "website": "https://helpinghounds.com.au/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=HH&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.629311+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "6bc1842b-0f4f-48c4-8782-0454c63e2deb",
+    "name": "Ian (Ian The Dog Trainer)",
+    "suburb": "Carlton",
+    "address": "Carlton VIC 3053",
+    "categories": [
+      "behaviour-obedience"
+    ],
+    "match_tags": [
+      "confidence-building",
+      "manners",
+      "obedience"
+    ],
+    "description": "Ian (Ian The Dog Trainer) is a dedicated behaviour obedience specialist based in Carlton.",
+    "phone": "0408 374 444",
+    "email": null,
+    "website": "https://ianthedogtrainer.com.au/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=I(&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.628745+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "f84a3e1a-9a1c-48d8-98fb-a7e67a216dac",
+    "name": "Jamie The Dog Trainer",
+    "suburb": "Geelong",
+    "address": "Geelong VIC 3220",
+    "categories": [
+      "behaviour-obedience"
+    ],
+    "match_tags": [
+      "confidence-building",
+      "manners",
+      "obedience"
+    ],
+    "description": "Serving regional Geelong with tailored behaviour training solutions.",
+    "phone": null,
+    "email": null,
+    "website": null,
+    "facebook": "Facebook: https://www.facebook.com/JamieTheDogTrainer/",
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=JT&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.631428+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "15fd1287-67e5-4687-9653-4b9d1f00bf94",
+    "name": "Jennifer (The Dog Training Co)",
+    "suburb": "Southbank",
+    "address": "Southbank VIC 3000",
+    "categories": [
+      "behaviour-obedience"
+    ],
+    "match_tags": [
+      "confidence-building",
+      "manners",
+      "obedience"
+    ],
+    "description": "Jennifer (The Dog Training Co) is a dedicated behaviour obedience specialist based in Southbank.",
+    "phone": "0434 231 672",
+    "email": null,
+    "website": "https://www.thedogtrainingco.com.au/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=J(&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.628538+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "ada8ebe8-e2c2-4d75-9932-2d1c6edd6637",
+    "name": "Jenny Harlow",
+    "suburb": "Carlton",
+    "address": "Carlton VIC 3053",
+    "categories": [
+      "anxiety-stress-management"
+    ],
+    "match_tags": [
+      "anxiety",
+      "fear",
+      "reactivity",
+      "separation-anxiety"
+    ],
+    "description": "Jenny Harlow is a dedicated anxiety stress management specialist based in Carlton.",
+    "phone": "0419 535 236",
+    "email": null,
+    "website": "https://jhdogtraining.com.au/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=JH&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.628402+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "65635a84-e812-43ef-bd0c-2caa8cc31584",
+    "name": "K9 Coach",
+    "suburb": "Preston",
+    "address": "Preston VIC 3072",
+    "categories": [
+      "behaviour-obedience"
+    ],
+    "match_tags": [
+      "confidence-building",
+      "manners",
+      "obedience"
+    ],
+    "description": "K9 Coach is a dedicated behaviour obedience specialist based in Preston.",
+    "phone": null,
+    "email": null,
+    "website": "https://k9coach.com.au/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=KC&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.630601+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "ff0905bd-fcf0-4e8f-b8cd-02ba36b89e1e",
+    "name": "K9 Harmony",
+    "suburb": "Thornbury",
+    "address": "Thornbury VIC 3071",
+    "categories": [
+      "behaviour-obedience"
+    ],
+    "match_tags": [
+      "confidence-building",
+      "manners",
+      "obedience"
+    ],
+    "description": "K9 Harmony is a dedicated behaviour obedience specialist based in Thornbury.",
+    "phone": null,
+    "email": null,
+    "website": "https://k9harmony.com.au/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=KH&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.631117+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "ee9cc1fe-da05-4ac3-83cf-f942b685bb19",
+    "name": "K9Resolutions",
+    "suburb": "Skye",
+    "address": "Skye VIC 3977",
+    "categories": [
+      "behaviour-obedience"
+    ],
+    "match_tags": [
+      "confidence-building",
+      "manners",
+      "obedience"
+    ],
+    "description": "K9Resolutions is a dedicated behaviour obedience specialist based in Skye.",
+    "phone": null,
+    "email": null,
+    "website": "https://www.k9resolutions.com.au/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=K&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.629157+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "8936a96b-0484-4df3-a29e-a82e008fc149",
+    "name": "Lana’s Dog Training",
+    "suburb": "Abbotsford",
+    "address": "Abbotsford VIC 3067",
+    "categories": [
+      "behaviour-obedience"
+    ],
+    "match_tags": [
+      "confidence-building",
+      "manners",
+      "obedience"
+    ],
+    "description": "Specializing in one-on-one obedience and behaviour consultations for a well-mannered dog.",
+    "phone": null,
+    "email": null,
+    "website": "https://lanasdogtraining.com.au/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=LD&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.63208+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "718c4190-a7c5-42a3-badb-ce4f8807a6db",
+    "name": "Laura Mundy (Mundy Dogs)",
+    "suburb": "Footscray",
+    "address": "Footscray VIC 3011",
+    "categories": [
+      "anxiety-stress-management"
+    ],
+    "match_tags": [
+      "anxiety",
+      "fear",
+      "reactivity",
+      "separation-anxiety"
+    ],
+    "description": "Laura Mundy (Mundy Dogs) is a dedicated anxiety stress management specialist based in Footscray.",
+    "phone": null,
+    "email": null,
+    "website": "https://www.lauramundydogtraining.com.au/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=LM&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.628466+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "a3231f2c-930b-40c4-91bd-98cfe9bbef00",
+    "name": "Manners For Paws",
+    "suburb": "Collingwood",
+    "address": "Collingwood VIC 3066",
+    "categories": [
+      "anxiety-stress-management"
+    ],
+    "match_tags": [
+      "anxiety",
+      "fear",
+      "reactivity",
+      "separation-anxiety"
+    ],
+    "description": "Manners For Paws is a dedicated anxiety stress management specialist based in Collingwood.",
+    "phone": null,
+    "email": null,
+    "website": "https://mannersforpaws.com.au/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=MF&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.629718+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "f4bfacf1-2467-4b99-8f02-19a9f96f972c",
+    "name": "Melanie Norgate",
+    "suburb": "Murrumbeena",
+    "address": "Murrumbeena VIC 3000",
+    "categories": [
+      "behaviour-obedience"
+    ],
+    "match_tags": [
+      "confidence-building",
+      "manners",
+      "obedience"
+    ],
+    "description": "Melanie Norgate is a dedicated behaviour obedience specialist based in Murrumbeena.",
+    "phone": null,
+    "email": null,
+    "website": "https://www.melanienorgate.com/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=MN&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.628604+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "d1f37c9b-9528-41a7-b396-cbf9b7bf6e36",
+    "name": "Melbourne Dog Trainers",
+    "suburb": "Ormond",
+    "address": "Ormond VIC 3204",
+    "categories": [
+      "puppy-training",
+      "behaviour-obedience",
+      "anxiety-stress-management"
+    ],
+    "match_tags": [
+      "anxiety",
+      "confidence-building",
+      "fear",
+      "house-training",
+      "manners",
+      "obedience",
+      "puppy",
+      "reactivity",
+      "separation-anxiety",
+      "socialization"
+    ],
+    "description": "Accredited, family-friendly indoor/outdoor training with a focus on theory and practical obedience.",
+    "phone": "03 8609 9700",
+    "email": null,
+    "website": "https://melbournedogtrainers.com.au/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=MD&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.629674+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "504670de-995c-40b0-8ede-591732497126",
+    "name": "Michael Tucker’s Dog Training School",
+    "suburb": "Eltham",
+    "address": "Eltham VIC 3095",
+    "categories": [
+      "puppy-training",
+      "behaviour-obedience"
+    ],
+    "match_tags": [
+      "confidence-building",
+      "house-training",
+      "manners",
+      "obedience",
+      "puppy",
+      "socialization"
+    ],
+    "description": "Over 60 years of experience with RAF police and guide dog expertise, offering individual, puppy, group, and in-home training.",
+    "phone": "03 9439 7577",
+    "email": null,
+    "website": "https://dogtraining.com.au/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=MT&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.631877+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "ef4707f9-3bda-4a01-8804-c15d094b49c5",
+    "name": "Mornington Peninsula Community Dog Club",
+    "suburb": "Mount Martha",
+    "address": "Mount Martha VIC 3934",
+    "categories": [
+      "puppy-training"
+    ],
+    "match_tags": [
+      "house-training",
+      "puppy",
+      "socialization"
+    ],
+    "description": "Mornington Peninsula Community Dog Club is a dedicated puppy training specialist based in Mount Martha.",
+    "phone": null,
+    "email": null,
+    "website": "https://mpcdogclub.org.au/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=MP&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.629501+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "7ee0be5e-e89e-4a03-9262-596445902239",
+    "name": "Paw Behaviour (Jen)",
+    "suburb": "Prahran",
+    "address": "Prahran VIC 3181",
+    "categories": [
+      "puppy-training"
+    ],
+    "match_tags": [
+      "house-training",
+      "puppy",
+      "socialization"
+    ],
+    "description": "Paw Behaviour (Jen) is a dedicated puppy training specialist based in Prahran.",
+    "phone": "0414 637 568",
+    "email": null,
+    "website": "https://pawbehaviour.com.au/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=PB&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.630229+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "cd66d2cc-ff97-4e91-9dbf-17363bbedc7d",
+    "name": "Pawfect Manners",
+    "suburb": "Ashbourne",
+    "address": "Ashbourne VIC 3442",
+    "categories": [
+      "puppy-training",
+      "behaviour-obedience"
+    ],
+    "match_tags": [
+      "confidence-building",
+      "house-training",
+      "manners",
+      "obedience",
+      "puppy",
+      "socialization"
+    ],
+    "description": "Experienced behaviourist-run programs across Macedon Ranges, offering personalized one-on-one and board/train programs.",
+    "phone": "0430 017 297",
+    "email": null,
+    "website": "https://pawfectmanners.com.au/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=PM&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.632035+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "0be45816-ce3d-4fab-acf5-4647a151df15",
+    "name": "Paws & Praise (Melissa)",
+    "suburb": "St Kilda",
+    "address": "St Kilda VIC 3000",
+    "categories": [
+      "behaviour-obedience"
+    ],
+    "match_tags": [
+      "confidence-building",
+      "manners",
+      "obedience"
+    ],
+    "description": "Paws & Praise (Melissa) is a dedicated behaviour obedience specialist based in St Kilda.",
+    "phone": null,
+    "email": null,
+    "website": "https://pawsandpraise.com.au/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=P&&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.629887+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "982b755e-f837-400c-bea1-c73e056d8485",
+    "name": "Paws and Learn",
+    "suburb": "Northcote",
+    "address": "Northcote VIC 3070",
+    "categories": [
+      "puppy-training"
+    ],
+    "match_tags": [
+      "house-training",
+      "puppy",
+      "socialization"
+    ],
+    "description": "Paws and Learn is a dedicated puppy training specialist based in Northcote.",
+    "phone": null,
+    "email": null,
+    "website": "https://pawsandlearn.com.au/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=PA&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.631039+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "ab86d1f2-e58f-4110-8325-28c4023c4c81",
+    "name": "Pawsitive Vibes",
+    "suburb": "Altona",
+    "address": "Altona VIC 3018",
+    "categories": [
+      "puppy-training"
+    ],
+    "match_tags": [
+      "house-training",
+      "puppy",
+      "socialization"
+    ],
+    "description": "Pawsitive Vibes is a dedicated puppy training specialist based in Altona.",
+    "phone": null,
+    "email": null,
+    "website": "https://pawsitivevibes.com.au/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=PV&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.630656+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "9cf1c12c-b79e-4c94-b3af-8a4ee1198171",
+    "name": "Pawsome Training",
+    "suburb": "Brunswick",
+    "address": "Brunswick VIC 3056",
+    "categories": [
+      "puppy-training"
+    ],
+    "match_tags": [
+      "house-training",
+      "puppy",
+      "socialization"
+    ],
+    "description": "Pawsome Training is a dedicated puppy training specialist based in Brunswick.",
+    "phone": null,
+    "email": null,
+    "website": "https://pawsometraining.com.au/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=PT&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.630848+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "d5dd5555-1ee7-4699-807c-702e3949196e",
+    "name": "Positive K9 Training",
+    "suburb": "Kew",
+    "address": "Kew VIC 3101",
+    "categories": [
+      "behaviour-obedience",
+      "puppy-training"
+    ],
+    "match_tags": [
+      "confidence-building",
+      "house-training",
+      "manners",
+      "obedience",
+      "puppy",
+      "socialization"
+    ],
+    "description": "Positive K9 Training is a dedicated behaviour obedience, puppy training specialist based in Kew.",
+    "phone": null,
+    "email": null,
+    "website": "https://positivek9training.com.au/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=PK&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.629608+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "c0a7287a-e43a-4f10-addf-77ffc1e8c6ff",
+    "name": "Renee Philp (Bayside Dog Behaviour)",
+    "suburb": "Brighton",
+    "address": "Brighton VIC 3186",
+    "categories": [
+      "behaviour-obedience"
+    ],
+    "match_tags": [
+      "confidence-building",
+      "manners",
+      "obedience"
+    ],
+    "description": "Renee Philp (Bayside Dog Behaviour) is a dedicated behaviour obedience specialist based in Brighton.",
+    "phone": null,
+    "email": null,
+    "website": "https://www.baysidedogbehaviour.com.au/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=RP&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.62894+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "58ac1d34-f41a-4e39-b10b-9389661b3dea",
+    "name": "Rod Sinclair & Dimitri (SitDropStay)",
+    "suburb": "Clayton",
+    "address": "Clayton VIC 3168",
+    "categories": [
+      "behaviour-obedience"
+    ],
+    "match_tags": [
+      "confidence-building",
+      "manners",
+      "obedience"
+    ],
+    "description": "Rod Sinclair & Dimitri (SitDropStay) is a dedicated behaviour obedience specialist based in Clayton.",
+    "phone": null,
+    "email": null,
+    "website": "https://sitdropstay.com.au/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=RS&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.628815+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "f192b64a-cef0-4c5f-883a-af278cf9e417",
+    "name": "Sally (Sally the Dog Trainer)",
+    "suburb": "Narre Warren",
+    "address": "Narre Warren VIC 3805",
+    "categories": [
+      "behaviour-obedience"
+    ],
+    "match_tags": [
+      "confidence-building",
+      "manners",
+      "obedience"
+    ],
+    "description": "Sally (Sally the Dog Trainer) is a dedicated behaviour obedience specialist based in Narre Warren.",
+    "phone": "0404110634",
+    "email": null,
+    "website": "https://sallythedogtrainer.com/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=S(&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.628328+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "47dba0e7-0d6a-4c51-890a-e535cd698f5d",
+    "name": "Sankiri Dog Training",
+    "suburb": "Seaford",
+    "address": "Seaford VIC 3198",
+    "categories": [
+      "anxiety-stress-management"
+    ],
+    "match_tags": [
+      "anxiety",
+      "fear",
+      "reactivity",
+      "separation-anxiety"
+    ],
+    "description": "Tackles tough cases with large, rescue, reactive, or aggressive dogs, equipping owners for success.",
+    "phone": "0401 634 392",
+    "email": null,
+    "website": "https://www.sankiridogtraining.com.au/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=SD&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.629399+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "7aa1d5f9-2b8e-4690-b880-baaa0500c474",
+    "name": "Secret Dogs Business",
+    "suburb": "Brighton",
+    "address": "Brighton VIC 3186",
+    "categories": [
+      "behaviour-obedience"
+    ],
+    "match_tags": [
+      "confidence-building",
+      "manners",
+      "obedience"
+    ],
+    "description": "The home of sensible dog training with guaranteed satisfaction, specializing in puppy and in-home modification.",
+    "phone": "0411 705 686",
+    "email": null,
+    "website": "https://secretdogsbusiness.com.au/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=SD&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.631593+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "b72290ea-be2c-47a1-9fcf-6be3168e4b33",
+    "name": "Sit Happens",
+    "suburb": "Mornington",
+    "address": "Mornington VIC 3931",
+    "categories": [
+      "behaviour-obedience"
+    ],
+    "match_tags": [
+      "confidence-building",
+      "manners",
+      "obedience"
+    ],
+    "description": "Sit Happens is a dedicated behaviour obedience specialist based in Mornington.",
+    "phone": null,
+    "email": null,
+    "website": "https://www.sithappens.com.au/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=SH&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.629196+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "b2874dba-6092-4882-8a51-9737d6e54c35",
+    "name": "Tail Waggers",
+    "suburb": "Essendon",
+    "address": "Essendon VIC 3040",
+    "categories": [
+      "behaviour-obedience"
+    ],
+    "match_tags": [
+      "confidence-building",
+      "manners",
+      "obedience"
+    ],
+    "description": "Tail Waggers is a dedicated behaviour obedience specialist based in Essendon.",
+    "phone": null,
+    "email": null,
+    "website": "https://tailwaggers.com.au/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=TW&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.630893+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "a658ed75-c0c5-4193-a87a-c45bb68219db",
+    "name": "Tamara Jackman (Underdog Training)",
+    "suburb": "Fitzroy",
+    "address": "Fitzroy VIC 3065",
+    "categories": [
+      "behaviour-obedience",
+      "puppy-training"
+    ],
+    "match_tags": [
+      "confidence-building",
+      "house-training",
+      "manners",
+      "obedience",
+      "puppy",
+      "socialization"
+    ],
+    "description": "Tamara Jackman (Underdog Training) is a dedicated behaviour obedience, puppy training specialist based in Fitzroy.",
+    "phone": null,
+    "email": null,
+    "website": "https://underdogtraining.com.au/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=TJ&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.628681+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "905f324b-89fc-45d0-b007-cbcb94f03a43",
+    "name": "Think Like A Dog",
+    "suburb": "Hawthorn",
+    "address": "Hawthorn VIC 3122",
+    "categories": [
+      "behaviour-obedience"
+    ],
+    "match_tags": [
+      "confidence-building",
+      "manners",
+      "obedience"
+    ],
+    "description": "Think Like A Dog is a dedicated behaviour obedience specialist based in Hawthorn.",
+    "phone": "0438 767745",
+    "email": null,
+    "website": "https://thinklikeadog.com.au/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=TL&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.62945+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "31bca6ca-a9a9-4d1d-9371-cd8189731c1d",
+    "name": "Thrive Canine",
+    "suburb": "Blackburn South",
+    "address": "Blackburn South VIC 3130",
+    "categories": [
+      "anxiety-stress-management",
+      "behaviour-obedience"
+    ],
+    "match_tags": [
+      "anxiety",
+      "confidence-building",
+      "fear",
+      "manners",
+      "obedience",
+      "reactivity",
+      "separation-anxiety"
+    ],
+    "description": "Force-free methods with a highly qualified team, specializing in reactive and aggressive dog rehabilitation.",
+    "phone": null,
+    "email": null,
+    "website": "https://thrivecanine.com.au/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=TC&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.631744+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "a3b63556-0b9e-4359-b2a0-b4dcdaf95211",
+    "name": "Treat Me Right",
+    "suburb": "Frankston",
+    "address": "Frankston VIC 3199",
+    "categories": [
+      "anxiety-stress-management"
+    ],
+    "match_tags": [
+      "anxiety",
+      "fear",
+      "reactivity",
+      "separation-anxiety"
+    ],
+    "description": "Treat Me Right is a dedicated anxiety stress management specialist based in Frankston.",
+    "phone": null,
+    "email": null,
+    "website": "https://www.treatmerightabt.com/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=TM&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.629244+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "c53d5682-2e69-4b28-acd9-86235537a2ea",
+    "name": "Urban Paws",
+    "suburb": "Yarraville",
+    "address": "Yarraville VIC 3013",
+    "categories": [
+      "behaviour-obedience"
+    ],
+    "match_tags": [
+      "confidence-building",
+      "manners",
+      "obedience"
+    ],
+    "description": "Urban Paws is a dedicated behaviour obedience specialist based in Yarraville.",
+    "phone": null,
+    "email": null,
+    "website": "https://urbanpaws.com.au/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=UP&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.63081+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "71bedb8c-f5a4-4a03-89c0-1b501d003d40",
+    "name": "Wiltja Dog Obedience Club",
+    "suburb": "Bundoora",
+    "address": "Bundoora VIC 3083",
+    "categories": [
+      "behaviour-obedience"
+    ],
+    "match_tags": [
+      "confidence-building",
+      "manners",
+      "obedience"
+    ],
+    "description": "NFP volunteer-run club focusing on education and trial-standard progression through introductory obedience and socialization classes.",
+    "phone": "0424 452 366",
+    "email": null,
+    "website": "https://wdoc.com.au/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=WD&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.631939+00:00",
+    "is_approved_notified": false
+  },
+  {
+    "id": "06718423-dcc8-4d36-b4d1-cd2973429888",
+    "name": "Woofers World",
+    "suburb": "Caulfield",
+    "address": "Caulfield VIC 3162",
+    "categories": [
+      "behaviour-obedience"
+    ],
+    "match_tags": [
+      "confidence-building",
+      "manners",
+      "obedience"
+    ],
+    "description": "Woofers World is a dedicated behaviour obedience specialist based in Caulfield.",
+    "phone": null,
+    "email": null,
+    "website": "https://woofersworld.com.au/",
+    "facebook": null,
+    "instagram": null,
+    "booking_link": null,
+    "profile_image_url": "https://ui-avatars.com/api/?name=WW&background=random&bold=true&format=png",
+    "created_at": "2025-06-21T15:38:06.63042+00:00",
+    "is_approved_notified": false
+  }
 ]
-

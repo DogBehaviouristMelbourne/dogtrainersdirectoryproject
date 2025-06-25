@@ -9,7 +9,7 @@ import trainersData from '../data/trainers.json';
 // Use static data for build, with client-side Supabase loading for production
 const trainers = trainersData;
 
-const suburbs = [...new Set(trainers.map(t => t.suburb))].sort();
+const suburbs = [...new Set(trainers.map(t => t.suburb || t.location))].filter(Boolean).sort();
 const categories = [...new Set(trainers.flatMap(t => t.categories ?? []))].sort();
 ---
 
@@ -150,8 +150,61 @@ const categories = [...new Set(trainers.flatMap(t => t.categories ?? []))].sort(
 </Layout>
 
 <script define:vars={{ suburbs, categories, trainers }}>
-  window.addEventListener('DOMContentLoaded', () => {
-    const cardsData = JSON.parse(JSON.stringify(trainers)).map(t => t); // Deep copy for filtering
+  window.addEventListener('DOMContentLoaded', async () => {
+    // Try to load from Supabase first, fallback to static data
+    let cardsData;
+    try {
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabaseUrl = 'https://wxvjxzgphtqibgtghpte.supabase.co';
+      const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4dmp4emdwaHRxaWJndGdocHRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzI2MDM5NjQsImV4cCI6MjA0ODE3OTk2NH0.LGCZhk8GlvTPATPyWxfYUoOq19fJpNfv8qm5qJMlxZg';
+      const supabase = createClient(supabaseUrl, supabaseKey);
+      
+      const { data: supabaseTrainers, error } = await supabase
+        .from('trainers')
+        .select('*')
+        .order('name');
+      
+      if (!error && supabaseTrainers && supabaseTrainers.length > 0) {
+        // Convert Supabase data to match expected format
+        cardsData = supabaseTrainers.map(trainer => ({
+          id: trainer.id,
+          name: trainer.name,
+          location: trainer.suburb || trainer.location,
+          suburb: trainer.suburb || trainer.location,
+          categories: trainer.categories || [],
+          matchTags: trainer.match_tags || [],
+          phone: trainer.phone,
+          email: trainer.email,
+          website: trainer.website,
+          description: trainer.description || trainer.why_choose_me,
+          profile_image: trainer.profile_image,
+          rating: trainer.rating,
+          review_count: trainer.review_count,
+          social_links: trainer.social_links
+        }));
+        console.log(`Loaded ${cardsData.length} trainers from Supabase`);
+      } else {
+        throw new Error('No Supabase data available');
+      }
+    } catch (err) {
+      console.log('Falling back to static data:', err.message);
+      cardsData = JSON.parse(JSON.stringify(trainers)).map(t => t); // Deep copy for filtering
+    }
+    
+    // Update dynamic filters based on loaded data
+    const dynamicSuburbs = [...new Set(cardsData.map(t => t.suburb || t.location))].filter(Boolean).sort();
+    const dynamicCategories = [...new Set(cardsData.flatMap(t => t.categories ?? []))].sort();
+    
+    // Update suburb filter options
+    const suburbSelect = document.getElementById('suburbFilter');
+    suburbSelect.innerHTML = '<option value="">All suburbs</option>' + 
+      dynamicSuburbs.map(s => `<option value="${s}">${s}</option>`).join('');
+    
+    // Update category filter buttons
+    const categoryContainer = document.querySelector('.category-filters');
+    categoryContainer.innerHTML = '<button class="category-button active" data-category="">All Trainers</button>' +
+      dynamicCategories.map(cat => `<button class="category-button" data-category="${cat}">${cat}</button>`).join('');
+    
     let filtered = cardsData;
     let currentPage = 1;
     const perPage = 12;
@@ -164,8 +217,6 @@ const categories = [...new Set(trainers.flatMap(t => t.categories ?? []))].sort(
     let currentSuburb = '';
 
     const searchInput = document.getElementById('search-input');
-    const categoryButtons = document.querySelectorAll('.category-button');
-    const suburbSelect = document.getElementById('suburbFilter');
     const sortSelect = document.getElementById('sort-select');
 
     // Show skeleton loader initially
@@ -270,7 +321,7 @@ const categories = [...new Set(trainers.flatMap(t => t.categories ?? []))].sort(
       if (sortBy === 'name') {
         filtered.sort((a, b) => a.name.localeCompare(b.name));
       } else if (sortBy === 'suburb') {
-        filtered.sort((a, b) => (a.suburb || '').localeCompare(b.suburb || ''));
+        filtered.sort((a, b) => (a.suburb || a.location || '').localeCompare(b.suburb || b.location || ''));
       } else if (sortBy === 'reviews') {
         filtered.sort((a, b) => (b.review_count || 0) - (a.review_count || 0));
       }
@@ -279,7 +330,7 @@ const categories = [...new Set(trainers.flatMap(t => t.categories ?? []))].sort(
     function applyFilters() {
       filtered = cardsData.filter(trainer => {
         const name    = trainer.name.toLowerCase();
-        const suburb  = trainer.suburb?.toLowerCase() || '';
+        const suburb  = (trainer.suburb || trainer.location || '').toLowerCase();
         const catsArr = trainer.categories || [];
         const desc    = trainer.description?.toLowerCase() || '';
         const matchCat  = !currentCategory || catsArr.includes(currentCategory);
@@ -296,10 +347,15 @@ const categories = [...new Set(trainers.flatMap(t => t.categories ?? []))].sort(
       renderPage(currentPage);
     }
 
+    // Set up event listeners for dynamic elements
+    const categoryButtons = document.querySelectorAll('.category-button');
+    const suburbSelectElement = document.getElementById('suburbFilter');
+    
     searchInput.addEventListener('input', (event) => {
       currentSearchTerm = event.target.value.trim().toLowerCase();
       applyFilters();
     });
+    
     categoryButtons.forEach(button => {
       button.addEventListener('click', (event) => {
         categoryButtons.forEach(btn => btn.classList.remove('active'));
@@ -308,24 +364,28 @@ const categories = [...new Set(trainers.flatMap(t => t.categories ?? []))].sort(
         applyFilters();
       });
     });
-    suburbSelect.addEventListener('change', (event) => {
+    
+    suburbSelectElement.addEventListener('change', (event) => {
       currentSuburb = event.target.value;
       applyFilters();
     });
+    
     sortSelect.addEventListener('change', () => {
       sortTrainers();
       renderPage(currentPage);
     });
+    
     window.clearFilters = () => {
       currentSearchTerm = '';
       currentCategory = '';
       currentSuburb = '';
       searchInput.value = '';
-      suburbSelect.value = '';
+      suburbSelectElement.value = '';
       categoryButtons.forEach(btn => btn.classList.remove('active'));
       categoryButtons[0].classList.add('active');
       applyFilters();
     };
+    
     // Initial render
     applyFilters();
   });
