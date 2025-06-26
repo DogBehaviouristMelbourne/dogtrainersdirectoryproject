@@ -40,7 +40,7 @@
 
     // Toggle panel on click and prevent closing by click on toggle
     toggleBtn.addEventListener('click', (e) => {
-      panel.classList.toggle('open');
+      panel.classList.toggle('active');
       e.stopPropagation();
     });
     // Prevent clicks inside the content region from closing the panel
@@ -49,8 +49,8 @@
     });
     // Close panel when clicking anywhere outside
     document.addEventListener('click', () => {
-      if (panel.classList.contains('open')) {
-        panel.classList.remove('open');
+      if (panel.classList.contains('active')) {
+        panel.classList.remove('active');
       }
     });
 
@@ -149,7 +149,7 @@
     transition: all var(--animation-duration-base) var(--transition-smooth);
 }
 
-.preferences-panel.open .preferences-content {
+.preferences-panel.active .preferences-content {
     opacity: 1;
     visibility: visible;
     transform: translateY(0);

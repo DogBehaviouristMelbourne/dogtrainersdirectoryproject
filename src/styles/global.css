@@ -682,11 +682,11 @@ body {
     position: absolute;
     bottom: 100%;
     right: 0;
+    margin-bottom: var(--space-4);
+    padding: var(--space-4);
     width: 280px;
-    padding: 1.5rem;
-    margin-bottom: 1rem;
     background: var(--bg-color);
-    border-radius: 1rem;
+    border-radius: var(--card-radius);
     box-shadow: var(--shadow-lg);
     opacity: 0;
     visibility: hidden;
