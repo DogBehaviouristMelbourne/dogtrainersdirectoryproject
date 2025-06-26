@@ -30,75 +30,80 @@
     </div>
 </div>
 
-<script>
+<script is:inline>
+  document.addEventListener('DOMContentLoaded', () => {
     const panel = document.getElementById('preferences-panel');
     const toggleBtn = panel.querySelector('.preferences-toggle');
+    const content = panel.querySelector('.preferences-content');
     const themeSelect = document.getElementById('theme-select');
     const sizeButtons = panel.querySelectorAll('.button-group .neu-button');
 
-    // Toggle panel on click
+    // Toggle panel on click and prevent closing by click on toggle
     toggleBtn.addEventListener('click', (e) => {
-        panel.classList.toggle('open');
-        e.stopPropagation();
+      panel.classList.toggle('open');
+      e.stopPropagation();
     });
-    // Close panel when clicking outside
-    document.addEventListener('click', (e) => {
-        if (panel.classList.contains('open') && !panel.contains(e.target)) {
-            panel.classList.remove('open');
-        }
+    // Prevent clicks inside the content region from closing the panel
+    content.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+    // Close panel when clicking anywhere outside
+    document.addEventListener('click', () => {
+      if (panel.classList.contains('open')) {
+        panel.classList.remove('open');
+      }
     });
 
-    // Theme preference
+    // Theme preference handler
     themeSelect.addEventListener('change', (e) => {
-        const theme = e.target.value;
-        if (theme === 'dark') {
-            document.documentElement.classList.add('dark-mode');
-            localStorage.setItem('theme', 'dark');
-        } else if (theme === 'light') {
-            document.documentElement.classList.remove('dark-mode');
-            localStorage.setItem('theme', 'light');
+      const theme = e.target.value;
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark-mode');
+        localStorage.setItem('theme', 'dark');
+      } else if (theme === 'light') {
+        document.documentElement.classList.remove('dark-mode');
+        localStorage.setItem('theme', 'light');
+      } else {
+        localStorage.removeItem('theme');
+        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          document.documentElement.classList.add('dark-mode');
         } else {
-            localStorage.removeItem('theme');
-            if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                document.documentElement.classList.add('dark-mode');
-            } else {
-                document.documentElement.classList.remove('dark-mode');
-            }
+          document.documentElement.classList.remove('dark-mode');
         }
+      }
     });
 
     // Font size buttons
     sizeButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            sizeButtons.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            let scale = 1;
-            if (btn.dataset.size === 'small') scale = 0.8;
-            else if (btn.dataset.size === 'large') scale = 1.2;
-            document.documentElement.style.setProperty('--user-font-scale', scale);
-            localStorage.setItem('user-font-scale', scale);
-        });
+      btn.addEventListener('click', () => {
+        sizeButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        let scale = 1;
+        if (btn.dataset.size === 'small') scale = 0.8;
+        else if (btn.dataset.size === 'large') scale = 1.2;
+        document.documentElement.style.setProperty('--user-font-scale', scale);
+        localStorage.setItem('user-font-scale', scale);
+      });
     });
 
     // Load saved preferences
-    document.addEventListener('DOMContentLoaded', () => {
-        // Theme
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme) themeSelect.value = savedTheme;
-        // Font scale
-        const savedScale = localStorage.getItem('user-font-scale');
-        if (savedScale) {
-            const sc = parseFloat(savedScale);
-            document.documentElement.style.setProperty('--user-font-scale', sc);
-            sizeButtons.forEach(b => {
-                if ((b.dataset.size === 'small' && sc < 1) || (b.dataset.size === 'medium' && sc === 1) || (b.dataset.size === 'large' && sc > 1)) {
-                    b.classList.add('active');
-                } else {
-                    b.classList.remove('active');
-                }
-            });
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+      themeSelect.value = savedTheme;
+    }
+    const savedScale = localStorage.getItem('user-font-scale');
+    if (savedScale) {
+      const sc = parseFloat(savedScale);
+      document.documentElement.style.setProperty('--user-font-scale', sc);
+      sizeButtons.forEach(b => {
+        if ((b.dataset.size === 'small' && sc < 1) || (b.dataset.size === 'medium' && sc === 1) || (b.dataset.size === 'large' && sc > 1)) {
+          b.classList.add('active');
+        } else {
+          b.classList.remove('active');
         }
-    });
+      });
+    }
+  });
 </script>
 
 <style>

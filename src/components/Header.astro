@@ -76,20 +76,21 @@ const isActive = (href: string) => currentPath === href ? 'active' : '';
 </header>
 
 <script is:inline>
-    document.addEventListener('DOMContentLoaded', () => {
+    (function() {
         const burgerButton = document.querySelector('.burger-button');
         const mobileMenu = document.getElementById('mobile-menu');
         const body = document.body;
 
         // Initialize menu state
-        burgerButton.classList.remove('active');
-        mobileMenu.classList.remove('active');
+        burgerButton?.classList.remove('active');
+        mobileMenu?.classList.remove('active');
         body.style.overflow = '';
 
         function toggleMenu() {
             const isOpen = burgerButton.classList.contains('active');
             burgerButton.classList.toggle('active');
             mobileMenu.classList.toggle('active');
+            body.classList.toggle('menu-open');
             body.style.overflow = isOpen ? '' : 'hidden';
         }
 
@@ -98,9 +99,7 @@ const isActive = (href: string) => currentPath === href ? 'active' : '';
 
         // Close menu when clicking a link
         mobileMenu?.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', () => {
-                toggleMenu();
-            });
+            link.addEventListener('click', toggleMenu);
         });
 
         // Close menu when pressing Escape
@@ -109,6 +108,6 @@ const isActive = (href: string) => currentPath === href ? 'active' : '';
                 toggleMenu();
             }
         });
-    });
+    })();
 </script>
 
