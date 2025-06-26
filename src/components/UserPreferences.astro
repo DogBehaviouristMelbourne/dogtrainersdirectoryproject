@@ -19,61 +19,37 @@
         </div>
         
         <div class="preference-group">
-            <label for="text-size">Text Size</label>
+            <label>Text Size</label>
             <div class="button-group">
                 <button class="neu-button" data-size="small">Small</button>
                 <button class="neu-button active" data-size="medium">Medium</button>
                 <button class="neu-button" data-size="large">Large</button>
             </div>
         </div>
-            </select>
-        </div>
+        
     </div>
 </div>
 
 <script>
-    let currentFontSize = 1;
-    const root = document.documentElement;
-    
-    // Toggle panel
     const panel = document.getElementById('preferences-panel');
-    const toggle = panel.querySelector('.preferences-toggle');
-    toggle.addEventListener('click', () => {
+    const toggleBtn = panel.querySelector('.preferences-toggle');
+    const themeSelect = document.getElementById('theme-select');
+    const sizeButtons = panel.querySelectorAll('.button-group .neu-button');
+
+    // Toggle panel on click
+    toggleBtn.addEventListener('click', (e) => {
         panel.classList.toggle('open');
+        e.stopPropagation();
     });
-    
-    // Font size adjustment
-    function adjustFontSize(change) {
-        const input = document.getElementById('font-size');
-        currentFontSize = Math.max(0.8, Math.min(1.4, currentFontSize + change));
-        input.value = currentFontSize;
-        updateFontSize();
-    }
-    
-    document.getElementById('font-size').addEventListener('input', (e) => {
-        currentFontSize = parseFloat(e.target.value);
-        updateFontSize();
+    // Close panel when clicking outside
+    document.addEventListener('click', (e) => {
+        if (panel.classList.contains('open') && !panel.contains(e.target)) {
+            panel.classList.remove('open');
+        }
     });
-    
-    function updateFontSize() {
-        root.style.setProperty('--user-font-scale', currentFontSize);
-        localStorage.setItem('user-font-scale', currentFontSize);
-    }
-    
-    // Motion preference
-    document.getElementById('motion-toggle').addEventListener('change', (e) => {
-        root.style.setProperty('--user-reduced-motion', e.target.checked ? 'paused' : 'running');
-        localStorage.setItem('user-reduced-motion', e.target.checked);
-    });
-    
-    // Contrast preference
-    document.getElementById('contrast-toggle').addEventListener('change', (e) => {
-        root.style.setProperty('--user-high-contrast', e.target.checked ? 'high' : 'normal');
-        localStorage.setItem('user-high-contrast', e.target.checked);
-    });
-    
+
     // Theme preference
-    document.getElementById('theme-select').addEventListener('change', (e) => {
+    themeSelect.addEventListener('change', (e) => {
         const theme = e.target.value;
         if (theme === 'dark') {
             document.documentElement.classList.add('dark-mode');
@@ -90,31 +66,37 @@
             }
         }
     });
-    
+
+    // Font size buttons
+    sizeButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            sizeButtons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            let scale = 1;
+            if (btn.dataset.size === 'small') scale = 0.8;
+            else if (btn.dataset.size === 'large') scale = 1.2;
+            document.documentElement.style.setProperty('--user-font-scale', scale);
+            localStorage.setItem('user-font-scale', scale);
+        });
+    });
+
     // Load saved preferences
-    window.addEventListener('DOMContentLoaded', () => {
-        const savedFontScale = localStorage.getItem('user-font-scale');
-        if (savedFontScale) {
-            currentFontSize = parseFloat(savedFontScale);
-            document.getElementById('font-size').value = currentFontSize;
-            updateFontSize();
-        }
-        
-        const savedMotion = localStorage.getItem('user-reduced-motion');
-        if (savedMotion) {
-            document.getElementById('motion-toggle').checked = savedMotion === 'true';
-            root.style.setProperty('--user-reduced-motion', savedMotion === 'true' ? 'paused' : 'running');
-        }
-        
-        const savedContrast = localStorage.getItem('user-high-contrast');
-        if (savedContrast) {
-            document.getElementById('contrast-toggle').checked = savedContrast === 'true';
-            root.style.setProperty('--user-high-contrast', savedContrast === 'true' ? 'high' : 'normal');
-        }
-        
+    document.addEventListener('DOMContentLoaded', () => {
+        // Theme
         const savedTheme = localStorage.getItem('theme');
-        if (savedTheme) {
-            document.getElementById('theme-select').value = savedTheme;
+        if (savedTheme) themeSelect.value = savedTheme;
+        // Font scale
+        const savedScale = localStorage.getItem('user-font-scale');
+        if (savedScale) {
+            const sc = parseFloat(savedScale);
+            document.documentElement.style.setProperty('--user-font-scale', sc);
+            sizeButtons.forEach(b => {
+                if ((b.dataset.size === 'small' && sc < 1) || (b.dataset.size === 'medium' && sc === 1) || (b.dataset.size === 'large' && sc > 1)) {
+                    b.classList.add('active');
+                } else {
+                    b.classList.remove('active');
+                }
+            });
         }
     });
 </script>

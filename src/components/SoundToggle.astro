@@ -14,29 +14,22 @@
     </svg>
 </button>
 
-<script>
-    import { toggleSound, isSoundEnabled, playSound } from '../utils/sound.js';
+<script is:inline>
+    document.addEventListener('DOMContentLoaded', () => {
+        import { toggleSound, isSoundEnabled, playSound } from '../utils/sound.js';
+        const btn = document.getElementById('sound-toggle');
+        const htmlEl = document.documentElement;
 
-    const soundToggleButton = document.getElementById('sound-toggle');
-    const htmlElement = document.documentElement; // To add a class for CSS styling
-
-    const updateSoundIcon = () => {
-        if (isSoundEnabled()) {
-            htmlElement.classList.add('sound-enabled');
-        } else {
-            htmlElement.classList.remove('sound-enabled');
+        function update() {
+            htmlEl.classList.toggle('sound-enabled', isSoundEnabled());
         }
-    };
+        update();
 
-    // Initial update
-    updateSoundIcon();
-
-    soundToggleButton.addEventListener('click', () => {
-        toggleSound();
-        updateSoundIcon();
-        if (isSoundEnabled()) {
-            playSound('click'); // Play a click sound when enabling
-        }
+        btn.addEventListener('click', async () => {
+            const enabled = toggleSound();
+            update();
+            if (enabled) await playSound('click');
+        });
     });
 </script>
 
