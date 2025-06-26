@@ -21,11 +21,16 @@
 
     /* General UI Colors */
     --color-primary-button-bg: #f4c550;  /* Brighter mustard for buttons */
-    --color-secondary-button-bg: #ffffff;
+    --color-secondary-button-bg: rgba(255, 255, 255, 0.95);
     --color-primary-button-text: #2a2a2a;
     --color-secondary-button-text: #2a2a2a;
     --color-link: var(--color-accent-teal);
     --color-link-hover: var(--color-accent-mustard);
+    
+    /* Hero Section Colors */
+    --hero-stats-bg: rgba(255, 255, 255, 0.85);
+    --hero-text-color: var(--color-text-dark);
+    --hero-heading-color: #2a2a2a;
 
     /* Shadows */
     --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
@@ -114,16 +119,30 @@
 
 .dark-mode {
     /* Dark Mode Colors */
-    --color-background-light: #2a2a2a; /* Deep, muted charcoal */
-    --color-text-light: #e0e0e0;      /* Soft white/light grey */
-    --color-card-bg-light: #3b3b3b;  /* Slightly lighter charcoal for cards */
-    --color-border-light: #4a4a4a;    /* Darker grey border */
+    --color-background-light: #1a1a1a; /* Deeper, darker charcoal */
+    --color-text-light: #f0f0f0;      /* Brighter white for better contrast */
+    --color-card-bg-light: #2a2a2a;   /* Slightly lighter charcoal for cards */
+    --color-border-light: #3a3a3a;    /* Darker grey border */
 
-    /* General UI Colors (adjust for dark mode readability if needed) */
-    --color-primary-button-bg: var(--color-accent-mustard); /* Can remain same */
-    --color-primary-button-text: #3a3a3a; /* Darker text on mustard for contrast */
+    /* Hero Section Colors */
+    --hero-stats-bg: rgba(26, 26, 26, 0.85);
+    --hero-text-color: #f0f0f0;
+    --hero-heading-color: #f0f0f0;
+
+    /* Button Colors */
+    --color-primary-button-bg: var(--color-accent-mustard);
+    --color-secondary-button-bg: rgba(42, 42, 42, 0.95);
+    --color-primary-button-text: #1a1a1a;
+    --color-secondary-button-text: #f0f0f0;
+
+    /* Link Colors */
     --color-link: var(--color-accent-teal);
     --color-link-hover: var(--color-accent-mustard);
+
+    /* Shadows and Effects */
+    --shadow-neu-light: 6px 6px 12px rgba(0, 0, 0, 0.2),
+                      -6px -6px 12px rgba(255, 255, 255, 0.03);
+    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
 /* --------------------------------------------------- */
@@ -719,5 +738,106 @@ body {
     padding: 0.25rem 0.5rem;
     font-size: 0.9rem;
     min-width: 2.5rem;
+}
+
+/* Hero Section Styles */
+.hero-section {
+    position: relative;
+    min-height: 90vh;
+    padding: 2rem 0;
+    background: var(--color-background-light);
+    overflow: hidden;
+}
+
+.hero-content {
+    display: grid;
+    gap: 2rem;
+    align-items: center;
+}
+
+@media (min-width: 768px) {
+    .hero-content {
+        grid-template-columns: 1.2fr 0.8fr;
+    }
+}
+
+.hero-text {
+    position: relative;
+    z-index: 2;
+    padding: 0 1rem;
+}
+
+.hero-text h1 {
+    font-size: 2.5rem;
+    font-weight: 900;
+    line-height: 1.1;
+    color: var(--hero-heading-color);
+    margin-bottom: 1rem;
+    max-width: 85%;
+}
+
+.hero-subtitle {
+    font-size: 1.1rem;
+    line-height: 1.5;
+    color: var(--color-text-light);
+    margin-bottom: 2rem;
+    max-width: 90%;
+}
+
+.hero-actions {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.hero-actions .button {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    border-radius: 12px;
+    font-weight: 600;
+}
+
+.hero-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    padding: 1.5rem;
+    background: var(--hero-stats-bg);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.stat {
+    text-align: center;
+}
+
+.stat-number {
+    display: block;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--hero-heading-color);
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: var(--color-text-light);
+    font-weight: 500;
+}
+
+.hero-image {
+    position: relative;
+    height: 80vh;
+    max-height: 600px;
+    overflow: hidden;
+}
+
+.hero-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    border-radius: 20px;
 }
 
