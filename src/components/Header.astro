@@ -81,6 +81,11 @@ const isActive = (href: string) => currentPath === href ? 'active' : '';
         const mobileMenu = document.getElementById('mobile-menu');
         const body = document.body;
 
+        // Initialize menu state
+        burgerButton.classList.remove('active');
+        mobileMenu.classList.remove('active');
+        body.style.overflow = '';
+
         function toggleMenu() {
             const isOpen = burgerButton.classList.contains('active');
             burgerButton.classList.toggle('active');
