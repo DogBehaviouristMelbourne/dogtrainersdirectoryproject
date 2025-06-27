@@ -3,6 +3,9 @@
 import Layout from '../layouts/Layout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+
+// Get Stripe publishable key from environment
+const stripePublishableKey = import.meta.env.STRIPE_PUBLISHABLE_KEY;
 ---
 
 <Layout title="Premium Trainer Listing" description="Upgrade to a featured listing and get more visibility for your dog training services in Melbourne.">
@@ -49,10 +52,10 @@ import Footer from '../components/Footer.astro';
                     <div class="pricing-grid">
                         <div class="pricing-card">
                             <div class="plan-header">
-                                <h3>Monthly</h3>
+                                <h3>Monthly Premium</h3>
                                 <div class="price">
                                     <span class="currency">$</span>
-                                    <span class="amount">29</span>
+                                    <span class="amount">49</span>
                                     <span class="period">/month</span>
                                 </div>
                             </div>
@@ -62,51 +65,51 @@ import Footer from '../components/Footer.astro';
                                 <li>✅ Premium card styling</li>
                                 <li>✅ Cancel anytime</li>
                             </ul>
-                            <button class="button primary plan-button" data-plan="monthly" data-price="2900">
-                                Start Monthly Plan
+                            <button class="button primary plan-button" data-plan="monthly" data-price-id="price_1RX0QxDEY1RddZfIoRdn84vS">
+                                Start Monthly Premium
                             </button>
                         </div>
 
                         <div class="pricing-card popular">
-                            <div class="popular-badge">Most Popular</div>
+                            <div class="popular-badge">Best Value</div>
                             <div class="plan-header">
-                                <h3>Quarterly</h3>
+                                <h3>Annual Standard</h3>
                                 <div class="price">
                                     <span class="currency">$</span>
-                                    <span class="amount">75</span>
-                                    <span class="period">/3 months</span>
+                                    <span class="amount">79</span>
+                                    <span class="period">/year</span>
                                 </div>
-                                <div class="savings">Save $12</div>
+                                <div class="savings">Save over 85%</div>
                             </div>
                             <ul class="plan-features">
-                                <li>✅ Everything in Monthly</li>
-                                <li>✅ 14% savings</li>
+                                <li>✅ Standard listing features</li>
+                                <li>✅ Annual billing discount</li>
                                 <li>✅ Priority support</li>
                                 <li>✅ Performance analytics</li>
                             </ul>
-                            <button class="button primary plan-button" data-plan="quarterly" data-price="7500">
-                                Start Quarterly Plan
+                            <button class="button primary plan-button" data-plan="annual" data-price-id="price_1RX0T2DEY1RddZfIATD9orLs">
+                                Start Annual Standard
                             </button>
                         </div>
 
                         <div class="pricing-card">
                             <div class="plan-header">
-                                <h3>Yearly</h3>
+                                <h3>Premium + Standard</h3>
                                 <div class="price">
                                     <span class="currency">$</span>
-                                    <span class="amount">275</span>
-                                    <span class="period">/year</span>
+                                    <span class="amount">128</span>
+                                    <span class="period">/year + monthly</span>
                                 </div>
-                                <div class="savings">Save $73</div>
+                                <div class="savings">Complete Package</div>
                             </div>
                             <ul class="plan-features">
-                                <li>✅ Everything in Quarterly</li>
-                                <li>✅ 21% savings</li>
-                                <li>✅ Monthly performance reports</li>
-                                <li>✅ Featured in newsletters</li>
+                                <li>✅ Annual Standard listing</li>
+                                <li>✅ Monthly Premium upgrade</li>
+                                <li>✅ Maximum visibility</li>
+                                <li>✅ All premium features</li>
                             </ul>
-                            <button class="button primary plan-button" data-plan="yearly" data-price="27500">
-                                Start Yearly Plan
+                            <button class="button primary plan-button" data-plan="combo" data-price-id="price_1RX0T2DEY1RddZfIATD9orLs">
+                                Get Complete Package
                             </button>
                         </div>
                     </div>
@@ -150,41 +153,185 @@ import Footer from '../components/Footer.astro';
     <Footer />
 </Layout>
 
-<script type="module">
-import { supabase } from '../lib/supabaseClient.js'
+<script type="module" define:vars={{ stripePublishableKey }}>
+// Plan: Integrate Stripe Checkout for premium subscription purchases
+// Implementation:
+// 1. Load Stripe.js library and initialize with publishable key
+// 2. On button click, call our /api/create-checkout-session endpoint
+// 3. Use Stripe.js to redirect to checkout with the returned session ID
+// 4. Handle loading states and errors gracefully
+// Expected Results:
+// - Clicking a plan button creates a Stripe checkout session and redirects to payment
+// - After successful payment, webhook automatically updates trainer status in Supabase
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    // Load Stripe.js with the publishable key from the server
+    const stripe = await loadStripe(stripePublishableKey);
+    
+    if (!stripe) {
+        console.error('Failed to load Stripe');
+        return;
+    }
+    
     const planButtons = document.querySelectorAll('.plan-button');
+    
+    // Get trainer ID from URL parameters or prompt user
+    function getTrainerId() {
+        const urlParams = new URLSearchParams(window.location.search);
+        let trainerId = urlParams.get('trainerId');
+        
+        if (!trainerId) {
+            // For demo purposes, use a default trainer ID or prompt
+            trainerId = prompt('Enter your Trainer ID:') || 'demo-trainer-123';
+        }
+        
+        return trainerId;
+    }
     
     planButtons.forEach(button => {
         button.addEventListener('click', async (e) => {
+            e.preventDefault();
+            
+            const priceId = e.target.dataset.priceId;
             const plan = e.target.dataset.plan;
-            const price = parseInt(e.target.dataset.price);
+            const trainerId = getTrainerId();
+            
+            if (!priceId || !trainerId) {
+                alert('Missing required information. Please try again.');
+                return;
+            }
             
             // Disable button during processing
+            const originalText = e.target.textContent;
             e.target.disabled = true;
-            e.target.textContent = 'Processing...';
+            e.target.textContent = 'Creating checkout session...';
             
             try {
-                // Here we'll redirect to Stripe Checkout
-                // For now, just log the selection
-                console.log(`Selected plan: ${plan}, price: ${price}`);
+                console.log(`Creating checkout session for plan: ${plan}, priceId: ${priceId}, trainerId: ${trainerId}`);
                 
-                // Redirect to payment processing page
-                window.location.href = `/premium/checkout?plan=${plan}&price=${price}`;
+                // Call our checkout session API
+                const response = await fetch('/api/create-checkout-session', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        priceId: priceId,
+                        trainerId: trainerId
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to create checkout session');
+                }
+                
+                if (data.sessionId) {
+                    // Redirect to Stripe Checkout using Stripe.js
+                    console.log('Redirecting to Stripe Checkout...');
+                    e.target.textContent = 'Redirecting to payment...';
+                    
+                    const { error } = await stripe.redirectToCheckout({
+                        sessionId: data.sessionId
+                    });
+                    
+                    if (error) {
+                        throw new Error(error.message);
+                    }
+                } else {
+                    throw new Error('No session ID returned from server');
+                }
                 
             } catch (error) {
-                console.error('Error processing payment:', error);
-                alert('There was an error processing your request. Please try again.');
+                console.error('Error creating checkout session:', error);
+                alert(`Error: ${error.message}`);
                 
                 // Re-enable button
                 e.target.disabled = false;
-                e.target.textContent = `Start ${plan.charAt(0).toUpperCase() + plan.slice(1)} Plan`;
+                e.target.textContent = originalText;
             }
         });
     });
+    
+    // Handle successful payment redirect
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionId = urlParams.get('session_id');
+    
+    if (sessionId) {
+        // Show success message
+        const successMessage = document.createElement('div');
+        successMessage.className = 'success-message';
+        successMessage.innerHTML = `
+            <div class="success-content">
+                <h3>🎉 Payment Successful!</h3>
+                <p>Your premium subscription has been activated. You should see the changes in your listing within a few minutes.</p>
+                <button onclick="this.parentElement.parentElement.remove()" class="button">Close</button>
+            </div>
+        `;
+        document.body.insertBefore(successMessage, document.body.firstChild);
+        
+        // Remove session_id from URL
+        const newUrl = window.location.pathname;
+        window.history.replaceState({}, document.title, newUrl);
+    }
 });
+
+// Load Stripe.js from CDN
+function loadStripe(publishableKey) {
+    return new Promise((resolve) => {
+        if (window.Stripe) {
+            resolve(window.Stripe(publishableKey));
+            return;
+        }
+        
+        const script = document.createElement('script');
+        script.src = 'https://js.stripe.com/v3/';
+        script.onload = () => {
+            resolve(window.Stripe(publishableKey));
+        };
+        script.onerror = () => {
+            resolve(null);
+        };
+        document.head.appendChild(script);
+    });
+}
 </script>
+
+<style>
+    /* Add success message styling */
+    .success-message {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+    
+    .success-content {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        text-align: center;
+        max-width: 400px;
+        margin: 1rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+    
+    .success-content h3 {
+        color: var(--color-accent-teal);
+        margin-bottom: 1rem;
+    }
+    
+    .success-content p {
+        margin-bottom: 1.5rem;
+        color: var(--color-text-light);
+    }
 
 <style>
     .premium-page {

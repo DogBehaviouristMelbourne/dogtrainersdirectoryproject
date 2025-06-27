@@ -20,8 +20,8 @@ import Layout from '../layouts/Layout.astro'
         
         console.log('Supabase imported successfully')
         
-        const supabaseUrl = 'https://fauysecbxlrzypyzifqw.supabase.co'
-        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZhdXlzZWNieGxyenlweXppZnF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0ODk4MTEsImV4cCI6MjA2NjA2NTgxMX0.LgkpF5cpgdRuN1mLeiYZEBC_DtkR3ONas__Z2-m3nEg'
+        const supabaseUrl = 'https://wxvjxzgphtqibgtghpte.supabase.co'
+        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4dmp4emdwaHRxaWJndGdocHRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzI2MDM5NjQsImV4cCI6MjA0ODE3OTk2NH0.LGCZhk8GlvTPATPyWxfYUoOq19fJpNfv8qm5qJMlxZg'
         
         const supabase = createClient(supabaseUrl, supabaseAnonKey)
         
@@ -50,53 +50,74 @@ import Layout from '../layouts/Layout.astro'
 
         async function loadAdminDashboard() {
           try {
-            adminContent.innerHTML = '<h1>Loading pending submissions...</h1>'
+            adminContent.innerHTML = '<h1>Loading admin dashboard...</h1>'
+            
+            // Plan: Render a summary panel that shows, for each suburb × category,
+            // how many premium slots are used out of 10 (using the `premium_slot_usage` view).
+            // Then list all trainers below with an Activate/Deactivate Premium toggle.
+            // Implementation:
+            // 1. Fetch from supabase.from('premium_slot_usage').
+            // 2. Render a table or list of suburb, category, and "active_premiums/10".
+            // 3. For each trainer row, render a button that toggles premium_status in 'trainers'.
+            // Expected Results:
+            // - A summary panel with lines like "Richmond — Puppy Training: 0/10 used".
+            // - Trainer list rows each have a toggle button updating premium_status in Supabase.
+            
+            console.log('Fetching premium slot usage...')
+            const { data: usage, error: usageError } = await supabase
+              .from('premium_slot_usage')
+              .select('*')
+            
+            console.log('Fetching all trainers...')
+            const { data: trainers, error: trainersError } = await supabase
+              .from('trainers')
+              .select('*')
+              .order('name')
             
             console.log('Fetching pending trainers...')
-            const { data: pending, error } = await supabase
+            const { data: pending, error: pendingError } = await supabase
               .from('pending_trainers')
               .select('*')
 
-            console.log('Supabase response:', { pending, error })
+            console.log('Supabase responses:', { usage, usageError, trainers, trainersError, pending, pendingError })
 
-            if (error) {
-              console.error('Error fetching pending trainers:', error)
+            // Handle individual errors - don't fail completely if only one query fails
+            if (trainersError) {
+              console.error('Error fetching trainers:', trainersError)
               adminContent.innerHTML = `
                 <h1>Error</h1>
-                <p>Failed to load pending submissions: ${error.message}</p>
+                <p>Failed to load trainers: ${trainersError.message}</p>
                 <p>Check the browser console for more details.</p>
               `
               return
             }
 
-            if (pending && pending.length > 0) {
-              console.log(`Found ${pending.length} pending trainers`)
-              renderPendingTrainers(pending)
-            } else {
-              console.log('No pending trainers found')
-              adminContent.innerHTML = `
-                <h1>Pending Trainer Submissions</h1>
-                <p>No pending trainers to review.</p>
-                <div style="margin-top: 2rem; padding: 1rem; background: #f0f0f0; border-radius: 4px;">
-                  <h3>Database Connection Status:</h3>
-                  <p>✅ Successfully connected to Supabase</p>
-                  <p>✅ Query executed without errors</p>
-                  <p>📝 No pending submissions found in database</p>
-                  
-                  <h4>Next Steps:</h4>
-                  <ul>
-                    <li><a href="/submit" target="_blank">Test the submission form</a> to create a pending submission</li>
-                    <li><button onclick="createTestSubmission()" style="background: #007acc; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; margin-right: 0.5rem;">Create Test Submission</button></li>
-                    <li><button onclick="setupDatabase()" style="background: #4CAF50; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer;">Setup Database Tables</button></li>
-                  </ul>
-                  
-                  <div style="margin-top: 1rem; padding: 1rem; background: #fff3cd; border-radius: 4px; border-left: 4px solid #ffc107;">
-                    <h5>⚠️ Database Setup Required</h5>
-                    <p>If you're getting column errors, you may need to set up your database tables first. Click "Setup Database Tables" above or run the SQL script in <code>database/setup.sql</code> in your Supabase SQL Editor.</p>
-                  </div>
-                </div>
-              `
+            if (pendingError) {
+              console.error('Error fetching pending trainers:', pendingError)
+              // Don't fail completely, just log the error
+              console.log('Continuing without pending trainers data')
             }
+
+            if (usageError) {
+              console.error('Error fetching usage data:', usageError)
+              // Don't fail completely, just log the error
+              console.log('Continuing without usage data')
+            }
+
+            // Ensure we have fallback data
+            const safeUsage = usage || []
+            const safeTrainers = trainers || []
+            const safePending = pending || []
+
+            console.log('Data counts:', { 
+              usage: safeUsage.length, 
+              trainers: safeTrainers.length, 
+              pending: safePending.length 
+            })
+
+            // Render the complete admin dashboard
+            renderAdminDashboard(safeUsage, safeTrainers, safePending)
+            
           } catch (err) {
             console.error('Error in loadAdminDashboard:', err)
             adminContent.innerHTML = `
@@ -106,36 +127,142 @@ import Layout from '../layouts/Layout.astro'
             `
           }
         }
-
-        function renderPendingTrainers(pending) {
-          console.log('Rendering pending trainers...')
-          const pendingHtml = pending.map(trainer => `
-            <li class="pending-card">
-              <h2>${trainer.name || 'No name provided'}</h2>
-              <p><strong>Suburb:</strong> ${trainer.suburb || 'Not specified'}</p>
-              <p><strong>Email:</strong> ${trainer.email || 'Not provided'}</p>
-              ${trainer.phone ? `<p><strong>Phone:</strong> ${trainer.phone}</p>` : ''}
-              ${trainer.website ? `<p><strong>Website:</strong> ${trainer.website}</p>` : ''}
-              <p><strong>Description:</strong> ${trainer.description || 'No description provided'}</p>
-              ${trainer.match_tags && trainer.match_tags.length > 0 ? `<p><strong>Tags:</strong> ${trainer.match_tags.join(', ')}</p>` : ''}
-              ${trainer.categories && trainer.categories.length > 0 ? `<p><strong>Categories:</strong> ${trainer.categories.join(', ')}</p>` : ''}
-              ${trainer.profile_image ? `<p><strong>Profile Image:</strong> <img src="${trainer.profile_image}" alt="Profile" style="max-width: 100px; height: auto;" /></p>` : ''}
-              ${trainer.why_choose_me ? `<p><strong>Why Choose Me:</strong> ${trainer.why_choose_me}</p>` : ''}
-              ${trainer.social_links ? `<p><strong>Social Links:</strong> ${Object.entries(trainer.social_links).map(([platform, url]) => `${platform}: ${url}`).join(', ')}</p>` : ''}
-              <p><strong>Submitted:</strong> ${new Date(trainer.created_at).toLocaleDateString()}</p>
-              <div class="action-buttons">
-                <button class="approve-btn" onclick="approveTrainer('${trainer.id}')">✅ Approve</button>
-                <button class="reject-btn" onclick="rejectTrainer('${trainer.id}')">❌ Reject</button>
-              </div>
-            </li>
-          `).join('')
+        
+        function renderAdminDashboard(usage, trainers, pending) {
+          console.log('Rendering complete admin dashboard...')
+          
+          // Render premium slot usage summary
+          const usageHtml = usage && usage.length > 0 ? 
+            usage.map(({ suburb, category, active_premiums }) => `
+              <li style="padding: 0.5rem; border-bottom: 1px solid #eee;">
+                <strong>${suburb}</strong> — ${category}: <span style="color: ${active_premiums >= 8 ? '#dc3545' : active_premiums >= 5 ? '#ffc107' : '#28a745'}">${active_premiums}/10 used</span>
+              </li>
+            `).join('') : 
+            `<li style="padding: 1rem; text-align: center; color: #666; background: #f8f9fa; border-radius: 8px;">
+              <strong>No premium slots in use yet</strong><br>
+              <small>Activate premium status for trainers below to see usage by suburb and category</small>
+            </li>`
+          
+          // Render trainers table
+          const trainersHtml = trainers && trainers.length > 0 ?
+            trainers.map(trainer => `
+              <tr>
+                <td style="padding: 0.5rem; border-bottom: 1px solid #eee;">${trainer.name}</td>
+                <td style="padding: 0.5rem; border-bottom: 1px solid #eee;">${trainer.suburb || 'N/A'}</td>
+                <td style="padding: 0.5rem; border-bottom: 1px solid #eee; font-size: 0.8em;">${(trainer.categories || []).join(', ') || 'None'}</td>
+                <td style="padding: 0.5rem; border-bottom: 1px solid #eee;">
+                  <span style="padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.8em; background: ${trainer.premium_status === 'active' ? '#d4edda' : '#f8d7da'}; color: ${trainer.premium_status === 'active' ? '#155724' : '#721c24'};">
+                    ${trainer.premium_status || 'inactive'}
+                  </span>
+                </td>
+                <td style="padding: 0.5rem; border-bottom: 1px solid #eee;">
+                  <button onclick="togglePremium('${trainer.id}', '${trainer.premium_status || 'inactive'}')" 
+                          style="background: ${trainer.premium_status === 'active' ? '#dc3545' : '#28a745'}; color: white; border: none; padding: 0.3rem 0.6rem; border-radius: 4px; cursor: pointer; font-size: 0.8em;">
+                    ${trainer.premium_status === 'active' ? 'Deactivate' : 'Activate'} Premium
+                  </button>
+                </td>
+              </tr>
+            `).join('') : '<tr><td colspan="5" style="padding: 1rem; text-align: center; color: #666;">No trainers found</td></tr>'
+          
+          // Render pending trainers
+          const pendingHtml = pending && pending.length > 0 ? 
+            pending.map(trainer => `
+              <li class="pending-card">
+                <h3>${trainer.name || 'No name provided'}</h3>
+                <p><strong>Suburb:</strong> ${trainer.suburb || 'Not specified'}</p>
+                <p><strong>Email:</strong> ${trainer.email || 'Not provided'}</p>
+                ${trainer.phone ? `<p><strong>Phone:</strong> ${trainer.phone}</p>` : ''}
+                ${trainer.website ? `<p><strong>Website:</strong> ${trainer.website}</p>` : ''}
+                <p><strong>Description:</strong> ${trainer.description || 'No description provided'}</p>
+                ${trainer.match_tags && trainer.match_tags.length > 0 ? `<p><strong>Tags:</strong> ${trainer.match_tags.join(', ')}</p>` : ''}
+                ${trainer.categories && trainer.categories.length > 0 ? `<p><strong>Categories:</strong> ${trainer.categories.join(', ')}</p>` : ''}
+                ${trainer.profile_image ? `<p><strong>Profile Image:</strong> <img src="${trainer.profile_image}" alt="Profile" style="max-width: 100px; height: auto;" /></p>` : ''}
+                ${trainer.why_choose_me ? `<p><strong>Why Choose Me:</strong> ${trainer.why_choose_me}</p>` : ''}
+                ${trainer.social_links ? `<p><strong>Social Links:</strong> ${Object.entries(trainer.social_links).map(([platform, url]) => `${platform}: ${url}`).join(', ')}</p>` : ''}
+                <p><strong>Submitted:</strong> ${new Date(trainer.created_at).toLocaleDateString()}</p>
+                <div class="action-buttons">
+                  <button class="approve-btn" onclick="approveTrainer('${trainer.id}')">✅ Approve</button>
+                  <button class="reject-btn" onclick="rejectTrainer('${trainer.id}')">❌ Reject</button>
+                </div>
+              </li>
+            `).join('') : '<li style="padding: 1rem; text-align: center; color: #666;">No pending submissions</li>'
 
           adminContent.innerHTML = `
-            <h1>Pending Trainer Submissions (${pending.length})</h1>
-            <ul style="list-style: none; padding: 0;">
-              ${pendingHtml}
-            </ul>
+            <div style="margin-bottom: 2rem;">
+              <h1>Admin Dashboard</h1>
+              <p>Manage premium slots and trainer submissions</p>
+            </div>
+            
+            <div style="display: grid; gap: 2rem; margin-bottom: 2rem;">
+              <section style="background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <h2 style="margin-bottom: 1rem; color: #333;">Premium Slot Usage</h2>
+                <ul style="list-style: none; padding: 0; margin: 0;">
+                  ${usageHtml}
+                </ul>
+              </section>
+              
+              <section style="background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <h2 style="margin-bottom: 1rem; color: #333;">All Trainers (${trainers ? trainers.length : 0})</h2>
+                <div style="overflow-x: auto;">
+                  <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                      <tr style="background: #f8f9fa;">
+                        <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid #dee2e6;">Name</th>
+                        <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid #dee2e6;">Suburb</th>
+                        <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid #dee2e6;">Categories</th>
+                        <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid #dee2e6;">Premium Status</th>
+                        <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid #dee2e6;">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${trainersHtml}
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+              
+              <section style="background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <h2 style="margin-bottom: 1rem; color: #333;">Pending Submissions (${pending ? pending.length : 0})</h2>
+                <ul style="list-style: none; padding: 0;">
+                  ${pendingHtml}
+                </ul>
+                <div style="margin-top: 1rem; padding: 1rem; background: #f0f0f0; border-radius: 4px;">
+                  <h4>Quick Actions:</h4>
+                  <button onclick="createTestSubmission()" style="background: #007acc; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; margin-right: 0.5rem;">Create Test Submission</button>
+                  <button onclick="setupDatabase()" style="background: #4CAF50; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer;">Setup Database Tables</button>
+                </div>
+              </section>
+            </div>
           `
+        }
+
+        // Global function for toggling premium status
+        window.togglePremium = async function(id, currentStatus) {
+          const newStatus = currentStatus === 'active' ? 'inactive' : 'active'
+          
+          if (!confirm(`${newStatus === 'active' ? 'Activate' : 'Deactivate'} premium status for this trainer?`)) return
+          
+          try {
+            console.log('Toggling premium status:', id, 'from', currentStatus, 'to', newStatus)
+            
+            const { error } = await supabase
+              .from('trainers')
+              .update({ premium_status: newStatus })
+              .eq('id', id)
+
+            if (error) {
+              alert('Failed to update premium status: ' + error.message)
+              return
+            }
+
+            alert(`Premium status ${newStatus === 'active' ? 'activated' : 'deactivated'} successfully!`)
+            
+            // Reload the dashboard to refresh both the usage stats and trainer list
+            await loadAdminDashboard()
+          } catch (err) {
+            console.error('Error toggling premium status:', err)
+            alert('Error updating premium status: ' + err.message)
+          }
         }
 
         function showAccessDenied() {

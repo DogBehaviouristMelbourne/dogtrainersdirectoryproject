@@ -12,6 +12,8 @@ const navLinks = [
     { name: 'Contact', href: '/contact' },
     { name: 'Become a Listed Trainer', href: '/submit' },
     { name: 'Update Listing', href: '/claim' },
+    { name: 'Trainer Dashboard', href: '/dashboard' },
+    { name: 'Premium Plans', href: '/premium' },
     { name: 'Blog', href: '/blog' },
 ];
 
@@ -75,39 +77,76 @@ const isActive = (href: string) => currentPath === href ? 'active' : '';
     </div>
 </header>
 
-<script is:inline>
-    (function() {
-        const burgerButton = document.querySelector('.burger-button');
-        const mobileMenu = document.getElementById('mobile-menu');
-        const body = document.body;
+<script>
+// Header burger menu functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const burgerButton = document.querySelector('.burger-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const body = document.body;
+    const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
 
-        // Initialize menu state
-        burgerButton?.classList.remove('active');
-        mobileMenu?.classList.remove('active');
-        body.style.overflow = '';
+    // Ensure elements exist
+    if (!burgerButton || !mobileMenu) {
+        console.warn('Burger menu elements not found');
+        return;
+    }
 
-        function toggleMenu() {
-            const isOpen = burgerButton.classList.contains('active');
-            burgerButton.classList.toggle('active');
-            mobileMenu.classList.toggle('active');
-            body.classList.toggle('menu-open');
-            body.style.overflow = isOpen ? '' : 'hidden';
-        }
+    // Initialize menu state
+    burgerButton.classList.remove('active');
+    mobileMenu.classList.remove('active');
+    body.classList.remove('menu-open');
+    body.style.overflow = '';
 
-        // Toggle menu on burger click
-        burgerButton?.addEventListener('click', toggleMenu);
+    function toggleMenu() {
+        const isOpen = burgerButton.classList.contains('active');
+        
+        // Toggle classes
+        burgerButton.classList.toggle('active');
+        mobileMenu.classList.toggle('active');
+        body.classList.toggle('menu-open');
+        
+        // Manage body scroll
+        body.style.overflow = isOpen ? '' : 'hidden';
+        
+        // Update aria attributes for accessibility
+        burgerButton.setAttribute('aria-expanded', !isOpen);
+        burgerButton.setAttribute('aria-label', isOpen ? 'Open navigation menu' : 'Close navigation menu');
+        
+        console.log('Menu toggled:', !isOpen ? 'opened' : 'closed');
+    }
 
-        // Close menu when clicking a link
-        mobileMenu?.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', toggleMenu);
-        });
+    // Toggle menu on burger click
+    burgerButton.addEventListener('click', toggleMenu);
 
-        // Close menu when pressing Escape
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && mobileMenu.classList.contains('active')) {
+    // Close menu when clicking a navigation link
+    mobileNavLinks.forEach(link => {
+        link.addEventListener('click', function() {
+            if (mobileMenu.classList.contains('active')) {
                 toggleMenu();
             }
         });
-    })();
+    });
+
+    // Close menu when pressing Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && mobileMenu.classList.contains('active')) {
+            toggleMenu();
+        }
+    });
+
+    // Close menu when clicking outside (on the overlay)
+    mobileMenu.addEventListener('click', function(e) {
+        if (e.target === mobileMenu) {
+            toggleMenu();
+        }
+    });
+
+    // Prevent scroll when menu is open
+    window.addEventListener('resize', function() {
+        if (window.innerWidth >= 768 && mobileMenu.classList.contains('active')) {
+            toggleMenu();
+        }
+    });
+});
 </script>
 

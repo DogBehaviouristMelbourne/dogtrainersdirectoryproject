@@ -374,6 +374,13 @@ const categories = [...new Set(trainers.flatMap((t: any) => t.categories ?? []))
     }
 
     function sortTrainers() {
+      // Plan: Take the existing `filtered` array, sort so that any trainer with
+      // premium_status === 'active' appears first, then render that sorted list.
+      // Implementation: 
+      // 1. Create sorting logic that prioritizes premium trainers in all sort options
+      // 2. Within each sort category, premium trainers appear first, followed by regular trainers
+      // Expected Results: The page shows all active-premium trainers at the top, followed by the rest.
+      
       const sortBy = sortSelect.value;
       if (sortBy === 'name') {
         filtered.sort((a, b) => {
