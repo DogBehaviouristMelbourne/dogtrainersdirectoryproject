@@ -1,0 +1,38 @@
+---
+// Debug page to check environment variables at build-time
+const stripePublishableKey = import.meta.env.STRIPE_PUBLISHABLE_KEY;
+const supabaseUrl         = import.meta.env.SUPABASE_URL;
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Environment Debug</title>
+  </head>
+
+  <body>
+    <h1>Environment Variables Debug</h1>
+
+    <section>
+      <h2>Frontend Environment Variables</h2>
+      <p><strong>STRIPE_PUBLISHABLE_KEY:</strong> {stripePublishableKey ? 'SET ✅' : 'NOT SET ❌'}</p>
+      <p><strong>SUPABASE_URL:</strong> {supabaseUrl ? 'SET ✅' : 'NOT SET ❌'}</p>
+    </section>
+
+    <!--
+      Pass the variables into a client-side block.
+      The double-brace syntax {{ … }} is required by Astro’s `define:vars`.
+    -->
+    <script define:vars={{ stripePublishableKey, supabaseUrl }}>
+      console.log('Stripe Publishable Key:', stripePublishableKey);
+      console.log('Supabase URL:', supabaseUrl);
+
+      if (!stripePublishableKey) {
+        console.error('❌ STRIPE_PUBLISHABLE_KEY is not available in the browser');
+        alert('Environment variables not configured. Check your deploy dashboard.');
+      } else {
+        console.log('✅ Stripe publishable key is available');
+      }
+    </script>
+  </body>
+</html>

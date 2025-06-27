@@ -1,0 +1,26 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+
+// Safely get environment variables with fallbacks to prevent build errors
+const stripeKey = import.meta.env.STRIPE_PUBLISHABLE_KEY || '';
+---
+
+<Layout title="Premium Trainer Listing">
+  <Header />
+  <main>
+    <h1>Premium Page</h1>
+    <p>This is a simplified version of the premium page.</p>
+  </main>
+  <Footer />
+</Layout>
+
+<script is:inline define:vars={{stripeKey}}>
+  window.STRIPE_PUBLISHABLE_KEY = stripeKey;
+</script>
+
+<script>
+  console.log('Script loaded');
+  console.log('Stripe key:', window.STRIPE_PUBLISHABLE_KEY);
+</script>
