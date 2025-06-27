@@ -1,0 +1,25 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+
+// Safe environment variable access
+const stripeKey = import.meta.env.STRIPE_PUBLISHABLE_KEY || '';
+---
+
+<Layout title="Premium Trainer Listing">
+  <Header />
+  <main>
+    <h1>Premium Page</h1>
+    <p>This is a minimal test version.</p>
+  </main>
+  <Footer />
+</Layout>
+
+<script src="https://js.stripe.com/v3/"></script>
+
+<script is:inline define:vars={{stripeKey}}>
+  // Basic script that just passes the server variable to client
+  window.STRIPE_KEY = stripeKey;
+  console.log('Stripe key available:', !!window.STRIPE_KEY);
+</script>
