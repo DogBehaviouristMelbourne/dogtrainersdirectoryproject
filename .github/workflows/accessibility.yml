@@ -69,4 +69,4 @@ jobs:
         run: |
           npx astro preview &
           sleep 5
-          pa11y http://localhost:4321 --reporter cli
+          pa11y http://localhost:4321 --reporter cli --chrome-launcher-flags="--no-sandbox --disable-setuid-sandbox"

@@ -6,33 +6,33 @@
  */
 
 import Stripe from 'stripe';
-import { supabaseService } from '../../lib/supabaseClient.js';       // ✅ fixed relative path (was ../../../)
+import { supabaseService } from '../../lib/supabaseClient.js';
 
-const {
-  STRIPE_SECRET_KEY,
-  STRIPE_ANNUAL_PRICE_ID,
-  STRIPE_MONTHLY_PRICE_ID,
-} = import.meta.env;
+// Safe environment variable extraction with fallbacks
+const STRIPE_SECRET_KEY = import.meta.env.STRIPE_SECRET_KEY || '';
+const STRIPE_ANNUAL_PRICE_ID = import.meta.env.STRIPE_ANNUAL_PRICE_ID || '';
+const STRIPE_MONTHLY_PRICE_ID = import.meta.env.STRIPE_MONTHLY_PRICE_ID || '';
 
 // Check for build-time environment
-const isBuildTime = typeof window === 'undefined' && (!import.meta.env.PUBLIC_SUPABASE_URL || !STRIPE_SECRET_KEY);
-
-if (isBuildTime) {
-  console.log('⚠️ Build time detected - Stripe client will use fallback configuration');
-} else {
-  // Runtime validation
-  if (!STRIPE_SECRET_KEY) {
-    console.error('❌ STRIPE_SECRET_KEY missing in runtime environment');
-  }
-  if (!STRIPE_ANNUAL_PRICE_ID || !STRIPE_MONTHLY_PRICE_ID) {
-    console.warn('⚠️ Price-ID env vars not set – hierarchy check may fail');
-  }
-}
+const isBuildTime = typeof window === 'undefined' && (
+  !import.meta.env.PUBLIC_SUPABASE_URL || 
+  !STRIPE_SECRET_KEY ||
+  STRIPE_SECRET_KEY === '' ||
+  STRIPE_SECRET_KEY.startsWith('placeholder')
+);
 
 // Initialize Stripe with fallback for build time
-const stripe = isBuildTime 
-  ? null 
-  : new Stripe(STRIPE_SECRET_KEY, { apiVersion: '2024-04-10' });
+let stripe = null;
+if (!isBuildTime && STRIPE_SECRET_KEY && STRIPE_SECRET_KEY.length > 10) {
+  try {
+    stripe = new Stripe(STRIPE_SECRET_KEY, { apiVersion: '2024-04-10' });
+    console.log('✅ Stripe client initialized successfully');
+  } catch (error) {
+    console.error('❌ Failed to initialize Stripe client:', error.message);
+  }
+} else {
+  console.log('⚠️ Build time or missing Stripe key - using fallback configuration');
+}
 
 const supabase = supabaseService;
 
