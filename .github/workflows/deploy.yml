@@ -18,11 +18,18 @@ jobs:
     - name: 📦 Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '18'
+        node-version: '20'
         cache: 'npm'
 
     - name: 📋 Install dependencies
       run: npm ci
+
+    - name: 🔍 Print environment info
+      run: |
+        echo "Node.js version: $(node --version)"
+        echo "npm version: $(npm --version)"
+        echo "Environment variables (filtered):"
+        printenv | grep -E "(PUBLIC_|STRIPE_|VITE_)" || echo "No environment variables found"
 
     - name: 🔍 Lint code
       run: npm run lint
@@ -33,10 +40,35 @@ jobs:
       continue-on-error: true
 
     - name: 🔨 Build project
-      run: npm run build
+      run: |
+        echo "🔨 Starting production build with enhanced error reporting..."
+        export NODE_OPTIONS="--trace-warnings --unhandled-rejections=strict"
+        export DEBUG="astro:*"
+        npm run build 2>&1 | tee build.log || {
+          echo "❌ Build failed. Debugging information:"
+          echo "📋 Last 50 lines of build output:"
+          tail -50 build.log
+          echo "🔍 Environment check:"
+          echo "NODE_VERSION: $(node --version)"
+          echo "NPM_VERSION: $(npm --version)"
+          echo "🗂️ Project structure check:"
+          ls -la src/pages/api/ || echo "No API directory found"
+          ls -la src/lib/ || echo "No lib directory found"
+          echo "📦 Dependencies status:"
+          npm list --depth=0 | head -20
+          echo "⚠️ Build failed - see logs above for details"
+          exit 1
+        }
       env:
-        VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-        VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+        PUBLIC_SUPABASE_URL: ${{ secrets.PUBLIC_SUPABASE_URL }}
+        PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.PUBLIC_SUPABASE_ANON_KEY }}
+        SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+        STRIPE_PUBLISHABLE_KEY: ${{ secrets.STRIPE_PUBLISHABLE_KEY }}
+        STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+        STRIPE_ANNUAL_PRICE_ID: ${{ secrets.STRIPE_ANNUAL_PRICE_ID }}
+        STRIPE_MONTHLY_PRICE_ID: ${{ secrets.STRIPE_MONTHLY_PRICE_ID }}
+        VITE_ADMIN_KEY: ${{ secrets.VITE_ADMIN_KEY }}
 
     - name: 📊 Upload build artifacts
       uses: actions/upload-artifact@v4
@@ -56,7 +88,7 @@ jobs:
     - name: 📦 Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '18'
+        node-version: '20'
         cache: 'npm'
 
     - name: 📋 Install dependencies

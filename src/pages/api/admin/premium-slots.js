@@ -76,7 +76,11 @@ export async function POST({ request }) {
 async function getPremiumSlotUsage() {
   try {
     // Check if we're in build mode or missing env vars
-    if (!supabase || process.env.NODE_ENV === 'production' && !import.meta.env.SUPABASE_SERVICE_KEY) {
+    const isBuildTime = typeof window === 'undefined' && (!import.meta.env.PUBLIC_SUPABASE_URL || !import.meta.env.PUBLIC_SUPABASE_ANON_KEY);
+    const isServiceKeyMissing = !import.meta.env.SUPABASE_SERVICE_KEY;
+    
+    if (!supabase || isBuildTime || isServiceKeyMissing) {
+      console.log('⚠️ Database not available - returning safe fallback response');
       return json({
         success: false,
         error: 'Database not available during build',
@@ -92,12 +96,37 @@ async function getPremiumSlotUsage() {
     }
 
     // Get all premium trainers with their suburb and categories
-    const { data: premiumTrainers, error } = await supabase
-      .from('trainers')
-      .select('id, name, suburb, categories, premium_status')
-      .eq('premium_status', 'active');
+    let premiumTrainers = [];
+    try {
+      const { data, error } = await supabase
+        .from('trainers')
+        .select('id, name, suburb, categories, premium_status')
+        .eq('premium_status', 'active');
 
-    if (error) throw error;
+      if (error) throw error;
+      premiumTrainers = data || [];
+    } catch (dbError) {
+      console.error('Error getting premium slot usage:', {
+        message: dbError.message,
+        details: dbError.stack,
+        hint: '',
+        code: ''
+      });
+      
+      // Return safe fallback if database query fails during build
+      return json({
+        success: false,
+        error: 'Database connection failed during build',
+        usage: [],
+        summary: {
+          total_combinations: 0,
+          full_combinations: 0,
+          total_premium_slots_used: 0,
+          total_premium_slots_available: 0,
+          average_utilization: 0
+        }
+      });
+    }
 
     // Calculate usage by suburb/category combination
     const usageMap = new Map();

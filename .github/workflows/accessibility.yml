@@ -21,8 +21,46 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build site
-        run: npx astro build
+      - name: Print environment info
+        run: |
+          echo "Node.js version: $(node --version)"
+          echo "npm version: $(npm --version)"
+          echo "Build environment check"
+
+      - name: Validate environment variables
+        run: |
+          echo "🔍 Checking environment setup for build..."
+          echo "PUBLIC_SUPABASE_URL: ${{ secrets.PUBLIC_SUPABASE_URL && 'SET' || 'NOT SET' }}"
+          echo "PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.PUBLIC_SUPABASE_ANON_KEY && 'SET' || 'NOT SET' }}"
+          echo "SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY && 'SET' || 'NOT SET' }}"
+          echo "All Stripe keys: ${{ secrets.STRIPE_SECRET_KEY && 'SET' || 'NOT SET' }}"
+          echo "VITE_ADMIN_KEY: ${{ secrets.VITE_ADMIN_KEY && 'SET' || 'NOT SET' }}"
+
+      - name: Build site (with enhanced error reporting)
+        run: |
+          echo "🔨 Starting Astro build with enhanced error reporting..."
+          export NODE_OPTIONS="--trace-warnings --unhandled-rejections=strict"
+          export DEBUG="astro:*"
+          npx astro build --verbose 2>&1 | tee build.log || {
+            echo "❌ Build failed. Last 50 lines of output:"
+            tail -50 build.log
+            echo "🔍 Checking for common issues..."
+            ls -la src/pages/api/ || echo "No API directory found"
+            ls -la src/lib/ || echo "No lib directory found"
+            echo "📋 Package.json dependencies:"
+            cat package.json | grep -A 20 '"dependencies"'
+            exit 1
+          }
+        env:
+          PUBLIC_SUPABASE_URL: ${{ secrets.PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
+          PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key' }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY || 'placeholder-service-key' }}
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY || 'sk_test_placeholder' }}
+          STRIPE_PUBLISHABLE_KEY: ${{ secrets.STRIPE_PUBLISHABLE_KEY || 'pk_test_placeholder' }}
+          STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET || 'whsec_placeholder' }}
+          STRIPE_ANNUAL_PRICE_ID: ${{ secrets.STRIPE_ANNUAL_PRICE_ID || 'price_placeholder_annual' }}
+          STRIPE_MONTHLY_PRICE_ID: ${{ secrets.STRIPE_MONTHLY_PRICE_ID || 'price_placeholder_monthly' }}
+          VITE_ADMIN_KEY: ${{ secrets.VITE_ADMIN_KEY || 'placeholder-admin-key' }}
 
       - name: Install pa11y
         run: npm install -g pa11y
