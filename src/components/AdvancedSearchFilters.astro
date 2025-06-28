@@ -1,0 +1,1370 @@
+---
+// src/components/AdvancedSearchFilters.astro
+// Advanced search filters with price range, availability, and specialized options
+
+interface Props {
+    initialFilters?: {
+        location?: string;
+        service?: string;
+        priceRange?: [number, number];
+        availability?: string;
+        experience?: string;
+        rating?: number;
+        distance?: number;
+        specializations?: string[];
+    };
+}
+
+const { initialFilters = {} } = Astro.props;
+---
+
+<div class="advanced-search-filters" id="advanced-filters">
+    <!-- Filter Toggle Button -->
+    <button class="filter-toggle" id="filter-toggle" aria-expanded="false" aria-controls="filter-panel">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+        </svg>
+        Advanced Filters
+        <span class="filter-count" id="filter-count">0</span>
+    </button>
+
+    <!-- Filter Panel -->
+    <div class="filter-panel" id="filter-panel" aria-hidden="true">
+        <div class="filter-header">
+            <h3>Refine Your Search</h3>
+            <button class="clear-filters" id="clear-filters">Clear All</button>
+        </div>
+
+        <div class="filter-grid">
+            <!-- Location & Distance -->
+            <div class="filter-group">
+                <label for="location-input">Location</label>
+                <div class="location-input-group">
+                    <input 
+                        type="text" 
+                        id="location-input" 
+                        placeholder="Enter suburb or postcode"
+                        value={initialFilters.location || ''}
+                        autocomplete="address-level2"
+                    />
+                    <button class="location-detect" id="detect-location" title="Use my location">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="3 11 22 2 13 21 11 13 3 11"></polygon>
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="distance-slider">
+                    <label for="distance-range">Distance: <span id="distance-value">25</span> km</label>
+                    <input 
+                        type="range" 
+                        id="distance-range" 
+                        min="5" 
+                        max="100" 
+                        value={initialFilters.distance || 25}
+                        step="5"
+                    />
+                </div>
+            </div>
+
+            <!-- Service Type -->
+            <div class="filter-group">
+                <label>Service Type</label>
+                <div class="checkbox-group">
+                    <label class="checkbox-item">
+                        <input type="checkbox" value="puppy-training" />
+                        <span class="checkmark"></span>
+                        Puppy Training
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" value="obedience-training" />
+                        <span class="checkmark"></span>
+                        Obedience Training
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" value="behavioral-training" />
+                        <span class="checkmark"></span>
+                        Behavioral Training
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" value="agility-training" />
+                        <span class="checkmark"></span>
+                        Agility Training
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" value="therapy-dog-training" />
+                        <span class="checkmark"></span>
+                        Therapy Dog Training
+                    </label>
+                </div>
+            </div>
+
+            <!-- Price Range -->
+            <div class="filter-group">
+                <label>Price Range (per session)</label>
+                <div class="price-range-slider">
+                    <div class="price-inputs">
+                        <input type="number" id="price-min" placeholder="Min" min="0" max="500" value="50" />
+                        <span>to</span>
+                        <input type="number" id="price-max" placeholder="Max" min="0" max="500" value="200" />
+                    </div>
+                    <div class="dual-range-slider">
+                        <input type="range" id="price-range-min" min="0" max="500" value="50" step="10" />
+                        <input type="range" id="price-range-max" min="0" max="500" value="200" step="10" />
+                    </div>
+                    <div class="price-labels">
+                        <span>$0</span>
+                        <span>$500+</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Experience Level -->
+            <div class="filter-group">
+                <label for="experience-select">Experience Level</label>
+                <select id="experience-select">
+                    <option value="">Any Experience</option>
+                    <option value="1-2">1-2 years</option>
+                    <option value="3-5">3-5 years</option>
+                    <option value="6-10">6-10 years</option>
+                    <option value="10+">10+ years</option>
+                </select>
+            </div>
+
+            <!-- Rating -->
+            <div class="filter-group">
+                <label>Minimum Rating</label>
+                <div class="rating-filter">
+                    <div class="star-rating" id="rating-filter">
+                        <button class="star" data-rating="1">★</button>
+                        <button class="star" data-rating="2">★</button>
+                        <button class="star" data-rating="3">★</button>
+                        <button class="star" data-rating="4">★</button>
+                        <button class="star" data-rating="5">★</button>
+                    </div>
+                    <span class="rating-text" id="rating-text">Any rating</span>
+                </div>
+            </div>
+
+            <!-- Availability -->
+            <div class="filter-group">
+                <label>Availability</label>
+                <div class="availability-options">
+                    <label class="radio-item">
+                        <input type="radio" name="availability" value="any" checked />
+                        <span class="radio-mark"></span>
+                        Any time
+                    </label>
+                    <label class="radio-item">
+                        <input type="radio" name="availability" value="weekdays" />
+                        <span class="radio-mark"></span>
+                        Weekdays only
+                    </label>
+                    <label class="radio-item">
+                        <input type="radio" name="availability" value="weekends" />
+                        <span class="radio-mark"></span>
+                        Weekends only
+                    </label>
+                    <label class="radio-item">
+                        <input type="radio" name="availability" value="evenings" />
+                        <span class="radio-mark"></span>
+                        Evenings
+                    </label>
+                </div>
+            </div>
+
+            <!-- Specializations -->
+            <div class="filter-group">
+                <label>Specializations</label>
+                <div class="specialization-tags">
+                    <button class="tag-filter" data-spec="aggressive-dogs">Aggressive Dogs</button>
+                    <button class="tag-filter" data-spec="rescue-dogs">Rescue Dogs</button>
+                    <button class="tag-filter" data-spec="senior-dogs">Senior Dogs</button>
+                    <button class="tag-filter" data-spec="small-breeds">Small Breeds</button>
+                    <button class="tag-filter" data-spec="large-breeds">Large Breeds</button>
+                    <button class="tag-filter" data-spec="working-dogs">Working Dogs</button>
+                    <button class="tag-filter" data-spec="service-dogs">Service Dogs</button>
+                    <button class="tag-filter" data-spec="competition">Competition Training</button>
+                </div>
+            </div>
+
+            <!-- Additional Options -->
+            <div class="filter-group">
+                <label>Additional Options</label>
+                <div class="checkbox-group">
+                    <label class="checkbox-item">
+                        <input type="checkbox" id="home-visits" value="home-visits" />
+                        <span class="checkmark"></span>
+                        Offers home visits
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" id="group-classes" value="group-classes" />
+                        <span class="checkmark"></span>
+                        Group classes available
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" id="online-training" value="online-training" />
+                        <span class="checkmark"></span>
+                        Online training
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" id="emergency-sessions" value="emergency-sessions" />
+                        <span class="checkmark"></span>
+                        Emergency sessions
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Actions -->
+        <div class="filter-actions">
+            <button class="apply-filters" id="apply-filters">
+                Apply Filters
+                <span class="results-count" id="results-count">Loading...</span>
+            </button>
+            <button class="save-search" id="save-search">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                </svg>
+                Save Search
+            </button>
+        </div>
+    </div>
+
+    <!-- Active Filters Display -->
+    <div class="active-filters" id="active-filters" style="display: none;">
+        <span class="active-filters-label">Active filters:</span>
+        <div class="active-filter-tags" id="active-filter-tags"></div>
+    </div>
+</div>
+
+<style>
+    .advanced-search-filters {
+        position: relative;
+        margin-bottom: 2rem;
+    }
+
+    /* Filter Toggle Button */
+    .filter-toggle {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.25rem;
+        background: var(--color-card-bg-light);
+        border: 1px solid var(--color-border-light);
+        border-radius: 8px;
+        color: var(--color-text-light);
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        position: relative;
+    }
+
+    .filter-toggle:hover {
+        background: var(--color-accent-teal);
+        color: white;
+        transform: translateY(-1px);
+    }
+
+    .filter-count {
+        background: var(--color-accent-mustard);
+        color: var(--color-text-light);
+        padding: 0.25rem 0.5rem;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        min-width: 20px;
+        text-align: center;
+    }
+
+    .filter-count:empty {
+        display: none;
+    }
+
+    /* Filter Panel */
+    .filter-panel {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: var(--color-card-bg-light);
+        border: 1px solid var(--color-border-light);
+        border-radius: 12px;
+        box-shadow: var(--shadow-lg);
+        z-index: 1000;
+        margin-top: 0.5rem;
+        padding: 1.5rem;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-10px);
+        transition: all 0.3s ease;
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+
+    .filter-panel.active {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+
+    .filter-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--color-border-light);
+    }
+
+    .filter-header h3 {
+        margin: 0;
+        color: var(--color-text-light);
+        font-size: 1.2rem;
+    }
+
+    .clear-filters {
+        background: none;
+        border: none;
+        color: var(--color-accent-teal);
+        font-weight: 500;
+        cursor: pointer;
+        padding: 0.5rem;
+        border-radius: 4px;
+        transition: background 0.2s ease;
+    }
+
+    .clear-filters:hover {
+        background: rgba(90, 155, 156, 0.1);
+    }
+
+    /* Filter Grid */
+    .filter-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .filter-group label {
+        font-weight: 600;
+        color: var(--color-text-light);
+        font-size: 0.9rem;
+    }
+
+    /* Location Input */
+    .location-input-group {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .location-input-group input {
+        flex: 1;
+        padding: 0.75rem;
+        border: 1px solid var(--color-border-light);
+        border-radius: 6px;
+        background: var(--color-background-light);
+        color: var(--color-text-light);
+    }
+
+    .location-detect {
+        padding: 0.75rem;
+        background: var(--color-accent-teal);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background 0.2s ease;
+    }
+
+    .location-detect:hover {
+        background: color-mix(in srgb, var(--color-accent-teal) 85%, black);
+    }
+
+    /* Distance Slider */
+    .distance-slider {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .distance-slider input[type="range"] {
+        width: 100%;
+        height: 6px;
+        background: var(--color-border-light);
+        border-radius: 3px;
+        outline: none;
+        -webkit-appearance: none;
+    }
+
+    .distance-slider input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 18px;
+        height: 18px;
+        background: var(--color-accent-teal);
+        border-radius: 50%;
+        cursor: pointer;
+    }
+
+    /* Checkbox Group */
+    .checkbox-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .checkbox-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        cursor: pointer;
+        padding: 0.5rem;
+        border-radius: 4px;
+        transition: background 0.2s ease;
+    }
+
+    .checkbox-item:hover {
+        background: rgba(90, 155, 156, 0.05);
+    }
+
+    .checkbox-item input[type="checkbox"] {
+        display: none;
+    }
+
+    .checkmark {
+        width: 18px;
+        height: 18px;
+        border: 2px solid var(--color-border-light);
+        border-radius: 3px;
+        position: relative;
+        transition: all 0.2s ease;
+    }
+
+    .checkbox-item input[type="checkbox"]:checked + .checkmark {
+        background: var(--color-accent-teal);
+        border-color: var(--color-accent-teal);
+    }
+
+    .checkbox-item input[type="checkbox"]:checked + .checkmark::after {
+        content: '✓';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        font-size: 12px;
+        font-weight: bold;
+    }
+
+    /* Price Range */
+    .price-range-slider {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .price-inputs {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .price-inputs input {
+        flex: 1;
+        padding: 0.5rem;
+        border: 1px solid var(--color-border-light);
+        border-radius: 4px;
+        background: var(--color-background-light);
+        color: var(--color-text-light);
+        text-align: center;
+    }
+
+    .dual-range-slider {
+        position: relative;
+        height: 6px;
+        background: var(--color-border-light);
+        border-radius: 3px;
+    }
+
+    .dual-range-slider input[type="range"] {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 6px;
+        background: transparent;
+        pointer-events: none;
+        -webkit-appearance: none;
+    }
+
+    .dual-range-slider input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 18px;
+        height: 18px;
+        background: var(--color-accent-teal);
+        border-radius: 50%;
+        cursor: pointer;
+        pointer-events: all;
+    }
+
+    .price-labels {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.8rem;
+        color: var(--color-text-light);
+        opacity: 0.7;
+    }
+
+    /* Select Dropdown */
+    select {
+        padding: 0.75rem;
+        border: 1px solid var(--color-border-light);
+        border-radius: 6px;
+        background: var(--color-background-light);
+        color: var(--color-text-light);
+        cursor: pointer;
+    }
+
+    /* Star Rating */
+    .rating-filter {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .star-rating {
+        display: flex;
+        gap: 0.25rem;
+    }
+
+    .star {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        color: var(--color-border-light);
+        cursor: pointer;
+        transition: color 0.2s ease;
+    }
+
+    .star:hover,
+    .star.active {
+        color: #ffd700;
+    }
+
+    .rating-text {
+        font-size: 0.9rem;
+        color: var(--color-text-light);
+        opacity: 0.8;
+    }
+
+    /* Radio Group */
+    .availability-options {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .radio-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        cursor: pointer;
+        padding: 0.5rem;
+        border-radius: 4px;
+        transition: background 0.2s ease;
+    }
+
+    .radio-item:hover {
+        background: rgba(90, 155, 156, 0.05);
+    }
+
+    .radio-item input[type="radio"] {
+        display: none;
+    }
+
+    .radio-mark {
+        width: 18px;
+        height: 18px;
+        border: 2px solid var(--color-border-light);
+        border-radius: 50%;
+        position: relative;
+        transition: all 0.2s ease;
+    }
+
+    .radio-item input[type="radio"]:checked + .radio-mark {
+        border-color: var(--color-accent-teal);
+    }
+
+    .radio-item input[type="radio"]:checked + .radio-mark::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 8px;
+        height: 8px;
+        background: var(--color-accent-teal);
+        border-radius: 50%;
+    }
+
+    /* Specialization Tags */
+    .specialization-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .tag-filter {
+        padding: 0.5rem 0.75rem;
+        background: var(--color-background-light);
+        border: 1px solid var(--color-border-light);
+        border-radius: 20px;
+        color: var(--color-text-light);
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .tag-filter:hover {
+        background: var(--color-accent-teal);
+        color: white;
+        border-color: var(--color-accent-teal);
+    }
+
+    .tag-filter.active {
+        background: var(--color-accent-teal);
+        color: white;
+        border-color: var(--color-accent-teal);
+    }
+
+    /* Filter Actions */
+    .filter-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--color-border-light);
+    }
+
+    .apply-filters {
+        flex: 1;
+        padding: 0.75rem 1.5rem;
+        background: var(--color-accent-teal);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .apply-filters:hover {
+        background: color-mix(in srgb, var(--color-accent-teal) 85%, black);
+        transform: translateY(-1px);
+    }
+
+    .results-count {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 0.25rem 0.5rem;
+        border-radius: 12px;
+        font-size: 0.8rem;
+    }
+
+    .save-search {
+        padding: 0.75rem 1rem;
+        background: var(--color-background-light);
+        border: 1px solid var(--color-border-light);
+        border-radius: 8px;
+        color: var(--color-text-light);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .save-search:hover {
+        background: var(--color-accent-mustard);
+        color: var(--color-text-light);
+    }
+
+    /* Active Filters */
+    .active-filters {
+        margin-top: 1rem;
+        padding: 1rem;
+        background: var(--color-background-light);
+        border-radius: 8px;
+        border: 1px solid var(--color-border-light);
+    }
+
+    .active-filters-label {
+        font-weight: 600;
+        color: var(--color-text-light);
+        margin-right: 0.75rem;
+    }
+
+    .active-filter-tags {
+        display: inline-flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .active-filter-tag {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.25rem 0.75rem;
+        background: var(--color-accent-teal);
+        color: white;
+        border-radius: 16px;
+        font-size: 0.8rem;
+    }
+
+    .active-filter-tag button {
+        background: none;
+        border: none;
+        color: white;
+        cursor: pointer;
+        padding: 0;
+        margin-left: 0.25rem;
+        font-size: 1rem;
+        line-height: 1;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .filter-panel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            margin: 0;
+            border-radius: 0;
+            max-height: none;
+            overflow-y: auto;
+        }
+
+        .filter-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .filter-actions {
+            flex-direction: column;
+        }
+
+        .price-inputs {
+            flex-direction: column;
+        }
+
+        .specialization-tags {
+            justify-content: center;
+        }
+    }
+
+    /* Dark mode support */
+    .dark-mode .filter-panel {
+        background: var(--color-card-bg-dark);
+        border-color: var(--color-border-dark);
+    }
+
+    .dark-mode .filter-toggle {
+        background: var(--color-card-bg-dark);
+        border-color: var(--color-border-dark);
+        color: var(--color-text-dark);
+    }
+</style>
+
+<script>
+// Advanced search filters functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const filterToggle = document.getElementById('filter-toggle');
+    const filterPanel = document.getElementById('filter-panel');
+    const clearFilters = document.getElementById('clear-filters');
+    const applyFilters = document.getElementById('apply-filters');
+    const saveSearch = document.getElementById('save-search');
+    const detectLocation = document.getElementById('detect-location');
+    const distanceRange = document.getElementById('distance-range');
+    const distanceValue = document.getElementById('distance-value');
+    const priceMin = document.getElementById('price-min');
+    const priceMax = document.getElementById('price-max');
+    const priceRangeMin = document.getElementById('price-range-min');
+    const priceRangeMax = document.getElementById('price-range-max');
+    const ratingFilter = document.getElementById('rating-filter');
+    const ratingText = document.getElementById('rating-text');
+    const filterCount = document.getElementById('filter-count');
+    const activeFilters = document.getElementById('active-filters');
+    const activeFilterTags = document.getElementById('active-filter-tags');
+    const resultsCount = document.getElementById('results-count');
+
+    let currentFilters = {};
+    let isFilterPanelOpen = false;
+
+    // Initialize
+    setupEventListeners();
+    updateFilterCount();
+    loadSavedFilters();
+
+    function setupEventListeners() {
+        // Filter toggle
+        if (filterToggle) {
+            filterToggle.addEventListener('click', toggleFilterPanel);
+        }
+
+        // Clear filters
+        if (clearFilters) {
+            clearFilters.addEventListener('click', clearAllFilters);
+        }
+
+        // Apply filters
+        if (applyFilters) {
+            applyFilters.addEventListener('click', handleApplyFilters);
+        }
+
+        // Save search
+        if (saveSearch) {
+            saveSearch.addEventListener('click', handleSaveSearch);
+        }
+
+        // Location detection
+        if (detectLocation) {
+            detectLocation.addEventListener('click', detectUserLocation);
+        }
+
+        // Distance slider
+        if (distanceRange && distanceValue) {
+            distanceRange.addEventListener('input', function() {
+                distanceValue.textContent = this.value;
+                updateFilters();
+            });
+        }
+
+        // Price range sliders
+        if (priceRangeMin && priceRangeMax) {
+            priceRangeMin.addEventListener('input', updatePriceRange);
+            priceRangeMax.addEventListener('input', updatePriceRange);
+        }
+
+        // Price inputs
+        if (priceMin && priceMax) {
+            priceMin.addEventListener('change', updatePriceSliders);
+            priceMax.addEventListener('change', updatePriceSliders);
+        }
+
+        // Rating filter
+        if (ratingFilter) {
+            const stars = ratingFilter.querySelectorAll('.star');
+            stars.forEach(star => {
+                star.addEventListener('click', function() {
+                    const rating = parseInt(this.dataset.rating);
+                    setRating(rating);
+                });
+            });
+        }
+
+        // Specialization tags
+        const tagFilters = document.querySelectorAll('.tag-filter');
+        tagFilters.forEach(tag => {
+            tag.addEventListener('click', function() {
+                this.classList.toggle('active');
+                updateFilters();
+            });
+        });
+
+        // All filter inputs
+        const filterInputs = filterPanel?.querySelectorAll('input, select');
+        filterInputs?.forEach(input => {
+            input.addEventListener('change', updateFilters);
+        });
+
+        // Close panel when clicking outside
+        document.addEventListener('click', function(e) {
+            if (isFilterPanelOpen && !filterPanel?.contains(e.target) && !filterToggle?.contains(e.target)) {
+                closeFilterPanel();
+            }
+        });
+
+        // Escape key to close panel
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && isFilterPanelOpen) {
+                closeFilterPanel();
+            }
+        });
+    }
+
+    function toggleFilterPanel() {
+        if (isFilterPanelOpen) {
+            closeFilterPanel();
+        } else {
+            openFilterPanel();
+        }
+    }
+
+    function openFilterPanel() {
+        if (filterPanel) {
+            filterPanel.classList.add('active');
+            filterPanel.setAttribute('aria-hidden', 'false');
+            filterToggle?.setAttribute('aria-expanded', 'true');
+            isFilterPanelOpen = true;
+            
+            // Focus first input
+            const firstInput = filterPanel.querySelector('input, select');
+            firstInput?.focus();
+        }
+    }
+
+    function closeFilterPanel() {
+        if (filterPanel) {
+            filterPanel.classList.remove('active');
+            filterPanel.setAttribute('aria-hidden', 'true');
+            filterToggle?.setAttribute('aria-expanded', 'false');
+            isFilterPanelOpen = false;
+        }
+    }
+
+    function clearAllFilters() {
+        // Reset all form inputs
+        const inputs = filterPanel?.querySelectorAll('input, select');
+        inputs?.forEach(input => {
+            if (input.type === 'checkbox' || input.type === 'radio') {
+                input.checked = input.defaultChecked;
+{
+                input.value = input.defaultValue || '';
+            }
+        });
+
+        // Reset specialization tags
+        const tagFilters = document.querySelectorAll('.tag-filter');
+        tagFilters.forEach(tag => tag.classList.remove('active'));
+
+        // Reset rating
+        setRating(0);
+
+        // Reset price range
+        if (priceMin) priceMin.value = '50';
+        if (priceMax) priceMax.value = '200';
+        if (priceRangeMin) priceRangeMin.value = '50';
+        if (priceRangeMax) priceRangeMax.value = '200';
+
+        // Reset distance
+        if (distanceRange) distanceRange.value = '25';
+        if (distanceValue) distanceValue.textContent = '25';
+
+        currentFilters = {};
+        updateFilterCount();
+        updateActiveFilters();
+    }
+
+    function updateFilters() {
+        currentFilters = {};
+
+        // Location
+        const locationInput = document.getElementById('location-input');
+        if (locationInput?.value) {
+            currentFilters.location = locationInput.value;
+        }
+
+        // Distance
+        if (distanceRange?.value && distanceRange.value !== '25') {
+            currentFilters.distance = distanceRange.value;
+        }
+
+        // Service types
+        const serviceTypes = [];
+        const serviceCheckboxes = document.querySelectorAll('input[type="checkbox"][value*="training"]');
+        serviceCheckboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+                serviceTypes.push(checkbox.value);
+            }
+        });
+        if (serviceTypes.length > 0) {
+            currentFilters.serviceTypes = serviceTypes;
+        }
+
+        // Price range
+        if (priceMin?.value || priceMax?.value) {
+            currentFilters.priceRange = [
+                parseInt(priceMin?.value) || 0,
+                parseInt(priceMax?.value) || 500
+            ];
+        }
+
+        // Experience
+        const experienceSelect = document.getElementById('experience-select');
+        if (experienceSelect?.value) {
+            currentFilters.experience = experienceSelect.value;
+        }
+
+        // Rating
+        const activeStars = ratingFilter?.querySelectorAll('.star.active');
+        if (activeStars?.length > 0) {
+            currentFilters.rating = activeStars.length;
+        }
+
+        // Availability
+        const availabilityRadio = document.querySelector('input[name="availability"]:checked');
+        if (availabilityRadio?.value && availabilityRadio.value !== 'any') {
+            currentFilters.availability = availabilityRadio.value;
+        }
+
+        // Specializations
+        const activeSpecs = [];
+        const activeTagFilters = document.querySelectorAll('.tag-filter.active');
+        activeTagFilters.forEach(tag => {
+            activeSpecs.push(tag.dataset.spec);
+        });
+        if (activeSpecs.length > 0) {
+            currentFilters.specializations = activeSpecs;
+        }
+
+        // Additional options
+        const additionalOptions = [];
+        const additionalCheckboxes = document.querySelectorAll('#home-visits, #group-classes, #online-training, #emergency-sessions');
+        additionalCheckboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+                additionalOptions.push(checkbox.value);
+            }
+        });
+        if (additionalOptions.length > 0) {
+            currentFilters.additionalOptions = additionalOptions;
+        }
+
+        updateFilterCount();
+        updateActiveFilters();
+        updateResultsCount();
+    }
+
+    function updateFilterCount() {
+        const count = Object.keys(currentFilters).length;
+        if (filterCount) {
+            filterCount.textContent = count > 0 ? count.toString() : '';
+        }
+    }
+
+    function updateActiveFilters() {
+        if (!activeFilters || !activeFilterTags) return;
+
+        activeFilterTags.innerHTML = '';
+        
+        if (Object.keys(currentFilters).length === 0) {
+            activeFilters.style.display = 'none';
+            return;
+        }
+
+        activeFilters.style.display = 'block';
+
+        Object.entries(currentFilters).forEach(([key, value]) => {
+            const tag = createActiveFilterTag(key, value);
+            if (tag) {
+                activeFilterTags.appendChild(tag);
+            }
+        });
+    }
+
+    function createActiveFilterTag(key, value) {
+        const tag = document.createElement('span');
+        tag.className = 'active-filter-tag';
+        
+        let displayText = '';
+        
+        switch (key) {
+            case 'location':
+                displayText = `Location: ${value}`;
+                break;
+            case 'distance':
+                displayText = `Within ${value}km`;
+                break;
+            case 'serviceTypes':
+                displayText = `Services: ${value.length} selected`;
+                break;
+            case 'priceRange':
+                displayText = `$${value[0]} - $${value[1]}`;
+                break;
+            case 'experience':
+                displayText = `Experience: ${value} years`;
+                break;
+            case 'rating':
+                displayText = `${value}+ stars`;
+                break;
+            case 'availability':
+                displayText = `Availability: ${value}`;
+                break;
+            case 'specializations':
+                displayText = `Specializations: ${value.length} selected`;
+                break;
+            case 'additionalOptions':
+                displayText = `Options: ${value.length} selected`;
+                break;
+        }
+
+        tag.innerHTML = `
+            ${displayText}
+            <button onclick="removeFilter('${key}')" aria-label="Remove filter">×</button>
+        `;
+
+        return tag;
+    }
+
+    function removeFilter(key) {
+        delete currentFilters[key];
+        
+        // Reset corresponding UI elements
+        switch (key) {
+            case 'location':
+                const locationInput = document.getElementById('location-input');
+                if (locationInput) locationInput.value = '';
+                break;
+            case 'distance':
+                if (distanceRange) distanceRange.value = '25';
+                if (distanceValue) distanceValue.textContent = '25';
+                break;
+            case 'serviceTypes':
+                const serviceCheckboxes = document.querySelectorAll('input[type="checkbox"][value*="training"]');
+                serviceCheckboxes.forEach(checkbox => checkbox.checked = false);
+                break;
+            case 'priceRange':
+                if (priceMin) priceMin.value = '50';
+                if (priceMax) priceMax.value = '200';
+                if (priceRangeMin) priceRangeMin.value = '50';
+                if (priceRangeMax) priceRangeMax.value = '200';
+                break;
+            case 'experience':
+                const experienceSelect = document.getElementById('experience-select');
+                if (experienceSelect) experienceSelect.value = '';
+                break;
+            case 'rating':
+                setRating(0);
+                break;
+            case 'availability':
+                const anyRadio = document.querySelector('input[name="availability"][value="any"]');
+                if (anyRadio) anyRadio.checked = true;
+                break;
+            case 'specializations':
+                const tagFilters = document.querySelectorAll('.tag-filter');
+                tagFilters.forEach(tag => tag.classList.remove('active'));
+                break;
+            case 'additionalOptions':
+                const additionalCheckboxes = document.querySelectorAll('#home-visits, #group-classes, #online-training, #emergency-sessions');
+                additionalCheckboxes.forEach(checkbox => checkbox.checked = false);
+                break;
+        }
+
+        updateFilterCount();
+        updateActiveFilters();
+        updateResultsCount();
+    }
+
+    function updatePriceRange() {
+        const minVal = parseInt(priceRangeMin?.value) || 0;
+        const maxVal = parseInt(priceRangeMax?.value) || 500;
+
+        if (minVal >= maxVal) {
+            if (priceRangeMin) priceRangeMin.value = Math.max(0, maxVal - 10);
+        }
+
+        if (priceMin) priceMin.value = priceRangeMin?.value || '50';
+        if (priceMax) priceMax.value = priceRangeMax?.value || '200';
+
+        updateFilters();
+    }
+
+    function updatePriceSliders() {
+        const minVal = parseInt(priceMin?.value) || 0;
+        const maxVal = parseInt(priceMax?.value) || 500;
+
+        if (priceRangeMin) priceRangeMin.value = minVal.toString();
+        if (priceRangeMax) priceRangeMax.value = maxVal.toString();
+
+        updateFilters();
+    }
+
+    function setRating(rating) {
+        const stars = ratingFilter?.querySelectorAll('.star');
+        stars?.forEach((star, index) => {
+            star.classList.toggle('active', index < rating);
+        });
+
+        if (ratingText) {
+            ratingText.textContent = rating > 0 ? `${rating}+ stars` : 'Any rating';
+        }
+
+        updateFilters();
+    }
+
+    function detectUserLocation() {
+        if (!navigator.geolocation) {
+            alert('Geolocation is not supported by this browser.');
+            return;
+        }
+
+        detectLocation.disabled = true;
+        detectLocation.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M12 1v6m0 6v6m11-7h-6m-6 0H1"></path></svg>';
+
+        navigator.geolocation.getCurrentPosition(
+            async (position) => {
+                try {
+                    const { latitude, longitude } = position.coords;
+                    const location = await reverseGeocode(latitude, longitude);
+                    
+                    const locationInput = document.getElementById('location-input');
+                    if (locationInput && location) {
+                        locationInput.value = location;
+                        updateFilters();
+                    }
+                } catch (error) {
+                    console.error('Error getting location:', error);
+                    alert('Unable to determine your location. Please enter manually.');
+                } finally {
+                    detectLocation.disabled = false;
+                    detectLocation.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 11 22 2 13 21 11 13 3 11"></polygon></svg>';
+                }
+            },
+            (error) => {
+                console.error('Geolocation error:', error);
+                alert('Unable to access your location. Please enter manually.');
+                detectLocation.disabled = false;
+                detectLocation.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 11 22 2 13 21 11 13 3 11"></polygon></svg>';
+            }
+        );
+    }
+
+    async function reverseGeocode(lat, lng) {
+        try {
+            const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`);
+            const data = await response.json();
+            return data.locality || data.city || data.principalSubdivision || 'Unknown location';
+        } catch (error) {
+            console.error('Reverse geocoding failed:', error);
+            return null;
+        }
+    }
+
+    function handleApplyFilters() {
+        closeFilterPanel();
+        
+        const searchEvent = new CustomEvent('filtersApplied', {
+            detail: currentFilters
+        });
+        document.dispatchEvent(searchEvent);
+        
+        updateURLWithFilters();
+    }
+
+    function handleSaveSearch() {
+        const searchData = {
+            filters: currentFilters,
+            timestamp: new Date().toISOString(),
+            name: `Search ${new Date().toLocaleDateString()}`
+        };
+
+        const savedSearches = JSON.parse(localStorage.getItem('savedSearches') || '[]');
+        savedSearches.unshift(searchData);
+        
+        if (savedSearches.length > 10) {
+            savedSearches.splice(10);
+        }
+        
+        localStorage.setItem('savedSearches', JSON.stringify(savedSearches));
+        showNotification('Search saved successfully!', 'success');
+    }
+
+    function loadSavedFilters() {
+        const urlParams = new URLSearchParams(window.location.search);
+        
+        urlParams.forEach((value, key) => {
+            switch (key) {
+                case 'location':
+                    const locationInput = document.getElementById('location-input');
+                    if (locationInput) locationInput.value = value;
+                    break;
+                case 'distance':
+                    if (distanceRange) distanceRange.value = value;
+                    if (distanceValue) distanceValue.textContent = value;
+                    break;
+                case 'priceMin':
+                    if (priceMin) priceMin.value = value;
+                    if (priceRangeMin) priceRangeMin.value = value;
+                    break;
+                case 'priceMax':
+                    if (priceMax) priceMax.value = value;
+                    if (priceRangeMax) priceRangeMax.value = value;
+                    break;
+                case 'rating':
+                    setRating(parseInt(value));
+                    break;
+            }
+        });
+
+        updateFilters();
+    }
+
+    function updateURLWithFilters() {
+        const url = new URL(window.location);
+        
+        const filterKeys = ['location', 'distance', 'priceMin', 'priceMax', 'rating', 'experience', 'availability'];
+        filterKeys.forEach(key => url.searchParams.delete(key));
+
+        Object.entries(currentFilters).forEach(([key, value]) => {
+            if (key === 'priceRange') {
+                url.searchParams.set('priceMin', value[0].toString());
+                url.searchParams.set('priceMax', value[1].toString());
+            } else if (Array.isArray(value)) {
+                url.searchParams.set(key, value.join(','));
+            } else {
+                url.searchParams.set(key, value.toString());
+            }
+        });
+
+        window.history.replaceState({}, '', url);
+    }
+
+    async function updateResultsCount() {
+        if (!resultsCount) return;
+
+        resultsCount.textContent = 'Calculating...';
+
+        try {
+            await new Promise(resolve => setTimeout(resolve, 500));
+            const count = Math.floor(Math.random() * 50) + 10;
+            resultsCount.textContent = `${count} results`;
+        } catch (error) {
+            resultsCount.textContent = 'Error';
+        }
+    }
+
+    function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.textContent = message;
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            background: ${type === 'success' ? '#4caf50' : '#2196f3'};
+            color: white;
+            border-radius: 8px;
+            z-index: 10000;
+            animation: slideIn 0.3s ease;
+        `;
+
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
+    }
+
+    window.removeFilter = removeFilter;
+});
+</script>
+            } else

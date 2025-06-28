@@ -3,7 +3,7 @@
 import waggingWisdomData from '../data/wagging-wisdom.json';
 
 // Use static data for build, with client-side Supabase loading for production
-const tips = waggingWisdomData || [];
+const tips = waggingWisdomData ?? [];
 ---
 
 <section class="wagging-wisdom">
@@ -17,84 +17,88 @@ const tips = waggingWisdomData || [];
       <button class="wisdom-nav wisdom-nav-right" aria-label="Next tip" type="button">&#8594;</button>
       <div class="carousel-indicators" id="carousel-indicators"></div>
     </div>
-  </div>      <script define:vars={{ waggingWisdomData: tips }}>
-    let currentIndex = 0;
-    let autoPlayInterval;
-    
-    const wisdomContent = document.getElementById('wisdom-content');
-    const indicatorsContainer = document.getElementById('carousel-indicators');
-    const leftBtn = document.querySelector('.wisdom-nav-left');
-    const rightBtn = document.querySelector('.wisdom-nav-right');
-    
+  </div>      
+  <script define:vars={{ tips }}>
     // Create indicators
-    waggingWisdomData.forEach((_, index) => {
-        const indicator = document.createElement('button');
-        indicator.className = 'indicator';
-        indicator.setAttribute('aria-label', `Go to tip ${index + 1}`);
-        indicator.addEventListener('click', () => goToSlide(index));
-        indicatorsContainer.appendChild(indicator);
+    const indicatorsContainer = document.getElementById('carousel-indicators');
+    const totalTips = tips.length;
+
+    // Clear existing indicators
+    indicatorsContainer.innerHTML = '';
+
+    // Create new indicators
+    for (let i = 0; i < totalTips; i++) {
+      const indicator = document.createElement('div');
+      indicator.classList.add('indicator');
+      indicator.dataset.index = i;
+      indicator.addEventListener('click', () => {
+        showTip(i);
+      });
+      indicatorsContainer.appendChild(indicator);
+    }
+
+    let currentIndex = 0;
+
+    function updateIndicators() {
+      const indicators = document.querySelectorAll('.indicator');
+      indicators.forEach((indicator, index) => {
+        indicator.classList.toggle('active', index === currentIndex);
+      });
+    }
+
+    function showTip(index) {
+      const contentDiv = document.getElementById('wisdom-content');
+      contentDiv.innerHTML = ''; // Clear existing content
+
+      // Create new tip element
+      const tip = document.createElement('div');
+      tip.classList.add('wisdom-item');
+
+      // Add icon, title, and text
+      const { icon, title, text, type } = tips[index];
+      const iconElement = document.createElement('div');
+      iconElement.classList.add('wisdom-icon');
+      const imgElement = document.createElement('img');
+      imgElement.src = icon;
+      imgElement.alt = title;
+      iconElement.appendChild(imgElement);
+      tip.appendChild(iconElement);
+
+      const textElement = document.createElement('div');
+      textElement.classList.add('wisdom-text');
+      const titleElement = document.createElement('h3');
+      titleElement.textContent = title;
+      const descriptionElement = document.createElement('p');
+      descriptionElement.textContent = text;
+      textElement.appendChild(titleElement);
+      textElement.appendChild(descriptionElement);
+      tip.appendChild(textElement);
+
+      // Add type label
+      const typeElement = document.createElement('div');
+      typeElement.classList.add('wisdom-type');
+      typeElement.textContent = type;
+      tip.appendChild(typeElement);
+
+      contentDiv.appendChild(tip);
+
+      currentIndex = index;
+      updateIndicators();
+    }
+
+    // Show the first tip initially
+    showTip(0);
+
+    // Navigation button event listeners
+    document.querySelector('.wisdom-nav-left').addEventListener('click', () => {
+      const newIndex = (currentIndex - 1 + totalTips) % totalTips;
+      showTip(newIndex);
     });
-    
-    const indicators = indicatorsContainer.querySelectorAll('.indicator');
-    
-    const updateContent = () => {
-        const currentItem = waggingWisdomData[currentIndex];
-        
-        wisdomContent.innerHTML = `
-            <div class="wisdom-item fade-in">
-                <div class="wisdom-icon">
-                    <img src="/images/icons/${currentItem.icon}.svg" alt="${currentItem.icon} icon" width="32" height="32">
-                </div>
-                <div class="wisdom-text">
-                    <h3>${currentItem.title}</h3>
-                    <p>${currentItem.content}</p>
-                    <span class="wisdom-type">${currentItem.type === 'tip' ? '💡 Training Tip' : '🐕 Fun Fact'}</span>
-                </div>
-            </div>
-        `;
-        
-        // Update indicators
-        indicators.forEach((indicator, index) => {
-            indicator.classList.toggle('active', index === currentIndex);
-        });
-    };
-    
-    const goToSlide = (index) => {
-        currentIndex = index;
-        updateContent();
-        resetAutoPlay();
-    };
-    
-    const nextSlide = () => {
-        currentIndex = (currentIndex + 1) % waggingWisdomData.length;
-        updateContent();
-    };
-    const prevSlide = () => {
-        currentIndex = (currentIndex - 1 + waggingWisdomData.length) % waggingWisdomData.length;
-        updateContent();
-    };
-    
-    const startAutoPlay = () => {
-        autoPlayInterval = setInterval(nextSlide, 5000); // Change every 5 seconds
-    };
-    
-    const resetAutoPlay = () => {
-        clearInterval(autoPlayInterval);
-        startAutoPlay();
-    };
-    
-    // Add event listeners for nav buttons
-    leftBtn.addEventListener('click', () => { prevSlide(); resetAutoPlay(); });
-    rightBtn.addEventListener('click', () => { nextSlide(); resetAutoPlay(); });
-    
-    // Initialize
-    updateContent();
-    startAutoPlay();
-    
-    // Pause auto-play when user hovers over the carousel
-    const carousel = document.querySelector('.wisdom-carousel');
-    carousel.addEventListener('mouseenter', () => clearInterval(autoPlayInterval));
-    carousel.addEventListener('mouseleave', startAutoPlay);
+
+    document.querySelector('.wisdom-nav-right').addEventListener('click', () => {
+      const newIndex = (currentIndex + 1) % totalTips;
+      showTip(newIndex);
+    });
   </script>
 </section>
 

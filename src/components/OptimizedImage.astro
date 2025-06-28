@@ -1,0 +1,87 @@
+---
+// src/components/OptimizedImage.astro
+// Optimized image component with lazy loading and responsive sizing
+
+interface Props {
+    src: string;
+    alt: string;
+    width?: number;
+    height?: number;
+    loading?: 'lazy' | 'eager';
+    class?: string;
+    sizes?: string;
+    priority?: boolean;
+}
+
+const { 
+    src, 
+    alt, 
+    width = 400, 
+    height = 300, 
+    loading = 'lazy',
+    class: className = '',
+    sizes = '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw',
+    priority = false
+} = Astro.props;
+
+// Generate responsive image URLs (placeholder for future CDN integration)
+const generateSrcSet = (baseSrc: string, width: number) => {
+    const sizes = [320, 640, 768, 1024, 1280];
+    return sizes
+        .filter(size => size <= width * 2) // Don't generate larger than 2x original
+        .map(size => `${baseSrc}?w=${size} ${size}w`)
+        .join(', ');
+};
+
+const srcSet = generateSrcSet(src, width);
+const actualLoading = priority ? 'eager' : loading;
+---
+
+<img 
+    src={src}
+    srcset={srcSet}
+    sizes={sizes}
+    alt={alt}
+    width={width}
+    height={height}
+    loading={actualLoading}
+    decoding="async"
+    class={`optimized-image ${className}`}
+    onerror="this.src='/images/sad-dog-404.png'"
+/>
+
+<style>
+    .optimized-image {
+        display: block;
+        max-width: 100%;
+        height: auto;
+        transition: opacity 0.3s ease;
+    }
+    
+    .optimized-image[loading="lazy"] {
+        opacity: 0;
+        animation: fadeIn 0.3s ease forwards;
+    }
+    
+    @keyframes fadeIn {
+        to {
+            opacity: 1;
+        }
+    }
+    
+    /* Aspect ratio preservation */
+    .optimized-image.aspect-square {
+        aspect-ratio: 1;
+        object-fit: cover;
+    }
+    
+    .optimized-image.aspect-video {
+        aspect-ratio: 16/9;
+        object-fit: cover;
+    }
+    
+    .optimized-image.aspect-portrait {
+        aspect-ratio: 3/4;
+        object-fit: cover;
+    }
+</style>

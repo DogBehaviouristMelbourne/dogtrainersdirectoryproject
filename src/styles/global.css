@@ -1,7 +1,5 @@
-/* Import Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Balsamiq+Sans:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap');
-
 /* src/styles/global.css */
+/* Google Fonts are now loaded via preload in Layout.astro for better performance */
 
 /* --------------------------------------------------- */
 /* 1. CSS Variables for "Earthy Playfulness" Palette */

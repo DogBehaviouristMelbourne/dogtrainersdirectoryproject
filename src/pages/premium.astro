@@ -1,11 +1,10 @@
 ---
-// src/pages/premium.astro
 import Layout from '../layouts/Layout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 
-// Get Stripe publishable key from environment
-const stripePublishableKey = import.meta.env.STRIPE_PUBLISHABLE_KEY;
+// Safely get environment variables with fallbacks to prevent build errors
+const stripeKey = import.meta.env.STRIPE_PUBLISHABLE_KEY || '';
 ---
 
 <Layout title="Premium Trainer Listing" description="Upgrade to a featured listing and get more visibility for your dog training services in Melbourne.">
@@ -48,16 +47,55 @@ const stripePublishableKey = import.meta.env.STRIPE_PUBLISHABLE_KEY;
 
                 <!-- Pricing Section -->
                 <section class="pricing-section">
-                    <h2>Simple, Transparent Pricing</h2>
-                    <div class="pricing-grid">
-                        <div class="pricing-card">
+                    <h2>Two-Tier Subscription Model</h2>
+                    <div class="pricing-hierarchy">
+                        <div class="hierarchy-note">
+                            <p><strong>Step 1:</strong> Start with Standard listing, then <strong>Step 2:</strong> Add Premium features</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Loading State -->
+                    <div id="subscription-loading" class="loading-state">
+                        <p>Loading your subscription status...</p>
+                    </div>
+
+                    <!-- Plans Container -->
+                    <div id="plans-container" class="pricing-grid" style="display: none;">
+                        <!-- Standard Plan (Always First) -->
+                        <div id="standard-plan" class="pricing-card popular">
+                            <div class="popular-badge">Required First</div>
                             <div class="plan-header">
-                                <h3>Monthly Premium</h3>
+                                <h3>Standard Annual Listing</h3>
+                                <div class="price">
+                                    <span class="currency">$</span>
+                                    <span class="amount">79</span>
+                                    <span class="period">/year</span>
+                                </div>
+                                <div class="savings">Foundation Plan</div>
+                            </div>
+                            <ul class="plan-features">
+                                <li>✅ Professional directory listing</li>
+                                <li>✅ Searchable by location & category</li>
+                                <li>✅ Basic analytics dashboard</li>
+                                <li>✅ Priority support</li>
+                            </ul>
+                            <button id="standard-button" class="button primary plan-button" data-plan="standard" data-price-id="price_1RX0T2DEY1RddZfIATD9orLs">
+                                Get Standard Listing
+                            </button>
+                            <div id="standard-status" class="plan-status" style="display: none;"></div>
+                        </div>
+
+                        <!-- Premium Upgrade (Conditional) -->
+                        <div id="premium-plan" class="pricing-card" style="display: none;">
+                            <div class="upgrade-badge">Upgrade</div>
+                            <div class="plan-header">
+                                <h3>Premium Monthly Features</h3>
                                 <div class="price">
                                     <span class="currency">$</span>
                                     <span class="amount">49</span>
                                     <span class="period">/month</span>
                                 </div>
+                                <div class="savings">Add to Standard</div>
                             </div>
                             <ul class="plan-features">
                                 <li>✅ Top placement in search results</li>
@@ -65,51 +103,51 @@ const stripePublishableKey = import.meta.env.STRIPE_PUBLISHABLE_KEY;
                                 <li>✅ Premium card styling</li>
                                 <li>✅ Cancel anytime</li>
                             </ul>
-                            <button class="button primary plan-button" data-plan="monthly" data-price-id="price_1RX0QxDEY1RddZfIoRdn84vS">
-                                Start Monthly Premium
+                            <button id="premium-button" class="button primary plan-button" data-plan="premium" data-price-id="price_1RX0QxDEY1RddZfIoRdn84vS">
+                                Upgrade to Premium
                             </button>
+                            <div id="premium-status" class="plan-status" style="display: none;"></div>
                         </div>
 
-                        <div class="pricing-card popular">
-                            <div class="popular-badge">Best Value</div>
+                        <!-- Premium Unavailable Message -->
+                        <div id="premium-unavailable" class="pricing-card unavailable" style="display: none;">
+                            <div class="unavailable-badge">Requires Standard</div>
                             <div class="plan-header">
-                                <h3>Annual Standard</h3>
+                                <h3>Premium Monthly Features</h3>
                                 <div class="price">
                                     <span class="currency">$</span>
-                                    <span class="amount">79</span>
-                                    <span class="period">/year</span>
+                                    <span class="amount">49</span>
+                                    <span class="period">/month</span>
                                 </div>
-                                <div class="savings">Save over 85%</div>
+                                <div class="savings">Available after Standard</div>
                             </div>
                             <ul class="plan-features">
-                                <li>✅ Standard listing features</li>
-                                <li>✅ Annual billing discount</li>
-                                <li>✅ Priority support</li>
-                                <li>✅ Performance analytics</li>
+                                <li>⭐ Top placement in search results</li>
+                                <li>⭐ Featured badge</li>
+                                <li>⭐ Premium card styling</li>
+                                <li>⭐ Cancel anytime</li>
                             </ul>
-                            <button class="button primary plan-button" data-plan="annual" data-price-id="price_1RX0T2DEY1RddZfIATD9orLs">
-                                Start Annual Standard
+                            <button class="button disabled" disabled>
+                                Purchase Standard First
                             </button>
+                            <p class="upgrade-note">You must have an active Standard subscription to access Premium features</p>
                         </div>
 
-                        <div class="pricing-card">
+                        <!-- Premium Active Status -->
+                        <div id="premium-active" class="pricing-card active" style="display: none;">
+                            <div class="active-badge">✅ Active</div>
                             <div class="plan-header">
-                                <h3>Premium + Standard</h3>
-                                <div class="price">
-                                    <span class="currency">$</span>
-                                    <span class="amount">128</span>
-                                    <span class="period">/year + monthly</span>
-                                </div>
-                                <div class="savings">Complete Package</div>
+                                <h3>Premium Features Active</h3>
+                                <div class="status-text">Your premium features are active</div>
                             </div>
                             <ul class="plan-features">
-                                <li>✅ Annual Standard listing</li>
-                                <li>✅ Monthly Premium upgrade</li>
-                                <li>✅ Maximum visibility</li>
-                                <li>✅ All premium features</li>
+                                <li>⭐ Featured placement active</li>
+                                <li>⭐ Premium styling applied</li>
+                                <li>⭐ Advanced analytics available</li>
+                                <li>⭐ Maximum visibility</li>
                             </ul>
-                            <button class="button primary plan-button" data-plan="combo" data-price-id="price_1RX0T2DEY1RddZfIATD9orLs">
-                                Get Complete Package
+                            <button id="manage-premium-button" class="button secondary">
+                                Manage Premium
                             </button>
                         </div>
                     </div>
@@ -153,110 +191,295 @@ const stripePublishableKey = import.meta.env.STRIPE_PUBLISHABLE_KEY;
     <Footer />
 </Layout>
 
-<script type="module" define:vars={{ stripePublishableKey }}>
-// Plan: Integrate Stripe Checkout for premium subscription purchases
-// Implementation:
-// 1. Load Stripe.js library and initialize with publishable key
-// 2. On button click, call our /api/create-checkout-session endpoint
-// 3. Use Stripe.js to redirect to checkout with the returned session ID
-// 4. Handle loading states and errors gracefully
-// Expected Results:
-// - Clicking a plan button creates a Stripe checkout session and redirects to payment
-// - After successful payment, webhook automatically updates trainer status in Supabase
+<!-- Load Stripe.js from CDN -->
+<script src="https://js.stripe.com/v3/"></script>
+
+<!-- Simple basic script to pass the server variable to client -->
+<script is:inline define:vars={{stripeKey}}>
+  window.STRIPE_PUBLISHABLE_KEY = stripeKey;
+</script>
+
+<script>
+// Enforce two-tier subscription model with subscription status checking
+console.log('🔧 DEBUG: Premium page script loading...');
+console.log('🔧 DEBUG: Stripe key available:', !!window.STRIPE_PUBLISHABLE_KEY);
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // Load Stripe.js with the publishable key from the server
-    const stripe = await loadStripe(stripePublishableKey);
+    console.log('🔧 DEBUG: DOM loaded, initializing...');
     
-    if (!stripe) {
-        console.error('Failed to load Stripe');
+    // Check if publishable key is available
+    if (!window.STRIPE_PUBLISHABLE_KEY) {
+        console.error('❌ STRIPE_PUBLISHABLE_KEY is not available!');
+        showConfigurationError();
         return;
     }
     
-    const planButtons = document.querySelectorAll('.plan-button');
-    
-    // Get trainer ID from URL parameters or prompt user
-    function getTrainerId() {
-        const urlParams = new URLSearchParams(window.location.search);
-        let trainerId = urlParams.get('trainerId');
-        
-        if (!trainerId) {
-            // For demo purposes, use a default trainer ID or prompt
-            trainerId = prompt('Enter your Trainer ID:') || 'demo-trainer-123';
-        }
-        
-        return trainerId;
+    // Initialize Stripe
+    const stripe = Stripe(window.STRIPE_PUBLISHABLE_KEY);
+    if (!stripe) {
+        console.error('❌ Failed to load Stripe.js');
+        showConfigurationError();
+        return;
     }
     
-    planButtons.forEach(button => {
+    console.log('✅ Stripe.js loaded successfully');
+    
+    // Get trainer ID and load subscription status
+    const trainerId = getTrainerId();
+    if (trainerId) {
+        await loadSubscriptionStatus(trainerId);
+        setupPlanButtonListeners(stripe, trainerId);
+    } else {
+        showNoTrainerIdState();
+    }
+    
+    // Handle payment success/cancellation
+    handlePaymentRedirects();
+});
+
+// Get trainer ID from URL parameters or prompt user
+function getTrainerId() {
+    const urlParams = new URLSearchParams(window.location.search);
+    let trainerId = urlParams.get('trainerId');
+    
+    if (!trainerId) {
+        // For testing/demo, allow manual entry
+        trainerId = prompt('Enter your Trainer ID or email (for testing):');
+    }
+    
+    console.log('🔧 DEBUG: Using trainer ID:', trainerId);
+    return trainerId;
+}
+
+// Load trainer's subscription status from Supabase
+async function loadSubscriptionStatus(trainerId) {
+    console.log('📡 Loading subscription status for trainer:', trainerId);
+    
+    try {
+        // Import centralized Supabase client
+        const { supabase } = await import('../../lib/supabaseClient.js');
+        
+        // Query trainer by ID or email
+        let query = supabase
+            .from('trainers')
+            .select('payment_status, premium_status, name, email');
+        
+        if (trainerId.includes('@')) {
+            query = query.eq('email', trainerId);
+        } else {
+            query = query.eq('id', trainerId);
+        }
+        
+        const { data: trainer, error } = await query.single();
+        
+        if (error) {
+            console.error('❌ Error fetching trainer:', error);
+            showTrainerNotFoundState();
+            return;
+        }
+        
+        console.log('✅ Trainer found:', trainer);
+        showPlansBasedOnStatus(trainer.payment_status, trainer.premium_status);
+        
+    } catch (error) {
+        console.error('❌ Error loading subscription status:', error);
+        showGenericPlansState();
+    }
+}
+
+// Show plans based on subscription status - ENFORCE HIERARCHY
+function showPlansBasedOnStatus(paymentStatus, premiumStatus) {
+    console.log('🎯 Showing plans for status:', { paymentStatus, premiumStatus });
+    
+    // Hide loading state
+    document.getElementById('subscription-loading').style.display = 'none';
+    document.getElementById('plans-container').style.display = 'grid';
+    
+    const standardPlan = document.getElementById('standard-plan');
+    const premiumPlan = document.getElementById('premium-plan');
+    const premiumUnavailable = document.getElementById('premium-unavailable');
+    const premiumActive = document.getElementById('premium-active');
+    
+    // Reset all plan visibility
+    premiumPlan.style.display = 'none';
+    premiumUnavailable.style.display = 'none';
+    premiumActive.style.display = 'none';
+    
+    if (paymentStatus !== 'paid_standard') {
+        // STEP 1: Show Standard plan as primary, Premium as unavailable
+        standardPlan.style.display = 'block';
+        document.getElementById('standard-button').textContent = 'Get Standard Listing';
+        document.getElementById('standard-button').disabled = false;
+        document.getElementById('standard-button').classList.remove('disabled');
+        
+        // Show Premium as unavailable
+        premiumUnavailable.style.display = 'block';
+        
+    } else {
+        // Has Standard subscription
+        standardPlan.style.display = 'block';
+        document.getElementById('standard-status').innerHTML = '<div class="status-active">✅ Standard Active</div>';
+        document.getElementById('standard-status').style.display = 'block';
+        document.getElementById('standard-button').textContent = 'Standard Active';
+        document.getElementById('standard-button').disabled = true;
+        document.getElementById('standard-button').classList.add('disabled');
+        
+        if (premiumStatus === 'active') {
+            // STEP 2: Show Premium as active
+            premiumActive.style.display = 'block';
+        } else {
+            // STEP 2: Show Premium as available upgrade
+            premiumPlan.style.display = 'block';
+        }
+    }
+}
+
+// Setup event listeners for plan buttons
+function setupPlanButtonListeners(stripe, trainerId) {
+    const planButtons = document.querySelectorAll('.plan-button:not(.disabled)');
+    console.log(`🔧 DEBUG: Setting up ${planButtons.length} plan button listeners`);
+    
+    planButtons.forEach((button, index) => {
+        if (button.disabled) return;
+        
+        console.log(`🔧 DEBUG: Adding event listener to button ${index + 1}`);
+        
         button.addEventListener('click', async (e) => {
+            console.log('🔧 DEBUG: Plan button clicked!', e.target);
             e.preventDefault();
             
             const priceId = e.target.dataset.priceId;
             const plan = e.target.dataset.plan;
-            const trainerId = getTrainerId();
+            
+            console.log('🔧 DEBUG: Button data:', { priceId, plan, trainerId });
             
             if (!priceId || !trainerId) {
+                console.error('❌ Missing required data:', { priceId, trainerId });
                 alert('Missing required information. Please try again.');
                 return;
             }
             
-            // Disable button during processing
-            const originalText = e.target.textContent;
-            e.target.disabled = true;
-            e.target.textContent = 'Creating checkout session...';
-            
-            try {
-                console.log(`Creating checkout session for plan: ${plan}, priceId: ${priceId}, trainerId: ${trainerId}`);
-                
-                // Call our checkout session API
-                const response = await fetch('/api/create-checkout-session', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        priceId: priceId,
-                        trainerId: trainerId
-                    })
-                });
-                
-                const data = await response.json();
-                
-                if (!response.ok) {
-                    throw new Error(data.error || 'Failed to create checkout session');
-                }
-                
-                if (data.sessionId) {
-                    // Redirect to Stripe Checkout using Stripe.js
-                    console.log('Redirecting to Stripe Checkout...');
-                    e.target.textContent = 'Redirecting to payment...';
-                    
-                    const { error } = await stripe.redirectToCheckout({
-                        sessionId: data.sessionId
-                    });
-                    
-                    if (error) {
-                        throw new Error(error.message);
-                    }
-                } else {
-                    throw new Error('No session ID returned from server');
-                }
-                
-            } catch (error) {
-                console.error('Error creating checkout session:', error);
-                alert(`Error: ${error.message}`);
-                
-                // Re-enable button
-                e.target.disabled = false;
-                e.target.textContent = originalText;
-            }
+            await handleCheckoutSession(stripe, e.target, priceId, plan, trainerId);
         });
     });
     
-    // Handle successful payment redirect
+    // Setup manage premium button
+    const managePremiumButton = document.getElementById('manage-premium-button');
+    if (managePremiumButton) {
+        managePremiumButton.addEventListener('click', () => {
+            window.location.href = '/dashboard';
+        });
+    }
+}
+
+// Handle checkout session creation
+async function handleCheckoutSession(stripe, button, priceId, plan, trainerId) {
+    // Show loading state
+    const originalText = button.textContent;
+    button.disabled = true;
+    button.textContent = 'Creating checkout session...';
+    button.style.opacity = '0.7';
+    
+    try {
+        console.log(`🔧 Creating checkout session for plan: ${plan}, priceId: ${priceId}, trainerId: ${trainerId}`);
+        
+        // Call our checkout session API with hierarchy enforcement
+        const response = await fetch('/api/create-checkout-session', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                priceId: priceId,
+                trainerId: trainerId,
+                planName: plan
+            })
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        
+        if (!data.sessionId) {
+            throw new Error('No session ID returned from server');
+        }
+        
+        // Redirect to Stripe Checkout
+        console.log('✅ Redirecting to Stripe Checkout...');
+        button.textContent = 'Redirecting to payment...';
+        
+        const { error } = await stripe.redirectToCheckout({
+            sessionId: data.sessionId
+        });
+        
+        if (error) {
+            throw new Error(error.message);
+        }
+        
+    } catch (error) {
+        console.error('❌ Error creating checkout session:', error);
+        
+        // Show user-friendly error message
+        let errorMessage = 'Sorry, there was a problem processing your request. ';
+        if (error.message.includes('Premium features require an active Standard subscription')) {
+            errorMessage += 'You must purchase a Standard subscription first before upgrading to Premium.';
+        } else if (error.message.includes('404')) {
+            errorMessage += 'The payment service is not configured. Please contact support.';
+        } else {
+            errorMessage += error.message;
+        }
+        
+        alert(errorMessage);
+        
+        // Reset button state
+        button.disabled = false;
+        button.textContent = originalText;
+        button.style.opacity = '1';
+    }
+}
+
+// State display functions
+function showConfigurationError() {
+    document.getElementById('subscription-loading').innerHTML = `
+        <div class="error-state">
+            <h3>⚠️ Configuration Error</h3>
+            <p>Payment system is not configured. Please contact support.</p>
+        </div>
+    `;
+}
+
+function showTrainerNotFoundState() {
+    document.getElementById('subscription-loading').innerHTML = `
+        <div class="error-state">
+            <h3>👤 Trainer Not Found</h3>
+            <p>We couldn't find your trainer profile. Please <a href="/submit">submit your profile</a> first.</p>
+        </div>
+    `;
+}
+
+function showNoTrainerIdState() {
+    console.log('📝 No trainer ID provided, showing generic plans');
+    document.getElementById('subscription-loading').style.display = 'none';
+    document.getElementById('plans-container').style.display = 'grid';
+    
+    // Show Standard plan and Premium as unavailable
+    document.getElementById('standard-plan').style.display = 'block';
+    document.getElementById('premium-unavailable').style.display = 'block';
+}
+
+function showGenericPlansState() {
+    console.log('🔄 Showing generic plans state');
+    showNoTrainerIdState();
+}
+
+// Handle payment success/cancellation
+function handlePaymentRedirects() {
     const urlParams = new URLSearchParams(window.location.search);
     const sessionId = urlParams.get('session_id');
+    const cancelled = urlParams.get('cancelled');
     
     if (sessionId) {
         // Show success message
@@ -265,36 +488,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         successMessage.innerHTML = `
             <div class="success-content">
                 <h3>🎉 Payment Successful!</h3>
-                <p>Your premium subscription has been activated. You should see the changes in your listing within a few minutes.</p>
-                <button onclick="this.parentElement.parentElement.remove()" class="button">Close</button>
+                <p>Your subscription has been activated. Changes will be visible within a few minutes.</p>
+                <button onclick="this.parentElement.parentElement.remove(); location.reload();" class="button">Refresh Page</button>
             </div>
         `;
         document.body.insertBefore(successMessage, document.body.firstChild);
         
-        // Remove session_id from URL
+        // Remove URL parameters
         const newUrl = window.location.pathname;
         window.history.replaceState({}, document.title, newUrl);
     }
-});
-
-// Load Stripe.js from CDN
-function loadStripe(publishableKey) {
-    return new Promise((resolve) => {
-        if (window.Stripe) {
-            resolve(window.Stripe(publishableKey));
-            return;
-        }
-        
-        const script = document.createElement('script');
-        script.src = 'https://js.stripe.com/v3/';
-        script.onload = () => {
-            resolve(window.Stripe(publishableKey));
-        };
-        script.onerror = () => {
-            resolve(null);
-        };
-        document.head.appendChild(script);
-    });
+    
+    if (cancelled) {
+        alert('Payment was cancelled. You can try again anytime.');
+        const newUrl = window.location.pathname;
+        window.history.replaceState({}, document.title, newUrl);
+    }
 }
 </script>
 
@@ -332,8 +541,7 @@ function loadStripe(publishableKey) {
         margin-bottom: 1.5rem;
         color: var(--color-text-light);
     }
-
-<style>
+    
     .premium-page {
         padding: 3rem 0;
         min-height: 70vh;
@@ -606,5 +814,179 @@ function loadStripe(publishableKey) {
         .faq-grid {
             grid-template-columns: 1fr;
         }
+    }
+
+    /* Two-tier hierarchy specific styles */
+    .pricing-hierarchy {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .hierarchy-note {
+        background: var(--color-accent-teal);
+        color: white;
+        padding: 1rem 2rem;
+        border-radius: 8px;
+        display: inline-block;
+        font-weight: 500;
+    }
+
+    .loading-state {
+        text-align: center;
+        padding: 3rem;
+        background: var(--color-card-bg-light);
+        border-radius: 12px;
+        margin-bottom: 2rem;
+    }
+
+    .error-state {
+        background: #fee;
+        color: #c33;
+        padding: 2rem;
+        border-radius: 8px;
+        text-align: center;
+    }
+
+    .error-state h3 {
+        margin-bottom: 1rem;
+        color: #c33;
+    }
+
+    /* Plan status indicators */
+    .plan-status {
+        margin-top: 1rem;
+    }
+
+    .status-active {
+        color: var(--color-accent-teal);
+        font-weight: 600;
+        padding: 0.5rem 1rem;
+        background: color-mix(in srgb, var(--color-accent-teal) 10%, var(--color-card-bg-light));
+        border-radius: 6px;
+        display: inline-block;
+    }
+
+    /* Upgrade badge */
+    .upgrade-badge {
+        position: absolute;
+        top: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--color-accent-teal);
+        color: white;
+        padding: 0.5em 1.5em;
+        border-radius: 20px;
+        font-size: 0.9em;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(54, 130, 127, 0.3);
+    }
+
+    /* Unavailable plan styles */
+    .pricing-card.unavailable {
+        opacity: 0.6;
+        border-color: #ccc;
+        background: #f8f8f8;
+    }
+
+    .unavailable-badge {
+        position: absolute;
+        top: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #999;
+        color: white;
+        padding: 0.5em 1.5em;
+        border-radius: 20px;
+        font-size: 0.9em;
+        font-weight: 600;
+    }
+
+    .upgrade-note {
+        color: #666;
+        font-size: 0.9em;
+        margin-top: 1rem;
+        font-style: italic;
+    }
+
+    /* Active plan styles */
+    .pricing-card.active {
+        border-color: var(--color-accent-teal);
+        background: linear-gradient(135deg, 
+            var(--color-card-bg-light) 0%, 
+            color-mix(in srgb, var(--color-accent-teal) 5%, var(--color-card-bg-light)) 100%
+        );
+    }
+
+    .active-badge {
+        position: absolute;
+        top: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--color-accent-teal);
+        color: white;
+        padding: 0.5em 1.5em;
+        border-radius: 20px;
+        font-size: 0.9em;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(54, 130, 127, 0.3);
+    }
+
+    .status-text {
+        color: var(--color-accent-teal);
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        font-size: 1.1em;
+    }
+
+    /* Button states */
+    .button.disabled {
+        background: #ccc;
+        color: #666;
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+
+    .button.disabled:hover {
+        background: #ccc;
+        transform: none;
+    }
+
+    .button.secondary {
+        background: transparent;
+        border: 2px solid var(--color-accent-teal);
+        color: var(--color-accent-teal);
+    }
+
+    .button.secondary:hover {
+        background: var(--color-accent-teal);
+        color: white;
+    }
+
+    /* Success message */
+    .success-message {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+
+    .success-content {
+        background: white;
+        padding: 3rem;
+        border-radius: 12px;
+        text-align: center;
+        max-width: 500px;
+        margin: 2rem;
+    }
+
+    .success-content h3 {
+        color: var(--color-accent-teal);
+        margin-bottom: 1rem;
     }
 </style>

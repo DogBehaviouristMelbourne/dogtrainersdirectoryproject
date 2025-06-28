@@ -1,86 +1,94 @@
-// Plan: Expose an API endpoint that takes { priceId, trainerId } in the POST body
-// and returns a Stripe Checkout session ID.
-// Implementation:
-// 1. Read priceId and trainerId from the JSON body.
-// 2. Call stripe.checkout.sessions.create with:
-//    - mode: 'subscription'
-//    - line_items: [{ price: priceId, quantity: 1 }]
-//    - metadata: { trainerId }
-//    - success_url: `${origin}/dashboard?session_id={CHECKOUT_SESSION_ID}`
-//    - cancel_url: `${origin}/dashboard`
-// Expected Results:
-// - POSTing to this endpoint returns { sessionId } to redirect the trainer to Stripe checkout.
+/**
+ * POST  /api/create-checkout-session
+ * ----------------------------------
+ * Body   : { priceId, trainerId, planName }
+ * Return : { sessionId }  – Stripe Checkout
+ */
 
 import Stripe from 'stripe';
+import { supabaseService } from '../../lib/supabaseClient.js';       // ✅ fixed relative path (was ../../../)
 
-const stripe = new Stripe(import.meta.env.STRIPE_SECRET_KEY);
+const {
+  STRIPE_SECRET_KEY,
+  STRIPE_ANNUAL_PRICE_ID,
+  STRIPE_MONTHLY_PRICE_ID,
+} = import.meta.env;
 
+if (!STRIPE_SECRET_KEY)     throw new Error('STRIPE_SECRET_KEY missing');
+if (!STRIPE_ANNUAL_PRICE_ID || !STRIPE_MONTHLY_PRICE_ID)
+  console.warn('⚠️  Price-ID env vars not set – hierarchy check may fail');
+
+const stripe    = new Stripe(STRIPE_SECRET_KEY, { apiVersion: '2024-04-10' });
+const supabase  = supabaseService;
+
+/* ──────────────────────────────────────────────────────────────────────────── */
 export async function POST({ request }) {
   try {
-    const { priceId, trainerId } = await request.json();
-    
-    if (!priceId || !trainerId) {
-      return new Response(
-        JSON.stringify({ error: 'Missing priceId or trainerId' }), 
-        { 
-          status: 400,
-          headers: { 'Content-Type': 'application/json' }
-        }
-      );
+    const { priceId, trainerId, planName = 'unknown' } = await request.json();
+
+    if (!priceId || !trainerId)
+      return json({ error: 'Missing priceId or trainerId' }, 400);
+
+    console.log(`➜ Create checkout for trainer ${trainerId} | plan ${planName} | price ${priceId}`);
+
+    /* ── Premium hierarchy check – must have Standard active ─────────────── */
+    if (planName === 'premium') {
+      const eligible = await hasActiveStandard(trainerId);
+      if (!eligible)
+        return json(
+          { error: 'Premium requires an active Standard subscription.' },
+          403,
+        );
     }
 
-    const origin = request.headers.get('origin') || 'http://localhost:4321';
-    
+    const origin  = request.headers.get('origin') || 'http://localhost:4321';
+
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
       payment_method_types: ['card'],
-      line_items: [
-        {
-          price: priceId,
-          quantity: 1,
-        },
-      ],
-      metadata: {
-        trainerId: trainerId,
-        priceId: priceId,
-      },
-      success_url: `${origin}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/dashboard`,
-      allow_promotion_codes: true,
+      line_items: [{ price: priceId, quantity: 1 }],
+      metadata: { trainerId, priceId, planName },
+      success_url: `${origin}/trainers?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url : `${origin}/trainers?cancelled=true`,
+      allow_promotion_codes   : true,
       billing_address_collection: 'required',
+      customer_email: trainerId.includes('@') ? trainerId : undefined,
     });
 
-    return new Response(
-      JSON.stringify({ sessionId: session.id }), 
-      {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' }
-      }
-    );
+    console.log(`✅ Stripe session ${session.id} created`);
+    return json({ sessionId: session.id }, 200);
 
-  } catch (error) {
-    console.error('Error creating checkout session:', error);
-    
-    return new Response(
-      JSON.stringify({ 
-        error: 'Failed to create checkout session',
-        details: error.message 
-      }), 
-      { 
-        status: 500,
-        headers: { 'Content-Type': 'application/json' }
-      }
-    );
+  } catch (err) {
+    console.error('💥 create-checkout-session error:', err);
+    return json({ error: 'Failed to create checkout session', details: err.message }, 500);
   }
 }
 
-// Handle non-POST requests
+/* ──────────────────────────────────────────────────────────────────────────── */
 export async function GET() {
-  return new Response(
-    JSON.stringify({ error: 'Method not allowed. Use POST.' }), 
-    { 
-      status: 405,
-      headers: { 'Content-Type': 'application/json' }
-    }
-  );
+  return json({ error: 'Method not allowed. Use POST.' }, 405);
+}
+
+/* ── Helpers ──────────────────────────────────────────────────────────────── */
+async function hasActiveStandard(trainerId) {
+  const { data, error } = await supabase
+    .from('trainers')
+    .select('payment_status')
+    .eq(trainerId.includes('@') ? 'email' : 'id', trainerId)
+    .single();
+
+  if (error) {
+    console.error('Supabase lookup failed:', error);
+    return false;
+  }
+  const ok = data?.payment_status === 'paid_standard';
+  if (!ok) console.log(`Trainer ${trainerId} → no active Standard`);
+  return ok;
+}
+
+function json(obj, status = 200) {
+  return new Response(JSON.stringify(obj), {
+    status,
+    headers: { 'Content-Type': 'application/json' },
+  });
 }

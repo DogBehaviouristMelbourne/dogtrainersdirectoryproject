@@ -1,0 +1,504 @@
+---
+// src/components/OptimizedTrainerCard.astro
+// Performance-optimized trainer card with lazy loading and enhanced UX
+
+import OptimizedImage from './OptimizedImage.astro';
+
+interface Props {
+    trainer: {
+        id: string | number;
+        name: string;
+        suburb?: string;
+        location?: string;
+        categories?: string[];
+        description?: string;
+        profile_image_url?: string;
+        rating?: number;
+        avg_rating?: number;
+        average_rating?: number;
+        review_count?: number;
+        phone?: string;
+        email?: string;
+        website?: string;
+        premium_status?: string;
+        social_links?: any;
+    };
+    loading?: 'lazy' | 'eager';
+    priority?: boolean;
+    searchQuery?: string;
+}
+
+const { 
+    trainer, 
+    loading = 'lazy', 
+    priority = false,
+    searchQuery = ''
+} = Astro.props;
+
+// Calculate rating and review data
+const rating = trainer.avg_rating || trainer.average_rating || trainer.rating;
+const reviewCount = trainer.review_count || 0;
+const isPremium = trainer.premium_status === 'active';
+
+// Generate categories display
+const categories = trainer.categories || [];
+const categoriesText = categories.join(', ');
+
+// Generate location display
+const location = trainer.suburb || trainer.location || '';
+
+// Generate trainer slug for potential future use
+const slug = trainer.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+
+// Contact methods available
+const hasPhone = !!trainer.phone;
+const hasEmail = !!trainer.email;
+const hasWebsite = !!trainer.website;
+
+// Highlight search terms if query provided
+function highlightText(text: string, query: string): string {
+    if (!query || !text) return text;
+    
+    const words = query.toLowerCase().split(/\s+/);
+    let highlightedText = text;
+    
+    words.forEach(word => {
+        if (word.length > 2) {
+            const regex = new RegExp(`(${word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+            highlightedText = highlightedText.replace(regex, '<mark>$1</mark>');
+        }
+    });
+    
+    return highlightedText;
+}
+---
+
+<article 
+    class={`trainer-card ${isPremium ? 'premium-card' : ''}`}
+    data-trainer-id={trainer.id}
+    data-suburb={location.toLowerCase()}
+    data-categories={categories.join(',')}
+    data-name={trainer.name.toLowerCase()}
+    data-description={(trainer.description || '').toLowerCase()}
+    tabindex="0"
+    role="group"
+    aria-label={`Trainer profile for ${trainer.name}`}
+>
+    {isPremium && (
+        <div class="premium-badge" aria-label="Featured trainer">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+            Featured
+        </div>
+    )}
+
+    <!-- Trainer Image -->
+    <div class="trainer-image">
+        <OptimizedImage
+            src={trainer.profile_image_url || '/images/sad-dog-404.png'}
+            alt={`${trainer.name} profile photo`}
+            width={80}
+            height={80}
+            loading={loading}
+            priority={priority}
+            class="aspect-square"
+        />
+    </div>
+
+    <!-- Trainer Info -->
+    <div class="trainer-info">
+        <h3 class="trainer-name" set:html={highlightText(trainer.name, searchQuery)}></h3>
+        
+        {rating && (
+            <div class="trainer-rating" aria-label={`Rating: ${rating.toFixed(1)} out of 5 stars`}>
+                <div class="stars" aria-hidden="true">
+                    {Array.from({ length: 5 }, (_, i) => (
+                        <span class={`star ${i < Math.floor(rating) ? 'filled' : i < rating ? 'half' : 'empty'}`}>
+                            ★
+                        </span>
+                    ))}
+                </div>
+                <span class="rating-text">
+                    {rating.toFixed(1)}
+                    {reviewCount > 0 && (
+                        <span class="review-count">
+                            ({reviewCount} review{reviewCount !== 1 ? 's' : ''})
+                        </span>
+                    )}
+                </span>
+            </div>
+        )}
+
+        {location && (
+            <div class="trainer-location">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                    <circle cx="12" cy="10" r="3"/>
+                </svg>
+                <span set:html={highlightText(location, searchQuery)}></span>
+            </div>
+        )}
+
+        {categoriesText && (
+            <div class="trainer-categories">
+                <span class="categories-label" aria-label="Specializations">Specializes in:</span>
+                <span class="categories-text" set:html={highlightText(categoriesText, searchQuery)}></span>
+            </div>
+        )}
+
+        {trainer.description && (
+            <p class="trainer-description" set:html={highlightText(trainer.description, searchQuery)}></p>
+        )}
+    </div>
+
+    <!-- Contact Methods -->
+    <div class="trainer-contact">
+        {hasPhone && (
+            <a 
+                href={`tel:${trainer.phone}`} 
+                class="contact-method phone"
+                aria-label={`Call ${trainer.name} at ${trainer.phone}`}
+                title="Call trainer"
+            >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                </svg>
+                <span class="contact-text">Call</span>
+            </a>
+        )}
+
+        {hasEmail && (
+            <a 
+                href={`mailto:${trainer.email}`} 
+                class="contact-method email"
+                aria-label={`Email ${trainer.name}`}
+                title="Send email"
+            >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                    <polyline points="22,6 12,13 2,6"/>
+                </svg>
+                <span class="contact-text">Email</span>
+            </a>
+        )}
+
+        {hasWebsite && (
+            <a 
+                href={trainer.website} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                class="contact-method website"
+                aria-label={`Visit ${trainer.name}'s website`}
+                title="Visit website"
+            >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="2" y1="12" x2="22" y2="12"/>
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                </svg>
+                <span class="contact-text">Website</span>
+            </a>
+        )}
+    </div>
+</article>
+
+<style>
+    .trainer-card {
+        background: var(--color-card-bg-light);
+        border: 1px solid var(--color-border-light);
+        border-radius: var(--card-radius);
+        padding: var(--card-padding);
+        box-shadow: var(--shadow-neu-light);
+        transition: all var(--animation-duration-base) var(--transition-smooth);
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        position: relative;
+        transform-style: preserve-3d;
+        perspective: var(--perspective);
+        cursor: pointer;
+    }
+
+    .trainer-card:hover {
+        transform: translateY(-4px) var(--rotate-y);
+        box-shadow: var(--shadow-lg);
+        border-color: var(--color-accent-teal);
+    }
+
+    .trainer-card:focus {
+        outline: 2px solid var(--color-accent-teal);
+        outline-offset: 2px;
+    }
+
+    .trainer-card:active {
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-neu-inset-light);
+    }
+
+    /* Premium Card Styling */
+    .premium-card {
+        border-color: var(--color-accent-mustard);
+        background: linear-gradient(135deg, 
+            var(--color-card-bg-light) 0%, 
+            color-mix(in srgb, var(--color-accent-mustard) 3%, var(--color-card-bg-light)) 100%
+        );
+    }
+
+    .premium-card:hover {
+        border-color: var(--color-accent-mustard);
+        box-shadow: 0 8px 32px rgba(232, 185, 79, 0.2);
+    }
+
+    .premium-badge {
+        position: absolute;
+        top: -8px;
+        right: 12px;
+        background: linear-gradient(135deg, var(--color-accent-mustard), #f4d03f);
+        color: var(--color-text-light);
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        box-shadow: 0 2px 8px rgba(232, 185, 79, 0.3);
+        z-index: 2;
+    }
+
+    .premium-badge svg {
+        width: 12px;
+        height: 12px;
+    }
+
+    /* Trainer Image */
+    .trainer-image {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 0.5rem;
+    }
+
+    /* Trainer Info */
+    .trainer-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .trainer-name {
+        font-size: var(--font-size-lg);
+        font-weight: 600;
+        color: var(--color-text-light);
+        margin: 0;
+        line-height: 1.3;
+        text-align: center;
+    }
+
+    .trainer-rating {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.25rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .stars {
+        display: flex;
+        gap: 0.125rem;
+        font-size: 1rem;
+    }
+
+    .star {
+        color: #ddd;
+        transition: color 0.2s ease;
+    }
+
+    .star.filled {
+        color: #ffd700;
+    }
+
+    .star.half {
+        background: linear-gradient(90deg, #ffd700 50%, #ddd 50%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .rating-text {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--color-text-light);
+        text-align: center;
+    }
+
+    .review-count {
+        font-weight: 400;
+        opacity: 0.7;
+        font-size: 0.8rem;
+    }
+
+    .trainer-location {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.375rem;
+        color: var(--color-text-light);
+        opacity: 0.8;
+        font-size: 0.875rem;
+    }
+
+    .trainer-categories {
+        text-align: center;
+        font-size: 0.8rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .categories-label {
+        display: block;
+        font-weight: 500;
+        color: var(--color-text-light);
+        opacity: 0.7;
+        margin-bottom: 0.25rem;
+    }
+
+    .categories-text {
+        color: var(--color-accent-teal);
+        font-weight: 500;
+    }
+
+    .trainer-description {
+        font-size: 0.875rem;
+        color: var(--color-text-light);
+        opacity: 0.8;
+        line-height: 1.4;
+        text-align: center;
+        margin: 0;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    /* Contact Methods */
+    .trainer-contact {
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-top: auto;
+        padding-top: 0.75rem;
+        border-top: 1px solid var(--color-border-light);
+    }
+
+    .contact-method {
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+        padding: 0.5rem 0.75rem;
+        border: 1px solid var(--color-border-light);
+        border-radius: 6px;
+        background: var(--color-background-light);
+        color: var(--color-text-light);
+        text-decoration: none;
+        font-size: 0.8rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        min-height: var(--tap-target-min);
+        flex: 1;
+        justify-content: center;
+        max-width: 80px;
+    }
+
+    .contact-method:hover {
+        border-color: var(--color-accent-teal);
+        background: var(--color-accent-teal);
+        color: white;
+        transform: translateY(-1px);
+    }
+
+    .contact-method:focus {
+        outline: 2px solid var(--color-accent-teal);
+        outline-offset: 2px;
+    }
+
+    .contact-text {
+        display: none;
+    }
+
+    /* Search highlighting */
+    :global(mark) {
+        background: rgba(90, 155, 156, 0.2);
+        color: var(--color-text-light);
+        padding: 0.125rem 0.25rem;
+        border-radius: 3px;
+        font-weight: 600;
+    }
+
+    /* Dark mode support */
+    .dark-mode .trainer-card {
+        box-shadow: var(--shadow-neu-dark);
+    }
+
+    .dark-mode .trainer-card:active {
+        box-shadow: var(--shadow-neu-inset-dark);
+    }
+
+    .dark-mode .premium-card {
+        background: linear-gradient(135deg, 
+            var(--color-card-bg-light) 0%, 
+            color-mix(in srgb, var(--color-accent-mustard) 5%, var(--color-card-bg-light)) 100%
+        );
+    }
+
+    /* Responsive Design */
+    @media (min-width: 480px) {
+        .contact-text {
+            display: inline;
+        }
+        
+        .contact-method {
+            max-width: none;
+        }
+    }
+
+    @media (min-width: 768px) {
+        .trainer-card {
+            padding: 1.5rem;
+        }
+        
+        .trainer-name {
+            font-size: var(--font-size-xl);
+        }
+        
+        .trainer-description {
+            font-size: 0.9rem;
+        }
+    }
+
+    /* Reduced motion support */
+    @media (prefers-reduced-motion: reduce) {
+        .trainer-card {
+            transition: none;
+        }
+        
+        .trainer-card:hover {
+            transform: none;
+        }
+        
+        .contact-method:hover {
+            transform: none;
+        }
+    }
+
+    /* High contrast mode support */
+    @media (prefers-contrast: high) {
+        .trainer-card {
+            border-width: 2px;
+        }
+        
+        .premium-badge {
+            border: 2px solid var(--color-text-light);
+        }
+    }
+</style>

@@ -1,0 +1,471 @@
+---
+// src/components/GeolocationSearch.astro
+// Advanced geolocation-based search component
+
+interface Props {
+    onLocationFound?: (location: { lat: number; lng: number; suburb: string }) => void;
+}
+
+const { onLocationFound } = Astro.props;
+---
+
+<div class="geolocation-search">
+    <div class="location-controls">
+        <button 
+            id="find-location-btn" 
+            class="location-button"
+            aria-label="Find trainers near me"
+            title="Use your location to find nearby trainers"
+        >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                <circle cx="12" cy="10" r="3"/>
+            </svg>
+            <span class="button-text">Find Near Me</span>
+        </button>
+        
+        <div class="distance-selector" id="distance-selector" style="display: none;">
+            <label for="distance-range">Search radius:</label>
+            <select id="distance-range" class="distance-select">
+                <option value="5">Within 5km</option>
+                <option value="10" selected>Within 10km</option>
+                <option value="20">Within 20km</option>
+                <option value="50">Within 50km</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="location-status" id="location-status" style="display: none;">
+        <div class="status-content">
+            <span class="status-icon">📍</span>
+            <span class="status-text" id="status-text">Finding your location...</span>
+        </div>
+        <button class="clear-location" id="clear-location" aria-label="Clear location">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        </button>
+    </div>
+
+    <div class="location-error" id="location-error" style="display: none;">
+        <div class="error-content">
+            <span class="error-icon">⚠️</span>
+            <span class="error-text" id="error-text">Location access denied</span>
+        </div>
+        <button class="retry-location" id="retry-location">Try Again</button>
+    </div>
+</div>
+
+<style>
+    .geolocation-search {
+        margin-bottom: 1rem;
+    }
+
+    .location-controls {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .location-button {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.25rem;
+        background: linear-gradient(135deg, var(--color-accent-teal), #4a9b8e);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 8px rgba(90, 155, 156, 0.3);
+        min-height: var(--tap-target-min);
+    }
+
+    .location-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(90, 155, 156, 0.4);
+    }
+
+    .location-button:active {
+        transform: translateY(0);
+    }
+
+    .location-button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .location-button.loading {
+        background: #ccc;
+        cursor: wait;
+    }
+
+    .location-button.loading .button-text {
+        opacity: 0.7;
+    }
+
+    .distance-selector {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .distance-selector label {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--color-text-light);
+    }
+
+    .distance-select {
+        padding: 0.5rem 0.75rem;
+        border: 1px solid var(--color-border-light);
+        border-radius: 8px;
+        background: var(--color-background-light);
+        color: var(--color-text-light);
+        font-size: 0.9rem;
+        cursor: pointer;
+        min-height: var(--tap-target-min);
+    }
+
+    .distance-select:focus {
+        outline: none;
+        border-color: var(--color-accent-teal);
+        box-shadow: 0 0 0 2px rgba(90, 155, 156, 0.2);
+    }
+
+    .location-status {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.75rem 1rem;
+        background: rgba(90, 155, 156, 0.1);
+        border: 1px solid var(--color-accent-teal);
+        border-radius: 8px;
+        margin-top: 1rem;
+    }
+
+    .status-content {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .status-icon {
+        font-size: 1.2rem;
+    }
+
+    .status-text {
+        font-size: 0.9rem;
+        color: var(--color-text-light);
+        font-weight: 500;
+    }
+
+    .clear-location {
+        background: none;
+        border: none;
+        color: var(--color-text-light);
+        opacity: 0.7;
+        cursor: pointer;
+        padding: 0.25rem;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+    }
+
+    .clear-location:hover {
+        opacity: 1;
+        background: rgba(0, 0, 0, 0.1);
+    }
+
+    .location-error {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.75rem 1rem;
+        background: rgba(231, 111, 81, 0.1);
+        border: 1px solid #e76f51;
+        border-radius: 8px;
+        margin-top: 1rem;
+    }
+
+    .error-content {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .error-icon {
+        font-size: 1.2rem;
+    }
+
+    .error-text {
+        font-size: 0.9rem;
+        color: #e76f51;
+        font-weight: 500;
+    }
+
+    .retry-location {
+        background: #e76f51;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: background 0.2s ease;
+    }
+
+    .retry-location:hover {
+        background: #d63447;
+    }
+
+    /* Mobile responsive */
+    @media (max-width: 768px) {
+        .location-controls {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .location-button {
+            justify-content: center;
+        }
+
+        .distance-selector {
+            justify-content: space-between;
+        }
+
+        .location-status,
+        .location-error {
+            flex-direction: column;
+            gap: 0.75rem;
+            align-items: stretch;
+        }
+
+        .status-content,
+        .error-content {
+            justify-content: center;
+        }
+    }
+
+    /* Loading animation */
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+
+    .location-button.loading svg {
+        animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    /* Dark mode support */
+    .dark-mode .location-button {
+        background: linear-gradient(135deg, var(--color-accent-teal), #4a9b8e);
+    }
+
+    .dark-mode .location-status {
+        background: rgba(90, 155, 156, 0.2);
+    }
+
+    .dark-mode .location-error {
+        background: rgba(231, 111, 81, 0.2);
+    }
+</style>
+
+<script>
+// Geolocation search functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const findLocationBtn = document.getElementById('find-location-btn');
+    const distanceSelector = document.getElementById('distance-selector');
+    const distanceRange = document.getElementById('distance-range');
+    const locationStatus = document.getElementById('location-status');
+    const locationError = document.getElementById('location-error');
+    const statusText = document.getElementById('status-text');
+    const errorText = document.getElementById('error-text');
+    const clearLocationBtn = document.getElementById('clear-location');
+    const retryLocationBtn = document.getElementById('retry-location');
+
+    let currentLocation = null;
+    let watchId = null;
+
+    // Melbourne suburbs with approximate coordinates for demo
+    const melbourneSuburbs = {
+        'Melbourne CBD': { lat: -37.8136, lng: 144.9631 },
+        'Richmond': { lat: -37.8197, lng: 144.9969 },
+        'Fitzroy': { lat: -37.7980, lng: 144.9780 },
+        'Carlton': { lat: -37.7963, lng: 144.9669 },
+        'South Yarra': { lat: -37.8397, lng: 144.9911 },
+        'St Kilda': { lat: -37.8677, lng: 144.9811 },
+        'Brighton': { lat: -37.9061, lng: 144.9999 },
+        'Hawthorn': { lat: -37.8220, lng: 145.0324 },
+        'Camberwell': { lat: -37.8244, lng: 145.0583 },
+        'Prahran': { lat: -37.8506, lng: 144.9956 }
+    };
+
+    function showStatus(message, isLoading = false) {
+        hideAllMessages();
+        statusText.textContent = message;
+        locationStatus.style.display = 'flex';
+        
+        if (isLoading) {
+            findLocationBtn.classList.add('loading');
+            findLocationBtn.disabled = true;
+        }
+    }
+
+    function showError(message) {
+        hideAllMessages();
+        errorText.textContent = message;
+        locationError.style.display = 'flex';
+        resetButton();
+    }
+
+    function hideAllMessages() {
+        locationStatus.style.display = 'none';
+        locationError.style.display = 'none';
+    }
+
+    function resetButton() {
+        findLocationBtn.classList.remove('loading');
+        findLocationBtn.disabled = false;
+        findLocationBtn.querySelector('.button-text').textContent = 'Find Near Me';
+    }
+
+    function calculateDistance(lat1, lng1, lat2, lng2) {
+        const R = 6371; // Earth's radius in kilometers
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLng = (lng2 - lng1) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                  Math.sin(dLng/2) * Math.sin(dLng/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c;
+    }
+
+    function findNearestSuburb(lat, lng) {
+        let nearestSuburb = null;
+        let minDistance = Infinity;
+
+        for (const [suburb, coords] of Object.entries(melbourneSuburbs)) {
+            const distance = calculateDistance(lat, lng, coords.lat, coords.lng);
+            if (distance < minDistance) {
+                minDistance = distance;
+                nearestSuburb = suburb;
+            }
+        }
+
+        return nearestSuburb;
+    }
+
+    function handleLocationSuccess(position) {
+        const { latitude, longitude } = position.coords;
+        currentLocation = { lat: latitude, lng: longitude };
+        
+        const nearestSuburb = findNearestSuburb(latitude, longitude);
+        const distance = distanceRange.value;
+        
+        showStatus(`Found: Near ${nearestSuburb} (${distance}km radius)`);
+        distanceSelector.style.display = 'flex';
+        
+        // Trigger location found event
+        const event = new CustomEvent('locationFound', {
+            detail: {
+                lat: latitude,
+                lng: longitude,
+                suburb: nearestSuburb,
+                radius: parseInt(distance)
+            }
+        });
+        document.dispatchEvent(event);
+        
+        console.log('Location found:', { latitude, longitude, nearestSuburb, distance });
+    }
+
+    function handleLocationError(error) {
+        let message = 'Location access failed';
+        
+        switch(error.code) {
+            case error.PERMISSION_DENIED:
+                message = 'Location access denied. Please enable location services.';
+                break;
+            case error.POSITION_UNAVAILABLE:
+                message = 'Location information unavailable.';
+                break;
+            case error.TIMEOUT:
+                message = 'Location request timed out.';
+                break;
+        }
+        
+        showError(message);
+        console.error('Geolocation error:', error);
+    }
+
+    function requestLocation() {
+        if (!navigator.geolocation) {
+            showError('Geolocation is not supported by this browser.');
+            return;
+        }
+
+        showStatus('Finding your location...', true);
+
+        const options = {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 300000 // 5 minutes
+        };
+
+        navigator.geolocation.getCurrentPosition(
+            handleLocationSuccess,
+            handleLocationError,
+            options
+        );
+    }
+
+    function clearLocation() {
+        currentLocation = null;
+        hideAllMessages();
+        distanceSelector.style.display = 'none';
+        resetButton();
+        
+        // Trigger location cleared event
+        const event = new CustomEvent('locationCleared');
+        document.dispatchEvent(event);
+        
+        console.log('Location cleared');
+    }
+
+    // Event listeners
+    findLocationBtn.addEventListener('click', requestLocation);
+    clearLocationBtn.addEventListener('click', clearLocation);
+    retryLocationBtn.addEventListener('click', requestLocation);
+
+    distanceRange.addEventListener('change', function() {
+        if (currentLocation) {
+            const nearestSuburb = findNearestSuburb(currentLocation.lat, currentLocation.lng);
+            const distance = this.value;
+            showStatus(`Found: Near ${nearestSuburb} (${distance}km radius)`);
+            
+            // Trigger distance changed event
+            const event = new CustomEvent('distanceChanged', {
+                detail: {
+                    ...currentLocation,
+                    suburb: nearestSuburb,
+                    radius: parseInt(distance)
+                }
+            });
+            document.dispatchEvent(event);
+        }
+    });
+
+    // Expose functions globally for integration
+    window.geolocationSearch = {
+        getCurrentLocation: () => currentLocation,
+        clearLocation: clearLocation,
+        requestLocation: requestLocation
+    };
+});
+</script>

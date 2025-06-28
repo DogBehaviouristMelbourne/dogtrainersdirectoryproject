@@ -5,7 +5,7 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 
 // Get Stripe publishable key from environment
-const stripePublishableKey = import.meta.env.STRIPE_PUBLISHABLE_KEY;
+const stripePublishableKey = import.meta.env.STRIPE_PUBLISHABLE_KEY || '';
 ---
 
 <Layout title="Trainer Dashboard" description="Manage your trainer profile and subscription status.">
@@ -99,7 +99,12 @@ const stripePublishableKey = import.meta.env.STRIPE_PUBLISHABLE_KEY;
     <Footer />
 </Layout>
 
-<script type="module" define:vars={{ stripePublishableKey }}>
+<script define:vars={{stripeKey: stripePublishableKey}}>
+// Pass environment variable to client
+window.STRIPE_PUBLISHABLE_KEY = stripeKey;
+</script>
+
+<script type="module">
 // Plan: Create a trainer dashboard that shows current subscription status and provides upgrade options
 // Implementation:
 // 1. Get trainer ID from URL parameters or localStorage
@@ -245,7 +250,7 @@ function displaySubscriptionStatus(trainer) {
 // Handle checkout button clicks
 async function setupCheckoutHandlers(trainerId) {
     // Load Stripe.js
-    const stripe = await loadStripe(stripePublishableKey);
+    const stripe = await loadStripe(window.STRIPE_PUBLISHABLE_KEY);
     
     if (!stripe) {
         console.error('Failed to load Stripe');

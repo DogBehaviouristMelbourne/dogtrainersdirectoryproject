@@ -1,551 +1,1446 @@
 ---
-import Layout from '../layouts/Layout.astro'
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+
+// Admin authentication - same as admin-secure123.astro for uniformity
+let hasAccess = false;
+const key = Astro.url.searchParams.get('key');
+const adminKey = import.meta.env.VITE_ADMIN_KEY;
+
+// Check if admin key is configured and matches
+if (adminKey && key === adminKey) {
+  hasAccess = true;
+}
 ---
 
-<Layout title="Admin Dashboard">
-  <section class="container">
-    <div id="admin-content">
-      <h1>Loading...</h1>
-      <p>Checking authentication...</p>
-    </div>
-  </section>
+<Layout title="Enhanced Admin Dashboard" description="Comprehensive admin dashboard for managing trainers, subscriptions, and premium features.">
+  <Header />
+  
+  {hasAccess ? (
+    <main id="main-content" class="admin-dashboard">
+      <div class="container">
+        <div class="dashboard-header">
+          <h1>🛠️ Enhanced Admin Dashboard</h1>
+          <p class="subtitle">Comprehensive management for trainers, subscriptions, and premium features</p>
+        </div>
 
-  <script type="module">
-    async function initAdmin() {
-      try {
-        console.log('Starting admin initialization...')
-        
-        // Import Supabase from CDN
-        const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm')
-        
-        console.log('Supabase imported successfully')
-        
-        const supabaseUrl = 'https://wxvjxzgphtqibgtghpte.supabase.co'
-        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4dmp4emdwaHRxaWJndGdocHRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzI2MDM5NjQsImV4cCI6MjA0ODE3OTk2NH0.LGCZhk8GlvTPATPyWxfYUoOq19fJpNfv8qm5qJMlxZg'
-        
-        const supabase = createClient(supabaseUrl, supabaseAnonKey)
-        
-        console.log('Supabase client created')
-
-        // Get the admin key from URL parameters
-        const urlParams = new URLSearchParams(window.location.search)
-        const providedKey = urlParams.get('key')
-        const expectedKey = 'dogtrainer2025admin'
-        
-        const adminContent = document.getElementById('admin-content')
-        
-        console.log('Client-side URL:', window.location.href)
-        console.log('Client-side search:', window.location.search)
-        console.log('Provided key:', providedKey)
-        console.log('Expected key:', expectedKey)
-        console.log('Keys match:', providedKey === expectedKey)
-
-        if (providedKey === expectedKey) {
-          console.log('Authentication successful, loading dashboard...')
-          await loadAdminDashboard()
-        } else {
-          console.log('Authentication failed, showing access denied')
-          showAccessDenied()
-        }
-
-        async function loadAdminDashboard() {
-          try {
-            adminContent.innerHTML = '<h1>Loading admin dashboard...</h1>'
-            
-            // Plan: Render a summary panel that shows, for each suburb × category,
-            // how many premium slots are used out of 10 (using the `premium_slot_usage` view).
-            // Then list all trainers below with an Activate/Deactivate Premium toggle.
-            // Implementation:
-            // 1. Fetch from supabase.from('premium_slot_usage').
-            // 2. Render a table or list of suburb, category, and "active_premiums/10".
-            // 3. For each trainer row, render a button that toggles premium_status in 'trainers'.
-            // Expected Results:
-            // - A summary panel with lines like "Richmond — Puppy Training: 0/10 used".
-            // - Trainer list rows each have a toggle button updating premium_status in Supabase.
-            
-            console.log('Fetching premium slot usage...')
-            const { data: usage, error: usageError } = await supabase
-              .from('premium_slot_usage')
-              .select('*')
-            
-            console.log('Fetching all trainers...')
-            const { data: trainers, error: trainersError } = await supabase
-              .from('trainers')
-              .select('*')
-              .order('name')
-            
-            console.log('Fetching pending trainers...')
-            const { data: pending, error: pendingError } = await supabase
-              .from('pending_trainers')
-              .select('*')
-
-            console.log('Supabase responses:', { usage, usageError, trainers, trainersError, pending, pendingError })
-
-            // Handle individual errors - don't fail completely if only one query fails
-            if (trainersError) {
-              console.error('Error fetching trainers:', trainersError)
-              adminContent.innerHTML = `
-                <h1>Error</h1>
-                <p>Failed to load trainers: ${trainersError.message}</p>
-                <p>Check the browser console for more details.</p>
-              `
-              return
-            }
-
-            if (pendingError) {
-              console.error('Error fetching pending trainers:', pendingError)
-              // Don't fail completely, just log the error
-              console.log('Continuing without pending trainers data')
-            }
-
-            if (usageError) {
-              console.error('Error fetching usage data:', usageError)
-              // Don't fail completely, just log the error
-              console.log('Continuing without usage data')
-            }
-
-            // Ensure we have fallback data
-            const safeUsage = usage || []
-            const safeTrainers = trainers || []
-            const safePending = pending || []
-
-            console.log('Data counts:', { 
-              usage: safeUsage.length, 
-              trainers: safeTrainers.length, 
-              pending: safePending.length 
-            })
-
-            // Render the complete admin dashboard
-            renderAdminDashboard(safeUsage, safeTrainers, safePending)
-            
-          } catch (err) {
-            console.error('Error in loadAdminDashboard:', err)
-            adminContent.innerHTML = `
-              <h1>Error</h1>
-              <p>An unexpected error occurred: ${err.message}</p>
-              <p>Check the browser console for more details.</p>
-            `
-          }
-        }
-        
-        function renderAdminDashboard(usage, trainers, pending) {
-          console.log('Rendering complete admin dashboard...')
-          
-          // Render premium slot usage summary
-          const usageHtml = usage && usage.length > 0 ? 
-            usage.map(({ suburb, category, active_premiums }) => `
-              <li style="padding: 0.5rem; border-bottom: 1px solid #eee;">
-                <strong>${suburb}</strong> — ${category}: <span style="color: ${active_premiums >= 8 ? '#dc3545' : active_premiums >= 5 ? '#ffc107' : '#28a745'}">${active_premiums}/10 used</span>
-              </li>
-            `).join('') : 
-            `<li style="padding: 1rem; text-align: center; color: #666; background: #f8f9fa; border-radius: 8px;">
-              <strong>No premium slots in use yet</strong><br>
-              <small>Activate premium status for trainers below to see usage by suburb and category</small>
-            </li>`
-          
-          // Render trainers table
-          const trainersHtml = trainers && trainers.length > 0 ?
-            trainers.map(trainer => `
-              <tr>
-                <td style="padding: 0.5rem; border-bottom: 1px solid #eee;">${trainer.name}</td>
-                <td style="padding: 0.5rem; border-bottom: 1px solid #eee;">${trainer.suburb || 'N/A'}</td>
-                <td style="padding: 0.5rem; border-bottom: 1px solid #eee; font-size: 0.8em;">${(trainer.categories || []).join(', ') || 'None'}</td>
-                <td style="padding: 0.5rem; border-bottom: 1px solid #eee;">
-                  <span style="padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.8em; background: ${trainer.premium_status === 'active' ? '#d4edda' : '#f8d7da'}; color: ${trainer.premium_status === 'active' ? '#155724' : '#721c24'};">
-                    ${trainer.premium_status || 'inactive'}
-                  </span>
-                </td>
-                <td style="padding: 0.5rem; border-bottom: 1px solid #eee;">
-                  <button onclick="togglePremium('${trainer.id}', '${trainer.premium_status || 'inactive'}')" 
-                          style="background: ${trainer.premium_status === 'active' ? '#dc3545' : '#28a745'}; color: white; border: none; padding: 0.3rem 0.6rem; border-radius: 4px; cursor: pointer; font-size: 0.8em;">
-                    ${trainer.premium_status === 'active' ? 'Deactivate' : 'Activate'} Premium
-                  </button>
-                </td>
-              </tr>
-            `).join('') : '<tr><td colspan="5" style="padding: 1rem; text-align: center; color: #666;">No trainers found</td></tr>'
-          
-          // Render pending trainers
-          const pendingHtml = pending && pending.length > 0 ? 
-            pending.map(trainer => `
-              <li class="pending-card">
-                <h3>${trainer.name || 'No name provided'}</h3>
-                <p><strong>Suburb:</strong> ${trainer.suburb || 'Not specified'}</p>
-                <p><strong>Email:</strong> ${trainer.email || 'Not provided'}</p>
-                ${trainer.phone ? `<p><strong>Phone:</strong> ${trainer.phone}</p>` : ''}
-                ${trainer.website ? `<p><strong>Website:</strong> ${trainer.website}</p>` : ''}
-                <p><strong>Description:</strong> ${trainer.description || 'No description provided'}</p>
-                ${trainer.match_tags && trainer.match_tags.length > 0 ? `<p><strong>Tags:</strong> ${trainer.match_tags.join(', ')}</p>` : ''}
-                ${trainer.categories && trainer.categories.length > 0 ? `<p><strong>Categories:</strong> ${trainer.categories.join(', ')}</p>` : ''}
-                ${trainer.profile_image ? `<p><strong>Profile Image:</strong> <img src="${trainer.profile_image}" alt="Profile" style="max-width: 100px; height: auto;" /></p>` : ''}
-                ${trainer.why_choose_me ? `<p><strong>Why Choose Me:</strong> ${trainer.why_choose_me}</p>` : ''}
-                ${trainer.social_links ? `<p><strong>Social Links:</strong> ${Object.entries(trainer.social_links).map(([platform, url]) => `${platform}: ${url}`).join(', ')}</p>` : ''}
-                <p><strong>Submitted:</strong> ${new Date(trainer.created_at).toLocaleDateString()}</p>
-                <div class="action-buttons">
-                  <button class="approve-btn" onclick="approveTrainer('${trainer.id}')">✅ Approve</button>
-                  <button class="reject-btn" onclick="rejectTrainer('${trainer.id}')">❌ Reject</button>
-                </div>
-              </li>
-            `).join('') : '<li style="padding: 1rem; text-align: center; color: #666;">No pending submissions</li>'
-
-          adminContent.innerHTML = `
-            <div style="margin-bottom: 2rem;">
-              <h1>Admin Dashboard</h1>
-              <p>Manage premium slots and trainer submissions</p>
+        <!-- Dashboard Stats -->
+        <section class="stats-grid" id="stats-section">
+          <div class="stat-card">
+            <div class="stat-icon">👥</div>
+            <div class="stat-content">
+              <h3 id="total-trainers">-</h3>
+              <p>Total Trainers</p>
             </div>
-            
-            <div style="display: grid; gap: 2rem; margin-bottom: 2rem;">
-              <section style="background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                <h2 style="margin-bottom: 1rem; color: #333;">Premium Slot Usage</h2>
-                <ul style="list-style: none; padding: 0; margin: 0;">
-                  ${usageHtml}
-                </ul>
-              </section>
-              
-              <section style="background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                <h2 style="margin-bottom: 1rem; color: #333;">All Trainers (${trainers ? trainers.length : 0})</h2>
-                <div style="overflow-x: auto;">
-                  <table style="width: 100%; border-collapse: collapse;">
-                    <thead>
-                      <tr style="background: #f8f9fa;">
-                        <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid #dee2e6;">Name</th>
-                        <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid #dee2e6;">Suburb</th>
-                        <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid #dee2e6;">Categories</th>
-                        <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid #dee2e6;">Premium Status</th>
-                        <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid #dee2e6;">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      ${trainersHtml}
-                    </tbody>
-                  </table>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">⭐</div>
+            <div class="stat-content">
+              <h3 id="premium-trainers">-</h3>
+              <p>Premium Active</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">⏳</div>
+            <div class="stat-content">
+              <h3 id="pending-submissions">-</h3>
+              <p>Pending Submissions</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">💰</div>
+            <div class="stat-content">
+              <h3 id="revenue-estimate">-</h3>
+              <p>Monthly Revenue</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Navigation Tabs -->
+        <nav class="tab-navigation">
+          <button class="tab-btn active" data-tab="overview">📊 Overview</button>
+          <button class="tab-btn" data-tab="subscriptions">💳 Subscriptions</button>
+          <button class="tab-btn" data-tab="pending">⏳ Pending</button>
+          <button class="tab-btn" data-tab="trainers">👥 All Trainers</button>
+          <button class="tab-btn" data-tab="analytics">📈 Analytics</button>
+        </nav>
+
+        <!-- Tab Content -->
+        <div class="tab-content">
+          <!-- Overview Tab -->
+          <div id="overview-tab" class="tab-panel active">
+            <div class="overview-grid">
+              <section class="panel">
+                <h2>🎯 Premium Slot Usage</h2>
+                <div id="premium-slots-overview" class="slots-container">
+                  <div class="loading">Loading premium slot data...</div>
                 </div>
               </section>
-              
-              <section style="background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                <h2 style="margin-bottom: 1rem; color: #333;">Pending Submissions (${pending ? pending.length : 0})</h2>
-                <ul style="list-style: none; padding: 0;">
-                  ${pendingHtml}
-                </ul>
-                <div style="margin-top: 1rem; padding: 1rem; background: #f0f0f0; border-radius: 4px;">
-                  <h4>Quick Actions:</h4>
-                  <button onclick="createTestSubmission()" style="background: #007acc; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; margin-right: 0.5rem;">Create Test Submission</button>
-                  <button onclick="setupDatabase()" style="background: #4CAF50; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer;">Setup Database Tables</button>
+
+              <section class="panel">
+                <h2>📋 Recent Activity</h2>
+                <div id="recent-activity" class="activity-feed">
+                  <div class="loading">Loading recent activity...</div>
+                </div>
+              </section>
+
+              <section class="panel">
+                <h2>⚡ Quick Actions</h2>
+                <div class="quick-actions">
+                  <button class="action-btn primary" onclick="refreshAllData()">🔄 Refresh Data</button>
+                  <button class="action-btn secondary" onclick="exportTrainerData()">📥 Export Data</button>
+                  <button class="action-btn warning" onclick="createTestSubmission()">🧪 Test Submission</button>
+                  <button class="action-btn info" onclick="viewSystemHealth()">🏥 System Health</button>
                 </div>
               </section>
             </div>
-          `
-        }
+          </div>
 
-        // Global function for toggling premium status
-        window.togglePremium = async function(id, currentStatus) {
-          const newStatus = currentStatus === 'active' ? 'inactive' : 'active'
-          
-          if (!confirm(`${newStatus === 'active' ? 'Activate' : 'Deactivate'} premium status for this trainer?`)) return
-          
-          try {
-            console.log('Toggling premium status:', id, 'from', currentStatus, 'to', newStatus)
-            
-            const { error } = await supabase
-              .from('trainers')
-              .update({ premium_status: newStatus })
-              .eq('id', id)
-
-            if (error) {
-              alert('Failed to update premium status: ' + error.message)
-              return
-            }
-
-            alert(`Premium status ${newStatus === 'active' ? 'activated' : 'deactivated'} successfully!`)
-            
-            // Reload the dashboard to refresh both the usage stats and trainer list
-            await loadAdminDashboard()
-          } catch (err) {
-            console.error('Error toggling premium status:', err)
-            alert('Error updating premium status: ' + err.message)
-          }
-        }
-
-        function showAccessDenied() {
-          adminContent.innerHTML = `
-            <h1>Access Denied</h1>
-            <p>You must supply a valid admin key to access this page.</p>
-            <p>Usage: <code>/admin?key=your-admin-key</code></p>
-            
-            <div style="background: #f0f0f0; padding: 1rem; margin: 1rem 0; border-radius: 4px;">
-              <h3>Debug Info:</h3>
-              <p><strong>Current URL:</strong> ${window.location.href}</p>
-              <p><strong>Search params:</strong> ${window.location.search || 'NONE'}</p>
-              <p><strong>Provided Key:</strong> ${providedKey || 'NOT PROVIDED'}</p>
-              <p><strong>Expected Key:</strong> ${expectedKey}</p>
-              <p><strong>Keys Match:</strong> ${providedKey === expectedKey ? 'YES' : 'NO'}</p>
+          <!-- Subscriptions Tab -->
+          <div id="subscriptions-tab" class="tab-panel">
+            <section class="panel">
+              <div class="panel-header">
+                <h2>💳 Subscription Management</h2>
+                <div class="panel-actions">
+                  <button class="action-btn primary" onclick="refreshSubscriptions()">🔄 Refresh</button>
+                  <button class="action-btn secondary" onclick="exportSubscriptionData()">📥 Export</button>
+                </div>
+              </div>
               
-              <h4>Try this:</h4>
-              <p>Copy this URL and paste it in your address bar:</p>
-              <input type="text" value="${window.location.origin}/admin?key=${expectedKey}" style="width: 100%; padding: 0.5rem; margin: 0.5rem 0;" readonly onclick="this.select()" />
-            </div>
-          `
-        }
+              <div class="subscription-filters">
+                <select id="subscription-filter" onchange="filterSubscriptions()">
+                  <option value="all">All Subscriptions</option>
+                  <option value="standard-active">Standard Active</option>
+                  <option value="premium-active">Premium Active</option>
+                  <option value="expired">Expired</option>
+                  <option value="pending">Pending Payment</option>
+                </select>
+                <input type="search" id="subscription-search" placeholder="Search by name or email..." onkeyup="searchSubscriptions()">
+              </div>
 
-        // Global functions for approve/reject buttons
-        window.approveTrainer = async function(id) {
-          if (!confirm('Approve this trainer submission?')) return
+              <div id="subscriptions-table" class="table-container">
+                <div class="loading">Loading subscription data...</div>
+              </div>
+            </section>
+          </div>
+
+          <!-- Pending Tab -->
+          <div id="pending-tab" class="tab-panel">
+            <section class="panel">
+              <div class="panel-header">
+                <h2>⏳ Pending Submissions</h2>
+                <div class="panel-actions">
+                  <button class="action-btn primary" onclick="refreshPending()">🔄 Refresh</button>
+                  <button class="action-btn success" onclick="bulkApprove()">✅ Bulk Approve</button>
+                  <button class="action-btn danger" onclick="bulkReject()">❌ Bulk Reject</button>
+                </div>
+              </div>
+
+              <div id="pending-submissions" class="submissions-container">
+                <div class="loading">Loading pending submissions...</div>
+              </div>
+            </section>
+          </div>
+
+          <!-- All Trainers Tab -->
+          <div id="trainers-tab" class="tab-panel">
+            <section class="panel">
+              <div class="panel-header">
+                <h2>👥 All Trainers Management</h2>
+                <div class="panel-actions">
+                  <button class="action-btn primary" onclick="refreshTrainers()">🔄 Refresh</button>
+                  <button class="action-btn secondary" onclick="exportTrainerData()">📥 Export</button>
+                </div>
+              </div>
+
+              <div class="trainer-filters">
+                <select id="trainer-filter" onchange="filterTrainers()">
+                  <option value="all">All Trainers</option>
+                  <option value="premium">Premium Only</option>
+                  <option value="standard">Standard Only</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+                <select id="suburb-filter" onchange="filterTrainers()">
+                  <option value="all">All Suburbs</option>
+                </select>
+                <input type="search" id="trainer-search" placeholder="Search trainers..." onkeyup="searchTrainers()">
+              </div>
+
+              <div id="trainers-table" class="table-container">
+                <div class="loading">Loading trainers data...</div>
+              </div>
+            </section>
+          </div>
+
+          <!-- Analytics Tab -->
+          <div id="analytics-tab" class="tab-panel">
+            <section class="panel">
+              <h2>📈 Analytics & Insights</h2>
+              <div class="analytics-grid">
+                <div class="chart-container">
+                  <h3>Subscription Growth</h3>
+                  <div id="growth-chart" class="chart-placeholder">
+                    📊 Chart visualization would go here
+                  </div>
+                </div>
+                <div class="chart-container">
+                  <h3>Revenue Trends</h3>
+                  <div id="revenue-chart" class="chart-placeholder">
+                    💰 Revenue chart would go here
+                  </div>
+                </div>
+                <div class="metrics-container">
+                  <h3>Key Metrics</h3>
+                  <div id="key-metrics" class="metrics-grid">
+                    <div class="metric">
+                      <span class="metric-value" id="conversion-rate">-</span>
+                      <span class="metric-label">Conversion Rate</span>
+                    </div>
+                    <div class="metric">
+                      <span class="metric-value" id="avg-revenue">-</span>
+                      <span class="metric-label">Avg Revenue/User</span>
+                    </div>
+                    <div class="metric">
+                      <span class="metric-value" id="churn-rate">-</span>
+                      <span class="metric-label">Churn Rate</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <!-- Status Messages -->
+        <div id="status-messages" class="status-container"></div>
+      </div>
+    </main>
+  ) : (
+    <main class="access-denied">
+      <div class="container">
+        <div class="access-denied-content">
+          <h1>🔒 Access Denied</h1>
+          <p>This enhanced admin dashboard requires authentication.</p>
           
-          try {
-            console.log('Approving trainer:', id)
-            
-            // Get the pending trainer data
-            const { data: trainerData, error: fetchError } = await supabase
-              .from('pending_trainers')
-              .select('*')
-              .eq('id', id)
-              .single()
-
-            if (fetchError || !trainerData) {
-              alert('Failed to fetch trainer data: ' + (fetchError?.message || 'Not found'))
-              return
-            }
-
-            // Generate slug from name
-            const slug = trainerData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
-
-            // Insert into trainers table
-            const { error: insertError } = await supabase.from('trainers').insert({
-              name: trainerData.name,
-              suburb: trainerData.suburb,
-              email: trainerData.email,
-              phone: trainerData.phone,
-              website: trainerData.website,
-              description: trainerData.description,
-              match_tags: trainerData.match_tags,
-              categories: trainerData.categories,
-              profile_image: trainerData.profile_image,
-              why_choose_me: trainerData.why_choose_me,
-              social_links: trainerData.social_links,
-              slug: slug,
-              status: 'approved'
-            })
-
-            if (insertError) {
-              alert('Failed to approve trainer: ' + insertError.message)
-              return
-            }
-
-            // Remove from pending table
-            const { error: deleteError } = await supabase
-              .from('pending_trainers')
-              .delete()
-              .eq('id', id)
-
-            if (deleteError) {
-              alert('Trainer approved but failed to remove from pending: ' + deleteError.message)
-            } else {
-              alert('Trainer approved successfully!')
-            }
-
-            // Reload the dashboard
-            await loadAdminDashboard()
-          } catch (err) {
-            console.error('Error approving trainer:', err)
-            alert('Error approving trainer: ' + err.message)
-          }
-        }
-
-        window.rejectTrainer = async function(id) {
-          if (!confirm('Are you sure you want to reject and delete this trainer submission?')) return
+          <div class="access-instructions">
+            <h3>How to Access:</h3>
+            <p>Add the admin key to the URL:</p>
+            <code>/admin-enhanced?key=dogadmin123</code>
+          </div>
           
-          try {
-            console.log('Rejecting trainer:', id)
-            
-            const { error } = await supabase
-              .from('pending_trainers')
-              .delete()
-              .eq('id', id)
+          <div class="contact-info">
+            <strong>Note:</strong> If you don't have the admin password, contact the site administrator.
+          </div>
+        </div>
+      </div>
+    </main>
+  )}
 
-            if (error) {
-              alert('Failed to reject trainer: ' + error.message)
-            } else {
-              alert('Trainer submission rejected.')
-              await loadAdminDashboard()
-            }
-          } catch (err) {
-            console.error('Error rejecting trainer:', err)
-            alert('Error rejecting trainer: ' + err.message)
-          }
-        }
-
-        window.createTestSubmission = async function() {
-          try {
-            console.log('Creating test submission...')
-            
-            // First, let's check what columns exist in the table
-            const { data: existingData, error: checkError } = await supabase
-              .from('pending_trainers')
-              .select('*')
-              .limit(1)
-            
-            console.log('Table check result:', { existingData, checkError })
-            
-            // Simple test data that should work with basic table structure
-            const testData = {
-              name: 'Test Dog Trainer',
-              suburb: 'Melbourne CBD',
-              email: 'test@example.com',
-              description: 'Professional dog trainer specializing in puppy training and obedience. Years of experience helping Melbourne dogs and their owners.'
-            }
-
-            const { data, error } = await supabase
-              .from('pending_trainers')
-              .insert(testData)
-              .select()
-
-            if (error) {
-              alert('Failed to create test submission: ' + error.message)
-              console.error('Insert error:', error)
-              console.log('Available columns might be limited. Try creating the table first or check your database schema.')
-            } else {
-              alert('Test submission created successfully!')
-              console.log('Test submission created:', data)
-              await loadAdminDashboard()
-            }
-          } catch (err) {
-            console.error('Error creating test submission:', err)
-            alert('Error creating test submission: ' + err.message)
-          }
-        }
-
-        window.setupDatabase = async function() {
-          if (!confirm('This will create the necessary database tables. Continue?')) return
-          
-          try {
-            console.log('Setting up database tables...')
-            
-            // Create pending_trainers table
-            const createTableSQL = `
-              CREATE TABLE IF NOT EXISTS pending_trainers (
-                id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-                name TEXT NOT NULL,
-                suburb TEXT NOT NULL,
-                email TEXT NOT NULL,
-                phone TEXT,
-                website TEXT,
-                description TEXT NOT NULL,
-                categories TEXT[],
-                match_tags TEXT[],
-                profile_image TEXT,
-                why_choose_me TEXT,
-                social_links JSONB,
-                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-              );
-            `
-            
-            const { data, error } = await supabase.rpc('exec_sql', { sql: createTableSQL })
-            
-            if (error) {
-              alert('Database setup failed: ' + error.message + '\\n\\nPlease run the SQL script in database/setup.sql manually in your Supabase SQL Editor.')
-              console.error('Database setup error:', error)
-            } else {
-              alert('Database tables created successfully! You can now create test submissions.')
-              console.log('Database setup successful:', data)
-            }
-          } catch (err) {
-            console.error('Error setting up database:', err)
-            alert('Error setting up database: ' + err.message + '\\n\\nPlease run the SQL script in database/setup.sql manually in your Supabase SQL Editor.')
-          }
-        }
-
-      } catch (error) {
-        console.error('Failed to initialize admin:', error)
-        document.getElementById('admin-content').innerHTML = `
-          <h1>Initialization Error</h1>
-          <p>Failed to load admin dashboard: ${error.message}</p>
-          <p>Check the browser console for more details.</p>
-        `
-      }
-    }
-
-    // Initialize when page loads
-    initAdmin()
-  </script>
-
-  <style>
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 2rem;
-    }
-
-    h1 {
-      color: var(--primary-color);
-      margin-bottom: 2rem;
-    }
-
-    ul {
-      list-style: none;
-      padding: 0;
-    }
-
-    .pending-card {
-      border: 1px solid #e0e0e0;
-      border-radius: 8px;
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
-      background: #fefefe;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-    .pending-card h2 {
-      color: var(--primary-color);
-      margin-bottom: 1rem;
-      font-size: 1.5rem;
-    }
-
-    .pending-card p {
-      margin-bottom: 0.5rem;
-      line-height: 1.5;
-    }
-
-    .pending-card strong {
-      color: var(--text-color);
-    }
-
-    .action-buttons {
-      margin-top: 1rem;
-      display: flex;
-      gap: 0.5rem;
-    }
-
-    .approve-btn, .reject-btn {
-      padding: 0.5rem 1rem;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-weight: 600;
-      transition: background-color 0.3s ease;
-    }
-
-    .approve-btn {
-      background-color: #4CAF50;
-      color: white;
-    }
-
-    .approve-btn:hover {
-      background-color: #45a049;
-    }
-
-    .reject-btn {
-      background-color: #f44336;
-      color: white;
-    }
-
-    .reject-btn:hover {
-      background-color: #da190b;
-    }
-
-    code {
-      background-color: #f4f4f4;
-      padding: 0.2rem 0.4rem;
-      border-radius: 3px;
-      font-family: 'Courier New', monospace;
-    }
-  </style>
+  <Footer />
 </Layout>
+
+<script type="module">
+import { supabase } from '../lib/supabaseClient.js';
+
+// Global state
+let currentData = {
+  trainers: [],
+  pending: [],
+  subscriptions: [],
+  stats: {}
+};
+
+// Initialize dashboard
+document.addEventListener('DOMContentLoaded', async () => {
+  console.log('🚀 Enhanced Admin Dashboard initializing...');
+  
+  // Setup tab navigation
+  setupTabNavigation();
+  
+  // Load initial data
+  await loadAllData();
+  
+  console.log('✅ Enhanced Admin Dashboard ready');
+});
+
+// Tab Navigation
+function setupTabNavigation() {
+  const tabBtns = document.querySelectorAll('.tab-btn');
+  const tabPanels = document.querySelectorAll('.tab-panel');
+  
+  tabBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetTab = btn.dataset.tab;
+      
+      // Update active states
+      tabBtns.forEach(b => b.classList.remove('active'));
+      tabPanels.forEach(p => p.classList.remove('active'));
+      
+      btn.classList.add('active');
+      document.getElementById(`${targetTab}-tab`).classList.add('active');
+      
+      // Load tab-specific data if needed
+      loadTabData(targetTab);
+    });
+  });
+}
+
+// Load all dashboard data
+async function loadAllData() {
+  showStatus('Loading dashboard data...', 'info');
+  
+  try {
+    await Promise.all([
+      loadStats(),
+      loadTrainers(),
+      loadPendingSubmissions(),
+      loadSubscriptionData(),
+      loadPremiumSlots()
+    ]);
+    
+    showStatus('Dashboard data loaded successfully', 'success');
+  } catch (error) {
+    console.error('Error loading dashboard data:', error);
+    showStatus('Error loading dashboard data: ' + error.message, 'error');
+  }
+}
+
+// Load dashboard statistics
+async function loadStats() {
+  try {
+    const [trainersResult, pendingResult] = await Promise.all([
+      supabase.from('trainers').select('id, premium_status, payment_status'),
+      supabase.from('pending_trainers').select('id')
+    ]);
+    
+    const trainers = trainersResult.data || [];
+    const pending = pendingResult.data || [];
+    
+    const premiumActive = trainers.filter(t => t.premium_status === 'active').length;
+    const standardActive = trainers.filter(t => t.payment_status === 'paid_standard').length;
+    
+    // Calculate estimated monthly revenue
+    const monthlyRevenue = (standardActive * 79 / 12) + (premiumActive * 49);
+    
+    // Update stats display
+    document.getElementById('total-trainers').textContent = trainers.length;
+    document.getElementById('premium-trainers').textContent = premiumActive;
+    document.getElementById('pending-submissions').textContent = pending.length;
+    document.getElementById('revenue-estimate').textContent = `$${Math.round(monthlyRevenue)}`;
+    
+    currentData.stats = {
+      totalTrainers: trainers.length,
+      premiumActive,
+      standardActive,
+      pending: pending.length,
+      monthlyRevenue
+    };
+    
+  } catch (error) {
+    console.error('Error loading stats:', error);
+  }
+}
+
+// Load trainers data
+async function loadTrainers() {
+  try {
+    const { data, error } = await supabase
+      .from('trainers')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    
+    currentData.trainers = data || [];
+    renderTrainersTable();
+    
+  } catch (error) {
+    console.error('Error loading trainers:', error);
+  }
+}
+
+// Load pending submissions
+async function loadPendingSubmissions() {
+  try {
+    const { data, error } = await supabase
+      .from('pending_trainers')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    
+    currentData.pending = data || [];
+    renderPendingSubmissions();
+    
+  } catch (error) {
+    console.error('Error loading pending submissions:', error);
+  }
+}
+
+// Load subscription data
+async function loadSubscriptionData() {
+  try {
+    const { data, error } = await supabase
+      .from('trainers')
+      .select('id, name, email, suburb, payment_status, premium_status, standard_start_date, standard_end_date, premium_start_date, premium_end_date')
+      .order('name');
+    
+    if (error) throw error;
+    
+    currentData.subscriptions = data || [];
+    renderSubscriptionsTable();
+    
+  } catch (error) {
+    console.error('Error loading subscription data:', error);
+  }
+}
+
+// Load premium slots data
+async function loadPremiumSlots() {
+  try {
+    // Try to load from premium_slot_usage view, fallback to manual calculation
+    let { data: usage, error } = await supabase
+      .from('premium_slot_usage')
+      .select('*');
+    
+    if (error || !usage) {
+      // Fallback: calculate manually
+      const { data: trainers } = await supabase
+        .from('trainers')
+        .select('suburb, categories, premium_status')
+        .eq('premium_status', 'active');
+      
+      usage = calculatePremiumUsage(trainers || []);
+    }
+    
+    renderPremiumSlots(usage || []);
+    
+  } catch (error) {
+    console.error('Error loading premium slots:', error);
+  }
+}
+
+// Calculate premium usage manually
+function calculatePremiumUsage(trainers) {
+  const usage = {};
+  
+  trainers.forEach(trainer => {
+    if (trainer.categories && trainer.suburb) {
+      trainer.categories.forEach(category => {
+        const key = `${trainer.suburb}-${category}`;
+        usage[key] = (usage[key] || 0) + 1;
+      });
+    }
+  });
+  
+  return Object.entries(usage).map(([key, count]) => {
+    const [suburb, category] = key.split('-');
+    return { suburb, category, active_premiums: count };
+  });
+}
+
+// Render functions
+function renderTrainersTable() {
+  const container = document.getElementById('trainers-table');
+  const trainers = currentData.trainers;
+  
+  if (!trainers.length) {
+    container.innerHTML = '<div class="empty-state">No trainers found</div>';
+    return;
+  }
+  
+  const html = `
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Suburb</th>
+          <th>Email</th>
+          <th>Standard Status</th>
+          <th>Premium Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${trainers.map(trainer => `
+          <tr>
+            <td><strong>${trainer.name}</strong></td>
+            <td>${trainer.suburb || 'N/A'}</td>
+            <td>${trainer.email}</td>
+            <td>
+              <span class="status-badge ${trainer.payment_status === 'paid_standard' ? 'success' : 'warning'}">
+                ${trainer.payment_status || 'pending'}
+              </span>
+            </td>
+            <td>
+              <span class="status-badge ${trainer.premium_status === 'active' ? 'success' : 'inactive'}">
+                ${trainer.premium_status || 'inactive'}
+              </span>
+            </td>
+            <td>
+              <div class="action-buttons">
+                <button class="btn-sm ${trainer.premium_status === 'active' ? 'danger' : 'success'}" 
+                        onclick="togglePremium('${trainer.id}', '${trainer.premium_status || 'inactive'}')">
+                  ${trainer.premium_status === 'active' ? 'Deactivate' : 'Activate'} Premium
+                </button>
+                <button class="btn-sm secondary" onclick="editTrainer('${trainer.id}')">Edit</button>
+              </div>
+            </td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+  
+  container.innerHTML = html;
+}
+
+function renderPendingSubmissions() {
+  const container = document.getElementById('pending-submissions');
+  const pending = currentData.pending;
+  
+  if (!pending.length) {
+    container.innerHTML = '<div class="empty-state">No pending submissions</div>';
+    return;
+  }
+  
+  const html = pending.map(submission => `
+    <div class="submission-card">
+      <div class="submission-header">
+        <h3>${submission.name}</h3>
+        <div class="submission-meta">
+          <span class="date">${new Date(submission.created_at).toLocaleDateString()}</span>
+          <span class="suburb">${submission.suburb}</span>
+        </div>
+      </div>
+      
+      <div class="submission-content">
+        <p><strong>Email:</strong> ${submission.email}</p>
+        ${submission.phone ? `<p><strong>Phone:</strong> ${submission.phone}</p>` : ''}
+        ${submission.website ? `<p><strong>Website:</strong> ${submission.website}</p>` : ''}
+        <p><strong>Description:</strong> ${submission.description}</p>
+        ${submission.categories ? `<p><strong>Categories:</strong> ${submission.categories.join(', ')}</p>` : ''}
+        ${submission.match_tags ? `<p><strong>Tags:</strong> ${submission.match_tags.join(', ')}</p>` : ''}
+      </div>
+      
+      <div class="submission-actions">
+        <button class="action-btn success" onclick="approveSubmission('${submission.id}')">
+          ✅ Approve
+        </button>
+        <button class="action-btn danger" onclick="rejectSubmission('${submission.id}')">
+          ❌ Reject
+        </button>
+        <button class="action-btn warning" onclick="flagSubmission('${submission.id}')">
+          ⚠️ Flag
+        </button>
+      </div>
+    </div>
+  `).join('');
+  
+  container.innerHTML = html;
+}
+
+function renderSubscriptionsTable() {
+  const container = document.getElementById('subscriptions-table');
+  const subscriptions = currentData.subscriptions;
+  
+  if (!subscriptions.length) {
+    container.innerHTML = '<div class="empty-state">No subscription data found</div>';
+    return;
+  }
+  
+  const html = `
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Trainer</th>
+          <th>Email</th>
+          <th>Standard Plan</th>
+          <th>Premium Plan</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${subscriptions.map(sub => `
+          <tr>
+            <td><strong>${sub.name}</strong><br><small>${sub.suburb}</small></td>
+            <td>${sub.email}</td>
+            <td>
+              <span class="status-badge ${sub.payment_status === 'paid_standard' ? 'success' : 'warning'}">
+                ${sub.payment_status || 'pending'}
+              </span>
+              ${sub.standard_end_date ? `<br><small>Expires: ${new Date(sub.standard_end_date).toLocaleDateString()}</small>` : ''}
+            </td>
+            <td>
+              <span class="status-badge ${sub.premium_status === 'active' ? 'success' : 'inactive'}">
+                ${sub.premium_status || 'inactive'}
+              </span>
+              ${sub.premium_end_date ? `<br><small>Expires: ${new Date(sub.premium_end_date).toLocaleDateString()}</small>` : ''}
+            </td>
+            <td>
+              <div class="action-buttons">
+                <button class="btn-sm primary" onclick="manageSubscription('${sub.id}')">Manage</button>
+                <button class="btn-sm secondary" onclick="viewSubscriptionHistory('${sub.id}')">History</button>
+              </div>
+            </td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+  
+  container.innerHTML = html;
+}
+
+function renderPremiumSlots(usage) {
+  const container = document.getElementById('premium-slots-overview');
+  
+  if (!usage.length) {
+    container.innerHTML = '<div class="empty-state">No premium slots in use</div>';
+    return;
+  }
+  
+  const html = usage.map(slot => {
+    const percentage = (slot.active_premiums / 10) * 100;
+    const statusClass = percentage >= 80 ? 'danger' : percentage >= 50 ? 'warning' : 'success';
+    
+    return `
+      <div class="slot-item">
+        <div class="slot-info">
+          <strong>${slot.suburb}</strong> — ${slot.category}
+        </div>
+        <div class="slot-usage">
+          <div class="usage-bar">
+            <div class="usage-fill ${statusClass}" style="width: ${percentage}%"></div>
+          </div>
+          <span class="usage-text">${slot.active_premiums}/10</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+  
+  container.innerHTML = html;
+}
+
+// Action functions
+window.togglePremium = async function(trainerId, currentStatus) {
+  const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+  
+  if (!confirm(`${newStatus === 'active' ? 'Activate' : 'Deactivate'} premium status?`)) return;
+  
+  try {
+    const { error } = await supabase
+      .from('trainers')
+      .update({ premium_status: newStatus })
+      .eq('id', trainerId);
+    
+    if (error) throw error;
+    
+    showStatus(`Premium status ${newStatus === 'active' ? 'activated' : 'deactivated'} successfully`, 'success');
+    await loadAllData();
+    
+  } catch (error) {
+    console.error('Error toggling premium:', error);
+    showStatus('Error updating premium status: ' + error.message, 'error');
+  }
+};
+
+window.approveSubmission = async function(submissionId) {
+  if (!confirm('Approve this trainer submission?')) return;
+  
+  try {
+    // Get submission data
+    const { data: submission, error: fetchError } = await supabase
+      .from('pending_trainers')
+      .select('*')
+      .eq('id', submissionId)
+      .single();
+    
+    if (fetchError) throw fetchError;
+    
+    // Generate slug
+    const slug = submission.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    
+    // Insert into trainers table
+    const { error: insertError } = await supabase.from('trainers').insert({
+      ...submission,
+      slug,
+      status: 'approved',
+      id: undefined // Let Supabase generate new ID
+    });
+    
+    if (insertError) throw insertError;
+    
+    // Remove from pending
+    const { error: deleteError } = await supabase
+      .from('pending_trainers')
+      .delete()
+      .eq('id', submissionId);
+    
+    if (deleteError) throw deleteError;
+    
+    showStatus('Trainer approved successfully', 'success');
+    await loadAllData();
+    
+  } catch (error) {
+    console.error('Error approving submission:', error);
+    showStatus('Error approving submission: ' + error.message, 'error');
+  }
+};
+
+window.rejectSubmission = async function(submissionId) {
+  if (!confirm('Reject and delete this submission?')) return;
+  
+  try {
+    const { error } = await supabase
+      .from('pending_trainers')
+      .delete()
+      .eq('id', submissionId);
+    
+    if (error) throw error;
+    
+    showStatus('Submission rejected', 'success');
+    await loadAllData();
+    
+  } catch (error) {
+    console.error('Error rejecting submission:', error);
+    showStatus('Error rejecting submission: ' + error.message, 'error');
+  }
+};
+
+window.refreshAllData = async function() {
+  await loadAllData();
+};
+
+window.createTestSubmission = async function() {
+  try {
+    const testData = {
+      name: `Test Trainer ${Date.now()}`,
+      suburb: 'Melbourne CBD',
+      email: `test${Date.now()}@example.com`,
+      description: 'Test submission for admin dashboard testing',
+      categories: ['puppy-training'],
+      match_tags: ['test', 'demo']
+    };
+    
+    const { error } = await supabase
+      .from('pending_trainers')
+      .insert(testData);
+    
+    if (error) throw error;
+    
+    showStatus('Test submission created', 'success');
+    await loadAllData();
+    
+  } catch (error) {
+    console.error('Error creating test submission:', error);
+    showStatus('Error creating test submission: ' + error.message, 'error');
+  }
+};
+
+// Utility functions
+function loadTabData(tabName) {
+  // Load specific data when tab is activated
+  switch (tabName) {
+    case 'subscriptions':
+      loadSubscriptionData();
+      break;
+    case 'pending':
+      loadPendingSubmissions();
+      break;
+    case 'trainers':
+      loadTrainers();
+      break;
+    case 'analytics':
+      loadAnalytics();
+      break;
+  }
+}
+
+function showStatus(message, type = 'info') {
+  const container = document.getElementById('status-messages');
+  const statusEl = document.createElement('div');
+  statusEl.className = `status-message ${type}`;
+  statusEl.textContent = message;
+  
+  container.appendChild(statusEl);
+  
+  setTimeout(() => {
+    statusEl.remove();
+  }, 5000);
+}
+
+async function loadAnalytics() {
+  // Placeholder for analytics data
+  console.log('Loading analytics data...');
+}
+</script>
+
+<style>
+/* Enhanced Admin Dashboard Styles */
+.admin-dashboard {
+  background: #f8f9fa;
+  min-height: 100vh;
+  padding: 2rem 0;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.dashboard-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.dashboard-header h1 {
+  font-size: 2.5rem;
+  color: #2c3e50;
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  color: #6c757d;
+  font-size: 1.1rem;
+}
+
+/* Stats Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.stat-icon {
+  font-size: 2.5rem;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--color-accent-teal), var(--color-accent-mustard));
+  border-radius: 12px;
+}
+
+.stat-content h3 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.stat-content p {
+  color: #6c757d;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+/* Tab Navigation */
+.tab-navigation {
+  display: flex;
+  background: white;
+  border-radius: 12px;
+  padding: 0.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  overflow-x: auto;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 1rem 1.5rem;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.tab-btn:hover {
+  background: #f8f9fa;
+}
+
+.tab-btn.active {
+  background: linear-gradient(135deg, var(--color-accent-teal), var(--color-accent-mustard));
+  color: white;
+}
+
+/* Tab Content */
+.tab-content {
+  min-height: 500px;
+}
+
+.tab-
+panel {
+  display: none;
+}
+
+.tab-panel.active {
+  display: block;
+}
+
+/* Panels */
+.panel {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  margin-bottom: 2rem;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.panel-header h2 {
+  margin: 0;
+  color: #2c3e50;
+}
+
+.panel-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Overview Grid */
+.overview-grid {
+  display: grid;
+  gap: 2rem;
+}
+
+/* Action Buttons */
+.action-btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.action-btn.primary {
+  background: var(--color-accent-teal);
+  color: white;
+}
+
+.action-btn.secondary {
+  background: #6c757d;
+  color: white;
+}
+
+.action-btn.success {
+  background: #28a745;
+  color: white;
+}
+
+.action-btn.danger {
+  background: #dc3545;
+  color: white;
+}
+
+.action-btn.warning {
+  background: #ffc107;
+  color: #212529;
+}
+
+.action-btn.info {
+  background: #17a2b8;
+  color: white;
+}
+
+.action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Quick Actions */
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+/* Tables */
+.table-container {
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.data-table th,
+.data-table td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.data-table th {
+  background: #f8f9fa;
+  font-weight: 600;
+  color: #495057;
+}
+
+.data-table tr:hover {
+  background: #f8f9fa;
+}
+
+/* Status Badges */
+.status-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.status-badge.success {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-badge.warning {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-badge.danger {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.status-badge.inactive {
+  background: #e2e3e5;
+  color: #6c757d;
+}
+
+/* Button Sizes */
+.btn-sm {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.875rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn-sm.primary {
+  background: var(--color-accent-teal);
+  color: white;
+}
+
+.btn-sm.secondary {
+  background: #6c757d;
+  color: white;
+}
+
+.btn-sm.success {
+  background: #28a745;
+  color: white;
+}
+
+.btn-sm.danger {
+  background: #dc3545;
+  color: white;
+}
+
+.btn-sm:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+/* Action Buttons Container */
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* Submissions */
+.submissions-container {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.submission-card {
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  padding: 1.5rem;
+  background: #fefefe;
+  transition: all 0.3s ease;
+}
+
+.submission-card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transform: translateY(-2px);
+}
+
+.submission-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.submission-header h3 {
+  margin: 0;
+  color: #2c3e50;
+}
+
+.submission-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+  color: #6c757d;
+}
+
+.submission-content {
+  margin-bottom: 1.5rem;
+}
+
+.submission-content p {
+  margin-bottom: 0.5rem;
+}
+
+.submission-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+/* Premium Slots */
+.slots-container {
+  display: grid;
+  gap: 1rem;
+}
+
+.slot-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  background: #fefefe;
+}
+
+.slot-info {
+  font-weight: 500;
+}
+
+.slot-usage {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.usage-bar {
+  width: 100px;
+  height: 8px;
+  background: #e9ecef;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.usage-fill {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.usage-fill.success {
+  background: #28a745;
+}
+
+.usage-fill.warning {
+  background: #ffc107;
+}
+
+.usage-fill.danger {
+  background: #dc3545;
+}
+
+.usage-text {
+  font-weight: 600;
+  color: #495057;
+}
+
+/* Filters */
+.subscription-filters,
+.trainer-filters {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.subscription-filters select,
+.subscription-filters input,
+.trainer-filters select,
+.trainer-filters input {
+  padding: 0.5rem;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 0.875rem;
+}
+
+.subscription-filters input[type="search"],
+.trainer-filters input[type="search"] {
+  flex: 1;
+  min-width: 200px;
+}
+
+/* Loading and Empty States */
+.loading {
+  text-align: center;
+  padding: 3rem;
+  color: #6c757d;
+  font-style: italic;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  color: #6c757d;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 2px dashed #dee2e6;
+}
+
+/* Status Messages */
+.status-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.status-message {
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  color: white;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  animation: slideIn 0.3s ease;
+}
+
+.status-message.success {
+  background: #28a745;
+}
+
+.status-message.error {
+  background: #dc3545;
+}
+
+.status-message.warning {
+  background: #ffc107;
+  color: #212529;
+}
+
+.status-message.info {
+  background: #17a2b8;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Analytics */
+.analytics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.chart-container {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.chart-placeholder {
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6c757d;
+  font-size: 1.5rem;
+  border: 2px dashed #dee2e6;
+  border-radius: 8px;
+}
+
+.metrics-container {
+  grid-column: 1 / -1;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+}
+
+.metric {
+  text-align: center;
+  padding: 1rem;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.metric-value {
+  display: block;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-accent-teal);
+}
+
+.metric-label {
+  font-size: 0.875rem;
+  color: #6c757d;
+}
+
+/* Access Denied */
+.access-denied {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.access-denied-content {
+  text-align: center;
+  max-width: 600px;
+  padding: 3rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.access-denied-content h1 {
+  color: #dc3545;
+  margin-bottom: 1rem;
+}
+
+.access-instructions {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin: 1.5rem 0;
+}
+
+.access-instructions h3 {
+  margin-bottom: 1rem;
+}
+
+.access-instructions code {
+  background: #e9ecef;
+  padding: 0.5rem;
+  border-radius: 4px;
+  display: block;
+  margin: 0.5rem 0;
+  font-family: 'Courier New', monospace;
+}
+
+.contact-info {
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  padding: 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .tab-navigation {
+    flex-direction: column;
+  }
+  
+  .panel-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .analytics-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .quick-actions {
+    grid-template-columns: 1fr;
+  }
+  
+  .submission-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .submission-meta {
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0 0.5rem;
+  }
+  
+  .dashboard-header h1 {
+    font-size: 2rem;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+  }
+  
+  .subscription-filters,
+  .trainer-filters {
+    flex-direction: column;
+  }
+}
+</style>

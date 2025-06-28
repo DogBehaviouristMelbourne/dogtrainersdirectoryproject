@@ -24,35 +24,38 @@ import Footer from '../components/Footer.astro';
         <h2 class="section-title">💰 Simple, Fair Pricing</h2>
         <div class="pricing-card">
           <h3>Standard Listing</h3>
-          <div class="price">$79 <span>one-time</span></div>
+          <div class="price">$79 <span>yearly</span></div>
           <ul class="features">
             <li>✅ Full trainer profile with photo</li>
             <li>✅ Contact details & website link</li>
             <li>✅ Service categories & specializations</li>
             <li>✅ SEO-optimized listing page</li>
-            <li>✅ Lifetime listing (no recurring fees)</li>
+            <li>✅ Annual renewal billing</li>
             <li>✅ Update requests anytime</li>
           </ul>
         </div>
         
         <div class="premium-preview">
-          <h3>Coming Soon: Premium Features</h3>
-          <ul class="coming-soon">
-            <li>🌟 Featured placement in search results</li>
+          <h3>🌟 Premium Features Available</h3>
+          <ul class="premium-features">
+            <li>⭐ Featured placement in search results</li>
             <li>📧 Direct inquiry forwarding</li>
             <li>📊 Performance analytics</li>
             <li>✅ Verified trainer badge</li>
           </ul>
-          <p class="early-bird">Apply now and get early access to premium features at no extra cost!</p>
+          <p class="premium-cta">
+            <strong>Upgrade to Premium:</strong> 
+            <a href="/trainers#premium" class="premium-link">View premium plans →</a>
+          </p>
         </div>
       </div>
 
       <h2 class="section-title">How it works</h2>
       <ol class="numbered-list">
         <li>Fill out the <a href="/submit" class="text-link">submission form</a>.</li>
-        <li>Complete payment via secure invoice ($79 one-time).</li>
+        <li>Complete payment via secure invoice ($79 yearly).</li>
         <li>We verify credentials within 48 hours.</li>
-        <li>Your profile goes live with lifetime listing guarantee.</li>
+        <li>Your profile goes live with annual renewal billing.</li>
         <li>Update any time via the <a href="/claim" class="text-link">update request</a> form.</li>
       </ol>
 
@@ -61,26 +64,26 @@ import Footer from '../components/Footer.astro';
         <li><strong>Targeted audience</strong> — owners actively seeking professional help, not casual browsers.</li>
         <li><strong>SEO advantage</strong> — high-authority backlinks boost your Google rankings.</li>
         <li><strong>Quality control</strong> — curated directory builds trust with potential clients.</li>
-        <li><strong>No ongoing fees</strong> — one payment, lifetime listing.</li>
+        <li><strong>Annual billing</strong> — affordable yearly renewal keeps you visible.</li>
         <li><strong>Melbourne-focused</strong> — local market dominance, not diluted by national competitors.</li>
       </ul>
 
       <!-- NEW: Value Proposition -->
       <div class="value-prop">
         <h2 class="section-title">📈 ROI Calculator</h2>
-        <p><strong>Just one new client pays for your listing!</strong></p>
+        <p><strong>Just one new client pays for your annual listing!</strong></p>
         <div class="roi-stats">
           <div class="stat">
             <span class="number">$79</span>
-            <span class="label">One-time investment</span>
+            <span class="label">Annual investment</span>
           </div>
           <div class="stat">
             <span class="number">$150+</span>
             <span class="label">Average client value</span>
           </div>
           <div class="stat">
-            <span class="number">∞</span>
-            <span class="label">Years of listing</span>
+            <span class="number">365</span>
+            <span class="label">Days of visibility</span>
           </div>
         </div>
       </div>
@@ -196,9 +199,47 @@ import Footer from '../components/Footer.astro';
     .coming-soon li {
       padding: 0.3rem 0;
       opacity: 0.8;
-    }
+    }      .premium-preview {
+        margin-top: 2rem;
+        padding: 1.5rem;
+        border: 2px dashed #e8b94f;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #fff9e5 0%, #f0f8ff 100%);
+      }
+      
+      .premium-features {
+        list-style: none;
+        padding: 0;
+        margin: 1rem 0;
+      }
+      
+      .premium-features li {
+        margin-bottom: 0.5rem;
+        color: var(--color-text-dark);
+      }
+      
+      .premium-cta {
+        margin-top: 1rem;
+        color: var(--color-text-dark);
+      }
+      
+      .premium-link {
+        color: var(--color-accent-teal);
+        text-decoration: none;
+        font-weight: 600;
+        padding: 0.5rem 1rem;
+        background: rgba(var(--color-accent-teal-rgb), 0.1);
+        border-radius: 6px;
+        transition: all 0.2s ease;
+      }
+      
+      .premium-link:hover {
+        background: var(--color-accent-teal);
+        color: white;
+        text-decoration: none;
+      }
 
-    .early-bird {
+      .early-bird {
       background: var(--color-accent-mustard);
       color: white;
       padding: 1rem;

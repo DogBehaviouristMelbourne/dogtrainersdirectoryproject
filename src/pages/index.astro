@@ -24,6 +24,11 @@ import BlogTeaser from '../components/BlogTeaser.astro';
                             <a href="/trainers" class="button primary">Start Your Search</a>
                             <a href="#quiz-section" class="button secondary">Take Our Quiz</a>
                         </div>
+                    </div>
+                    <div class="hero-image-container">
+                        <div class="hero-image">
+                            <img src="/images/hero-illustration.png" alt="Happy dog training session in Melbourne park" width="600" height="400">
+                        </div>
                         <div class="hero-stats">
                             <div class="stat">
                                 <span class="stat-number">50+</span>
@@ -38,9 +43,6 @@ import BlogTeaser from '../components/BlogTeaser.astro';
                                 <span class="stat-label">Positive Methods</span>
                             </div>
                         </div>
-                    </div>
-                    <div class="hero-image">
-                        <img src="/images/hero-illustration.png" alt="Happy dog training session in Melbourne park" width="600" height="400">
                     </div>
                 </div>
             </div>
@@ -110,6 +112,27 @@ import BlogTeaser from '../components/BlogTeaser.astro';
         <!-- Blog Teaser Section -->
         <BlogTeaser />
 
+        <!-- Trainer Promotion Section -->
+        <section class="trainer-promotion-section">
+            <div class="container">
+                <div class="promotion-content">
+                    <div class="promotion-text">
+                        <h2>🌟 Are You a Dog Trainer?</h2>
+                        <p>Join Melbourne's most trusted directory and connect with clients who need your expertise.</p>
+                        <ul class="promotion-benefits">
+                            <li>✅ Instant online presence</li>
+                            <li>✅ Premium featuring options</li>
+                            <li>✅ Up to 5x more client inquiries</li>
+                        </ul>
+                    </div>
+                    <div class="promotion-actions">
+                        <a href="/trainers#premium" class="button primary">View Premium Plans</a>
+                        <a href="/submit" class="button secondary">List Your Services</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- CTA Section -->
         <section class="cta-section">
             <div class="container">
@@ -126,71 +149,195 @@ import BlogTeaser from '../components/BlogTeaser.astro';
 </Layout>
 
 <style>
-    /* Hero Section */
+    /* Hero Section - Mobile First Design */
     .hero-section {
-        background: linear-gradient(135deg, var(--color-background-light) 0%, #f8f6f3 100%);
-        padding: 4rem 0;
-        min-height: 70vh;
+        background: var(--color-background-light);
+        padding: 2rem 1rem;
+        min-height: 85vh;
         display: flex;
         align-items: center;
     }
 
     .hero-content {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 4rem;
+        display: flex;
+        flex-direction: column;
         align-items: center;
+        text-align: center;
+        max-width: 400px;
+        margin: 0 auto;
+        gap: 2rem;
+    }
+
+    .hero-text {
+        order: 2;
+        width: 100%;
     }
 
     .hero-text h1 {
-        font-size: 3.5em;
-        margin-bottom: 1rem;
+        font-size: 2.5rem;
+        margin-bottom: 1.5rem;
         color: var(--color-text-light);
-        line-height: 1.1;
+        line-height: 1.2;
+        font-weight: 700;
+        text-align: left;
+        padding-left: 1rem;
     }
 
     .hero-subtitle {
-        font-size: 1.3em;
+        font-size: 1rem;
         color: var(--color-text-light);
         opacity: 0.8;
         margin-bottom: 2rem;
         line-height: 1.6;
+        text-align: center;
+        max-width: 100%;
     }
 
     .hero-actions {
         display: flex;
+        flex-direction: column;
         gap: 1rem;
-        margin-bottom: 3rem;
+        width: 100%;
+        align-items: center;
     }
 
-    .hero-stats {
-        display: flex;
-        gap: 2rem;
+    .hero-actions .button {
+        width: 100%;
+        max-width: 280px;
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+        border-radius: 25px;
     }
 
-    .stat {
-        text-align: center;
-    }
-
-    .stat-number {
-        display: block;
-        font-size: 2em;
-        font-weight: 700;
-        color: var(--color-accent-teal);
-        font-family: 'Balsamiq Sans', cursive;
-    }
-
-    .stat-label {
-        font-size: 0.9em;
+    .hero-actions .button.primary {
+        background: var(--color-accent-mustard);
         color: var(--color-text-light);
-        opacity: 0.7;
+        font-weight: 600;
+    }
+
+    .hero-actions .button.secondary {
+        background: transparent;
+        border: 2px solid var(--color-border-light);
+        color: var(--color-text-light);
+    }
+
+    .hero-image-container {
+        order: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.5rem;
+        width: 100%;
+    }
+
+    .hero-image {
+        background: linear-gradient(135deg, #4a9b8e 0%, #f4a261 50%, #e76f51 100%);
+        border-radius: 20px;
+        padding: 1.5rem;
+        width: 100%;
+        max-width: 350px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     }
 
     .hero-image img {
         width: 100%;
         height: auto;
+        border-radius: 12px;
+    }
+
+    .hero-stats {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        max-width: 350px;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 1rem 1.5rem;
         border-radius: 16px;
-        box-shadow: var(--shadow-lg);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+    }
+
+    .stat {
+        text-align: center;
+        flex: 1;
+    }
+
+    .stat-number {
+        display: block;
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--color-accent-teal);
+        font-family: 'Balsamiq Sans', cursive;
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-label {
+        font-size: 0.8rem;
+        color: var(--color-text-light);
+        opacity: 0.7;
+        font-weight: 500;
+        line-height: 1.2;
+    }
+
+    /* Desktop adjustments */
+    @media (min-width: 768px) {
+        .hero-section {
+            padding: 4rem 2rem;
+        }
+
+        .hero-content {
+            max-width: 1200px;
+            flex-direction: row;
+            gap: 4rem;
+            text-align: left;
+        }
+
+        .hero-text {
+            order: 1;
+            flex: 1;
+        }
+
+        .hero-text h1 {
+            font-size: 3.5rem;
+            text-align: left;
+            padding-left: 0;
+        }
+
+        .hero-subtitle {
+            font-size: 1.3rem;
+            text-align: left;
+        }
+
+        .hero-actions {
+            flex-direction: row;
+            justify-content: flex-start;
+        }
+
+        .hero-actions .button {
+            width: auto;
+        }
+
+        .hero-image-container {
+            order: 2;
+            flex: 1;
+        }
+
+        .hero-image {
+            max-width: 500px;
+        }
+
+        .hero-stats {
+            max-width: 500px;
+            gap: 2rem;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+        }
     }
 
     /* Categories Section */
@@ -216,9 +363,16 @@ import BlogTeaser from '../components/BlogTeaser.astro';
 
     .categories-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-        gap: 2rem;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
         margin-top: 3rem;
+    }
+
+    @media (min-width: 768px) {
+        .categories-grid {
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
     }
 
     .category-card {
@@ -327,6 +481,81 @@ import BlogTeaser from '../components/BlogTeaser.astro';
 
         .category-card {
             padding: 1.5rem;
+        }
+    }
+
+    /* Trainer Promotion Section */
+    .trainer-promotion-section {
+        padding: 4rem 0;
+        background: linear-gradient(135deg, #e0f7fa 0%, #e8f5e9 100%);
+        border-top: 1px solid rgba(0,0,0,0.05);
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .promotion-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 3rem;
+        text-align: center;
+    }
+
+    .promotion-text {
+        flex: 1;
+    }
+
+    .promotion-text h2 {
+        font-size: 2.2rem;
+        color: var(--color-primary);
+        margin-bottom: 1rem;
+    }
+
+    .promotion-text p {
+        font-size: 1.2rem;
+        color: var(--color-text-light);
+        margin-bottom: 1.5rem;
+    }
+
+    .promotion-benefits {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 2rem 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .promotion-benefits li {
+        color: var(--color-text-dark);
+        font-weight: 500;
+    }
+
+    .promotion-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    @media (max-width: 768px) {
+        .promotion-content {
+            flex-direction: column;
+            text-align: center;
+            gap: 2rem;
+        }
+        
+        .promotion-text h2 {
+            font-size: 1.8rem;
+        }
+        
+        .promotion-actions {
+            width: 100%;
+        }
+        
+        .promotion-actions .button {
+            flex: 1;
+            min-width: 150px;
         }
     }
 </style>

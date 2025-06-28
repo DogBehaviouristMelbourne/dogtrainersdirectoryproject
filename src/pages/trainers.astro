@@ -6,12 +6,16 @@ import Footer from '../components/Footer.astro';
 import TrainerCard from '../components/TrainerCard.astro';
 import FloatingIcons from '../components/FloatingIcons.astro';
 import trainersData from '../data/trainers.json';
+import { supabase } from '../lib/supabaseClient.js';
 
 // Use static data for build, with client-side Supabase loading for production
 const trainers = trainersData;
 
 const suburbs = [...new Set(trainers.map((t: any) => t.suburb || t.location))].filter(Boolean).sort();
 const categories = [...new Set(trainers.flatMap((t: any) => t.categories ?? []))].sort();
+
+// Get Stripe publishable key for premium subscriptions
+const stripeKey = import.meta.env.STRIPE_PUBLISHABLE_KEY || '';
 ---
 
 <Layout title="Find Dog Trainers in Melbourne" description="Browse certified dog trainers in Melbourne. Filter by specialization, location, and more to find the perfect match for your dog.">
@@ -25,6 +29,126 @@ const categories = [...new Set(trainers.flatMap((t: any) => t.categories ?? []))
                     <h1>Find Your Perfect Dog Trainer</h1>
                     <p class="page-subtitle">Browse our directory of certified professionals in Melbourne</p>
                 </div>
+
+                <!-- Premium Upgrade Section for Trainers -->
+                <section id="premium" class="premium-upgrade-section" style="margin-bottom: 2rem;">
+                    <div class="premium-banner">
+                        <div class="premium-content">
+                            <h2>🌟 Are You a Trainer? Get Listed & Featured!</h2>
+                            <p>Start with our Standard listing, then upgrade to Premium for maximum visibility</p>
+                            
+                            <!-- Loading State -->
+                            <div id="subscription-loading" class="loading-state">
+                                <p>Loading subscription status...</p>
+                            </div>
+
+                            <!-- Plans Container (Hidden until status loaded) -->
+                            <div id="plans-container" class="premium-plans-grid" style="display: none;">
+                                
+                                <!-- Standard Plan (Always First) -->
+                                <div id="standard-plan" class="plan-card standard-plan">
+                                    <h3>Standard Annual Listing</h3>
+                                    <div class="price">
+                                        <span class="currency">$</span>
+                                        <span class="amount">79</span>
+                                        <span class="period">/year</span>
+                                    </div>
+                                    <div class="plan-subtitle">Required first step for all trainers</div>
+                                    <ul class="plan-features">
+                                        <li>� Professional directory listing</li>
+                                        <li>📍 Searchable by location & category</li>
+                                        <li>📊 Basic analytics dashboard</li>
+                                        <li>🔄 Annual renewal</li>
+                                    </ul>
+                                    <button id="standard-button" class="upgrade-button plan-button primary" data-plan="standard" data-price-id="price_1RX0T2DEY1RddZfIATD9orLs">
+                                        Get Standard Listing
+                                    </button>
+                                    <div id="standard-status" class="plan-status" style="display: none;"></div>
+                                </div>
+
+                                <!-- Premium Upgrade Plan (Conditional) -->
+                                <div id="premium-plan" class="plan-card premium-plan" style="display: none;">
+                                    <div class="premium-badge">Upgrade</div>
+                                    <h3>Premium Monthly Features</h3>
+                                    <div class="price">
+                                        <span class="currency">$</span>
+                                        <span class="amount">49</span>
+                                        <span class="period">/month</span>
+                                    </div>
+                                    <div class="plan-subtitle">Add premium features to your Standard listing</div>
+                                    <ul class="plan-features">
+                                        <li>⭐ Featured badge & top placement</li>
+                                        <li>🎯 Premium card styling</li>
+                                        <li>📈 Advanced analytics</li>
+                                        <li>� Up to 5x more visibility</li>
+                                    </ul>
+                                    <button id="premium-button" class="upgrade-button plan-button" data-plan="premium" data-price-id="price_1RX0QxDEY1RddZfIoRdn84vS">
+                                        Upgrade to Premium
+                                    </button>
+                                    <div id="premium-status" class="plan-status" style="display: none;"></div>
+                                </div>
+
+                                <!-- Premium Not Available Message -->
+                                <div id="premium-unavailable" class="plan-card unavailable-plan" style="display: none;">
+                                    <h3>Premium Monthly Features</h3>
+                                    <div class="price">
+                                        <span class="currency">$</span>
+                                        <span class="amount">49</span>
+                                        <span class="period">/month</span>
+                                    </div>
+                                    <div class="plan-subtitle">Available after Standard purchase</div>
+                                    <ul class="plan-features">
+                                        <li>⭐ Featured badge & top placement</li>
+                                        <li>🎯 Premium card styling</li>
+                                        <li>� Advanced analytics</li>
+                                        <li>🚀 Up to 5x more visibility</li>
+                                    </ul>
+                                    <button class="upgrade-button disabled" disabled>
+                                        Requires Standard Subscription
+                                    </button>
+                                    <p class="upgrade-note">Purchase Standard listing first to unlock Premium features</p>
+                                </div>
+
+                                <!-- Premium Active Status -->
+                                <div id="premium-active" class="plan-card active-plan" style="display: none;">
+                                    <div class="active-badge">✅ Active</div>
+                                    <h3>Premium Features</h3>
+                                    <div class="status-text">Your premium features are active</div>
+                                    <ul class="plan-features">
+                                        <li>⭐ Featured placement active</li>
+                                        <li>🎯 Premium styling applied</li>
+                                        <li>📈 Advanced analytics available</li>
+                                        <li>🚀 Maximum visibility</li>
+                                    </ul>
+                                    <button id="manage-premium-button" class="upgrade-button secondary">
+                                        Manage Premium
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Quick Benefits -->
+                            <div class="quick-benefits">
+                                <div class="benefit-item">
+                                    <span class="benefit-icon">📈</span>
+                                    <span class="benefit-text">Professional presence</span>
+                                </div>
+                                <div class="benefit-item">
+                                    <span class="benefit-icon">🎯</span>
+                                    <span class="benefit-text">Local search visibility</span>
+                                </div>
+                                <div class="benefit-item">
+                                    <span class="benefit-icon">⚡</span>
+                                    <span class="benefit-text">Instant activation</span>
+                                </div>
+                            </div>
+
+                            <!-- CTA for non-listed trainers -->
+                            <div class="not-listed-cta">
+                                <p><strong>Not listed yet?</strong> <a href="/submit" class="text-link">Submit your profile first →</a></p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
 
                 <!-- Search and Filter Controls -->
                 <div style="display: flex; flex-wrap: wrap; gap: 1rem; justify-content: flex-end; margin-bottom: 1.5rem;">
@@ -152,16 +276,11 @@ const categories = [...new Set(trainers.flatMap((t: any) => t.categories ?? []))
     <Footer />
 </Layout>
 
-<script define:vars={{ suburbs, categories, trainers }}>
+<script define:vars={{suburbs, categories, trainers}}>
   window.addEventListener('DOMContentLoaded', async () => {
     // Try to load from Supabase first, fallback to static data
     let cardsData;
     try {
-      const { createClient } = await import('@supabase/supabase-js');
-      const supabaseUrl = 'https://wxvjxzgphtqibgtghpte.supabase.co';
-      const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4dmp4emdwaHRxaWJndGdocHRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzI2MDM5NjQsImV4cCI6MjA0ODE3OTk2NH0.LGCZhk8GlvTPATPyWxfYUoOq19fJpNfv8qm5qJMlxZg';
-      const supabase = createClient(supabaseUrl, supabaseKey);
-      
       const { data: supabaseTrainers, error } = await supabase
         .from('trainers')
         .select('*')
@@ -485,6 +604,362 @@ const categories = [...new Set(trainers.flatMap((t: any) => t.categories ?? []))
     applyFilters();
   });
 </script>
+
+<!-- Load Stripe.js for premium subscription functionality -->
+<script src="https://js.stripe.com/v3/"></script>
+
+<script define:vars={{stripeKey}}>
+// Pass environment variable to client
+window.STRIPE_PUBLISHABLE_KEY = stripeKey;
+</script>
+
+<script>
+// Premium subscription functionality with hierarchy enforcement
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log('🔧 DEBUG: Premium subscription script loading...');
+    console.log('🔧 DEBUG: Stripe publishable key available:', !!window.STRIPE_PUBLISHABLE_KEY);
+    
+    // Check if Stripe publishable key is available
+    if (!window.STRIPE_PUBLISHABLE_KEY) {
+        console.error('❌ STRIPE_PUBLISHABLE_KEY is not available!');
+        showConfigurationError();
+        return;
+    }
+    
+    console.log('✅ Stripe publishable key found, initializing...');
+    
+    // Initialize Stripe
+    const stripe = Stripe(window.STRIPE_PUBLISHABLE_KEY);
+    
+    if (!stripe) {
+        console.error('❌ Failed to load Stripe.js');
+        return;
+    }
+    
+    console.log('✅ Stripe.js loaded successfully');
+    
+    // Get trainer ID and load subscription status
+    const trainerId = getTrainerId();
+    if (trainerId) {
+        await loadSubscriptionStatus(trainerId);
+    } else {
+        showNoTrainerIdState();
+    }
+    
+    // Set up event listeners
+    setupPlanButtonListeners(stripe, trainerId);
+    
+    // Handle payment success/cancellation
+    handlePaymentRedirects();
+    
+    // Get trainer ID from URL parameters or prompt user
+    function getTrainerId() {
+        const urlParams = new URLSearchParams(window.location.search);
+        let trainerId = urlParams.get('trainerId');
+        
+        if (!trainerId) {
+            // For testing/demo, allow manual entry
+            // In production, this should come from authentication
+            trainerId = prompt('Enter your Trainer ID or email (for testing):');
+        }
+        
+        console.log('🔧 DEBUG: Using trainer ID:', trainerId);
+        return trainerId;
+    }
+    
+    // Load trainer's subscription status from Supabase
+    async function loadSubscriptionStatus(trainerId) {
+        console.log('📡 Loading subscription status for trainer:', trainerId);
+        
+        try {
+            // Query trainer by ID or email
+            let query = supabase
+                .from('trainers')
+                .select('payment_status, premium_status, name, email');
+            
+            if (trainerId.includes('@')) {
+                query = query.eq('email', trainerId);
+            } else {
+                query = query.eq('id', trainerId);
+            }
+            
+            const { data: trainer, error } = await query.single();
+            
+            if (error) {
+                console.error('❌ Error fetching trainer:', error);
+                showTrainerNotFoundState();
+                return;
+            }
+            
+            console.log('✅ Trainer found:', trainer);
+            showPlansBasedOnStatus(trainer.payment_status, trainer.premium_status);
+            
+        } catch (error) {
+            console.error('❌ Error loading subscription status:', error);
+            showGenericPlansState();
+        }
+    }
+    
+    // Show plans based on subscription status
+    function showPlansBasedOnStatus(paymentStatus, premiumStatus) {
+        console.log('🎯 Showing plans for status:', { paymentStatus, premiumStatus });
+        
+        // Hide loading state
+        document.getElementById('subscription-loading').style.display = 'none';
+        document.getElementById('plans-container').style.display = 'grid';
+        
+        const standardPlan = document.getElementById('standard-plan');
+        const premiumPlan = document.getElementById('premium-plan');
+        const premiumUnavailable = document.getElementById('premium-unavailable');
+        const premiumActive = document.getElementById('premium-active');
+        
+        // Reset all plan visibility
+        premiumPlan.style.display = 'none';
+        premiumUnavailable.style.display = 'none';
+        premiumActive.style.display = 'none';
+        
+        if (paymentStatus !== 'paid_standard') {
+            // Show Standard plan as primary option
+            standardPlan.style.display = 'block';
+            document.getElementById('standard-button').textContent = 'Get Standard Listing';
+            document.getElementById('standard-button').disabled = false;
+            
+            // Show Premium as unavailable
+            premiumUnavailable.style.display = 'block';
+            
+        } else {
+            // Has Standard subscription
+            standardPlan.style.display = 'block';
+            document.getElementById('standard-status').innerHTML = '<div class="status-active">✅ Standard Active</div>';
+            document.getElementById('standard-status').style.display = 'block';
+            document.getElementById('standard-button').textContent = 'Standard Active';
+            document.getElementById('standard-button').disabled = true;
+            document.getElementById('standard-button').classList.add('disabled');
+            
+            if (premiumStatus === 'active') {
+                // Show Premium as active
+                premiumActive.style.display = 'block';
+            } else {
+                // Show Premium as available upgrade
+                premiumPlan.style.display = 'block';
+            }
+        }
+    }
+    
+    // Show configuration error state
+    function showConfigurationError() {
+        document.getElementById('subscription-loading').innerHTML = `
+            <div class="error-state">
+                <h3>⚠️ Configuration Error</h3>
+                <p>Payment system is not configured. Please contact support.</p>
+            </div>
+        `;
+    }
+    
+    // Show trainer not found state
+    function showTrainerNotFoundState() {
+        document.getElementById('subscription-loading').innerHTML = `
+            <div class="error-state">
+                <h3>👤 Trainer Not Found</h3>
+                <p>We couldn't find your trainer profile. Please <a href="/submit">submit your profile</a> first.</p>
+            </div>
+        `;
+    }
+    
+    // Show no trainer ID state
+    function showNoTrainerIdState() {
+        console.log('📝 No trainer ID provided, showing generic plans');
+        document.getElementById('subscription-loading').style.display = 'none';
+        document.getElementById('plans-container').style.display = 'grid';
+        
+        // Show Standard plan and Premium as unavailable
+        document.getElementById('standard-plan').style.display = 'block';
+        document.getElementById('premium-unavailable').style.display = 'block';
+    }
+    
+    // Show generic plans (fallback)
+    function showGenericPlansState() {
+        console.log('🔄 Showing generic plans state');
+        showNoTrainerIdState();
+    }
+    
+    // Set up event listeners for plan buttons
+    function setupPlanButtonListeners(stripe, trainerId) {
+        const planButtons = document.querySelectorAll('.plan-button:not(.disabled)');
+        console.log(`🔧 DEBUG: Setting up ${planButtons.length} plan button listeners`);
+        
+        planButtons.forEach((button, index) => {
+            if (button.disabled) return;
+            
+            console.log(`🔧 DEBUG: Adding event listener to button ${index + 1}`);
+            
+            button.addEventListener('click', async (e) => {
+                console.log('🔧 DEBUG: Plan button clicked!', e.target);
+                e.preventDefault();
+                
+                const priceId = e.target.dataset.priceId;
+                const plan = e.target.dataset.plan;
+                
+                console.log('🔧 DEBUG: Button data:', { priceId, plan, trainerId });
+                
+                if (!priceId || !trainerId) {
+                    console.error('❌ Missing required data:', { priceId, trainerId });
+                    alert('Missing required information. Please try again.');
+                    return;
+                }
+                
+                await handleCheckoutSession(stripe, e.target, priceId, plan, trainerId);
+            });
+        });
+        
+        // Setup manage premium button
+        const managePremiumButton = document.getElementById('manage-premium-button');
+        if (managePremiumButton) {
+            managePremiumButton.addEventListener('click', () => {
+                // Redirect to dashboard or show management options
+                window.location.href = '/dashboard';
+            });
+        }
+    }
+    
+    // Handle checkout session creation
+    async function handleCheckoutSession(stripe, button, priceId, plan, trainerId) {
+        // Show loading state
+        const originalText = button.textContent;
+        button.disabled = true;
+        button.textContent = 'Creating checkout session...';
+        button.style.opacity = '0.7';
+        
+        try {
+            console.log(`🔧 Creating checkout session for plan: ${plan}, priceId: ${priceId}, trainerId: ${trainerId}`);
+            
+            // Call our checkout session API
+            const response = await fetch('/api/create-checkout-session', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    priceId: priceId,
+                    trainerId: trainerId,
+                    planName: plan
+                })
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            const data = await response.json();
+            
+            if (!data.sessionId) {
+                throw new Error('No session ID returned from server');
+            }
+            
+            // Redirect to Stripe Checkout
+            console.log('✅ Redirecting to Stripe Checkout...');
+            button.textContent = 'Redirecting to payment...';
+            
+            const { error } = await stripe.redirectToCheckout({
+                sessionId: data.sessionId
+            });
+            
+            if (error) {
+                throw new Error(error.message);
+            }
+            
+        } catch (error) {
+            console.error('❌ Error creating checkout session:', error);
+            
+            // Show user-friendly error message
+            let errorMessage = 'Sorry, there was a problem processing your request. ';
+            if (error.message.includes('404')) {
+                errorMessage += 'The payment service is not configured. Please contact support.';
+            } else if (error.message.includes('Premium requires Standard')) {
+                errorMessage += 'Premium features require an active Standard subscription.';
+            } else {
+                errorMessage += error.message;
+            }
+            
+            alert(errorMessage);
+            
+            // Reset button state
+            button.disabled = false;
+            button.textContent = originalText;
+            button.style.opacity = '1';
+        }
+    }
+    
+    // Handle successful payment redirect and cancellations
+    function handlePaymentRedirects() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const sessionId = urlParams.get('session_id');
+        const cancelled = urlParams.get('cancelled');
+        
+        if (sessionId) {
+            console.log('✅ Payment successful, session ID:', sessionId);
+            showSuccessModal();
+            // Remove session_id from URL
+            const newUrl = window.location.pathname + window.location.hash;
+            window.history.replaceState({}, document.title, newUrl);
+        }
+        
+        if (cancelled) {
+            console.log('💔 Payment cancelled');
+            showCancelledMessage();
+            // Remove cancelled param from URL
+            const newUrl = window.location.pathname + window.location.hash;
+            window.history.replaceState({}, document.title, newUrl);
+        }
+    }
+    
+    // Show success modal
+    function showSuccessModal() {
+        const successModal = document.createElement('div');
+        successModal.className = 'success-overlay';
+        successModal.innerHTML = `
+            <div class="success-modal">
+                <div class="success-content">
+                    <h3>🎉 Payment Successful!</h3>
+                    <p>Your subscription has been activated. Changes to your listing will appear within a few minutes.</p>
+                    <div class="success-actions">
+                        <button onclick="this.closest('.success-overlay').remove(); location.reload();" class="button primary">Refresh Page</button>
+                        <a href="/dashboard" class="button secondary">Go to Dashboard</a>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(successModal);
+    }
+    
+    // Show cancelled message
+    function showCancelledMessage() {
+        const cancelMessage = document.createElement('div');
+        cancelMessage.className = 'cancel-notification';
+        cancelMessage.innerHTML = `
+            <div class="cancel-content">
+                <h3>Payment Cancelled</h3>
+                <p>No charges were made. You can try again anytime.</p>
+                <button onclick="this.parentElement.parentElement.remove()" class="button small">Close</button>
+            </div>
+        `;
+        cancelMessage.style.cssText = `
+            position: fixed; top: 20px; right: 20px; z-index: 1000;
+            background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px;
+            padding: 1rem; max-width: 300px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        `;
+        document.body.appendChild(cancelMessage);
+        
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            if (cancelMessage.parentElement) {
+                cancelMessage.remove();
+            }
+        }, 5000);
+    }
+});
+</script>
 <style>
     .trainers-page {
         padding: var(--space-4) 0;
@@ -528,6 +1003,451 @@ const categories = [...new Set(trainers.flatMap((t: any) => t.categories ?? []))
         opacity: 0.8;
         max-width: 600px;
         margin: 0 auto;
+    }
+
+    /* Premium Upgrade Section */
+    .premium-upgrade-section {
+        background: var(--color-card-bg);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-lg);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .premium-upgrade-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--color-accent-teal), var(--color-accent-mustard));
+    }
+
+    .premium-banner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 2rem;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #e0f7fa 0%, #e8f5e9 100%);
+        margin-bottom: 1.5rem;
+    }
+
+    .premium-content {
+        max-width: 1000px;
+        width: 100%;
+    }
+
+    .premium-content h2 {
+        font-size: 2.5rem;
+        color: var(--color-primary);
+        margin-bottom: 1rem;
+        background: linear-gradient(135deg, var(--color-accent-teal), var(--color-accent-mustard));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .premium-content > p {
+        font-size: 1.2rem;
+        color: var(--color-text-light);
+        margin-bottom: 2rem;
+        opacity: 0.9;
+    }
+
+    /* Loading State */
+    .loading-state {
+        text-align: center;
+        padding: 3rem;
+        color: var(--color-text-light);
+    }
+
+    .loading-state p {
+        font-size: 1.1rem;
+        margin: 0;
+    }
+
+    /* Error States */
+    .error-state {
+        text-align: center;
+        padding: 2rem;
+        background: #fff3cd;
+        border: 1px solid #ffeaa7;
+        border-radius: 8px;
+        margin: 1rem 0;
+    }
+
+    .error-state h3 {
+        color: #856404;
+        margin-bottom: 1rem;
+    }
+
+    .error-state p {
+        color: #856404;
+        margin: 0;
+    }
+
+    /* Premium Plans Grid */
+    .premium-plans-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .plan-card {
+        background: var(--color-card-bg-light);
+        border: 2px solid var(--color-border-light);
+        border-radius: 12px;
+        padding: 2rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .plan-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        border-color: var(--color-accent-teal);
+    }
+
+    /* Standard Plan Styling */
+    .standard-plan {
+        border-color: var(--color-accent-teal);
+    }
+
+    .standard-plan.has-subscription {
+        background: linear-gradient(135deg, 
+            var(--color-card-bg-light) 0%, 
+            color-mix(in srgb, var(--color-accent-teal) 5%, var(--color-card-bg-light)) 100%
+        );
+    }
+
+    /* Premium Plan Styling */
+    .premium-plan {
+        border-color: var(--color-accent-mustard);
+    }
+
+    .premium-badge {
+        position: absolute;
+        top: -12px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--color-accent-mustard);
+        color: white;
+        padding: 0.4rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(232, 185, 79, 0.3);
+    }
+
+    /* Unavailable Plan Styling */
+    .unavailable-plan {
+        opacity: 0.6;
+        border-color: #ddd;
+        background: #f8f9fa;
+    }
+
+    .unavailable-plan:hover {
+        transform: none;
+        box-shadow: none;
+        border-color: #ddd;
+    }
+
+    /* Active Plan Styling */
+    .active-plan {
+        border-color: #28a745;
+        background: linear-gradient(135deg, 
+            var(--color-card-bg-light) 0%, 
+            color-mix(in srgb, #28a745 5%, var(--color-card-bg-light)) 100%
+        );
+    }
+
+    .active-badge {
+        position: absolute;
+        top: -12px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #28a745;
+        color: white;
+        padding: 0.4rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+    }
+
+    .plan-card h3 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        color: var(--color-text-dark);
+    }
+
+    .plan-card .price {
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: baseline;
+        justify-content: center;
+        gap: 0.2rem;
+    }
+
+    .plan-card .currency {
+        font-size: 1.2rem;
+        color: var(--color-text-light);
+    }
+
+    .plan-card .amount {
+        font-size: 3rem;
+        font-weight: 700;
+        color: var(--color-primary);
+    }
+
+    .plan-card .period {
+        font-size: 1rem;
+        color: var(--color-text-light);
+        opacity: 0.8;
+    }
+
+    .plan-subtitle {
+        color: var(--color-text-light);
+        font-size: 0.9rem;
+        margin-bottom: 1.5rem;
+        font-style: italic;
+    }
+
+    .plan-features {
+        list-style: none;
+        padding: 0;
+        margin: 1.5rem 0;
+        text-align: left;
+    }
+
+    .plan-features li {
+        padding: 0.5rem 0;
+        color: var(--color-text-dark);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .upgrade-button {
+        background: var(--color-primary);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 1rem 1.5rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        width: 100%;
+        margin-top: 1rem;
+    }
+
+    .upgrade-button:hover:not(:disabled) {
+        background: var(--color-primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+
+    .upgrade-button:active {
+        transform: translateY(0);
+    }
+
+    .upgrade-button:disabled,
+    .upgrade-button.disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+        background: #ccc;
+    }
+
+    .upgrade-button.primary {
+        background: var(--color-accent-mustard);
+    }
+
+    .upgrade-button.primary:hover:not(:disabled) {
+        background: color-mix(in srgb, var(--color-accent-mustard) 85%, black);
+    }
+
+    .upgrade-button.secondary {
+        background: var(--color-accent-teal);
+    }
+
+    .upgrade-button.secondary:hover:not(:disabled) {
+        background: color-mix(in srgb, var(--color-accent-teal) 85%, black);
+    }
+
+    /* Plan Status */
+    .plan-status {
+        margin-top: 1rem;
+    }
+
+    .status-active {
+        color: #28a745;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .status-text {
+        font-size: 1.1rem;
+        color: var(--color-text-light);
+        margin-bottom: 1.5rem;
+    }
+
+    .upgrade-note {
+        margin-top: 1rem;
+        font-size: 0.9rem;
+        color: var(--color-text-light);
+        font-style: italic;
+    }
+
+    /* Quick Benefits */
+    .quick-benefits {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 2rem;
+        margin: 2rem 0;
+        padding: 1.5rem;
+        background: rgba(255, 255, 255, 0.5);
+        border-radius: 12px;
+    }
+
+    .benefit-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--color-text-dark);
+    }
+
+    .benefit-icon {
+        font-size: 1.2rem;
+    }
+
+    .benefit-text {
+        font-weight: 500;
+        font-size: 0.95rem;
+    }
+
+    /* Not Listed CTA */
+    .not-listed-cta {
+        margin-top: 2rem;
+        padding: 1.5rem;
+        background: rgba(var(--color-accent-teal-rgb), 0.1);
+        border-radius: 8px;
+        border-left: 4px solid var(--color-accent-teal);
+    }
+
+    .not-listed-cta p {
+        margin: 0;
+        color: var(--color-text-dark);
+    }
+
+    .text-link {
+        color: var(--color-accent-teal);
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .text-link:hover {
+        text-decoration: underline;
+    }
+
+    /* Success/Error Modals */
+    .success-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+
+    .success-modal {
+        background: white;
+        border-radius: 16px;
+        max-width: 500px;
+        margin: 1rem;
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+    }
+
+    .success-content {
+        padding: 3rem 2rem;
+        text-align: center;
+    }
+
+    .success-content h3 {
+        color: var(--color-accent-teal);
+        margin-bottom: 1rem;
+        font-size: 1.8rem;
+    }
+
+    .success-content p {
+        margin-bottom: 2rem;
+        color: var(--color-text-light);
+        line-height: 1.6;
+    }
+
+    .success-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+    }
+
+    .success-actions .button {
+        padding: 0.8rem 1.5rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .premium-content h2 {
+            font-size: 2rem;
+        }
+        
+        .premium-plans-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .plan-card {
+            padding: 1.5rem;
+        }
+        
+        .plan-card .amount {
+            font-size: 2.5rem;
+        }
+        
+        .quick-benefits {
+            flex-direction: column;
+            gap: 1rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .premium-upgrade-section {
+            padding: 1rem;
+        }
+        
+        .premium-banner {
+            padding: 1.5rem;
+        }
     }
 
     /* Search Controls */

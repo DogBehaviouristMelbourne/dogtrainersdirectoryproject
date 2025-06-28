@@ -35,12 +35,7 @@ const modalMessage = 'Your message has been sent successfully!';
   </section>
   <SuccessModal visible={modalVisible} message={modalMessage} />
   <script type="module">
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-
-    const supabase = createClient(
-      import.meta.env.VITE_SUPABASE_URL,
-      import.meta.env.VITE_SUPABASE_ANON_KEY
-    );
+    import { supabase } from '../lib/supabaseClient.js';
 
     const form = document.querySelector('#contact-form');
     const loading = document.querySelector('#form-loading');

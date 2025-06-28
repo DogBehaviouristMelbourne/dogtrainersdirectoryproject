@@ -24,18 +24,72 @@
 // - After payments via Stripe CLI, your local server will update the `trainers` table in Supabase accordingly.
 
 import Stripe from 'stripe';
-import { createClient } from '@supabase/supabase-js';
+import { supabaseService as supabase } from '../../../lib/supabaseClient.js';
+
+/**
+ * Plan: Audit and verify the Stripe webhook handler to ensure our two‐tier subscription
+ *       logic is correctly enforced and robust.
+ *
+ * Rationale:
+ *   - Prevent bugs in production by validating key code paths:
+ *     • Standard cancellation must revoke Premium and mark Standard as pending.
+ *     • Premium cancellation must only revoke Premium, leaving Standard intact.
+ *     • No hard-coded price IDs; always use environment variables.
+ *   - Ensure clear, testable console logs for each branch.
+ *
+ * Implementation Steps:
+ *   1. Open this file in VS Code and locate the `if (event.type === 'customer.subscription.deleted')` block.
+ *   2. Confirm extraction of `priceId` via 
+ *        const priceId = event.data.object.items.data[0].price.id;
+ *      and `trainerId` via metadata.
+ *   3. Verify branch for Standard price:
+ *        if (priceId === process.env.STANDARD_PRICE_ID) { … }
+ *      contains a single Supabase .update() call setting both
+ *        payment_status: 'pending_standard' AND premium_status: 'inactive'.
+ *   4. Verify branch for Premium price:
+ *        if (priceId === process.env.PREMIUM_PRICE_ID) { … }
+ *      contains only premium_status: 'inactive', leaving payment_status untouched.
+ *   5. Ensure console.log() calls exist in each branch, logging the event type,
+ *      trainerId, and which fields were updated.
+ *   6. Save this file and restart your local server.
+ *   7. Use Stripe CLI (`stripe trigger customer.subscription.deleted --event-data …`)
+ *      to fire both Standard and Premium cancellations, and watch VS Code's terminal:
+ *        – You should see your console.log() messages.
+ *        – In Supabase's Table Editor, the trainer record must reflect the correct updates.
+ *
+ * Expected Deliverables & Output:
+ *   • Updated `stripe.js` where:
+ *     – No literal price IDs remain; all references use `process.env.*`.  
+ *     – Standard cancellation branch updates both fields in one query.  
+ *     – Premium cancellation branch updates only `premium_status`.  
+ *     – Clear console.log() statements in each branch.  
+ *   • Successful test runs in terminal showing log output.  
+ *   • Trainer rows in Supabase updated correctly after each test event.
+ */
 
 const stripe = new Stripe(import.meta.env.STRIPE_SECRET_KEY);
 const endpointSecret = import.meta.env.STRIPE_WEBHOOK_SECRET;
 
-// Initialize Supabase client with service role key for database updates
-const supabase = createClient(
-  import.meta.env.SUPABASE_URL,
-  import.meta.env.SUPABASE_SERVICE_KEY
-);
+// Environment variable validation (audit requirement)
+const STANDARD_PRICE_ID = import.meta.env.STRIPE_ANNUAL_PRICE_ID;
+const PREMIUM_PRICE_ID = import.meta.env.STRIPE_MONTHLY_PRICE_ID;
 
-export async function POST({ request }) {
+// Validate required environment variables on startup
+if (!STANDARD_PRICE_ID || !PREMIUM_PRICE_ID) {
+  const errorMsg = '🚨 CRITICAL: Missing required price ID environment variables';
+  console.error(errorMsg);
+  console.error(`   STRIPE_ANNUAL_PRICE_ID: ${STANDARD_PRICE_ID ? '✅ Set' : '❌ Missing'}`);
+  console.error(`   STRIPE_MONTHLY_PRICE_ID: ${PREMIUM_PRICE_ID ? '✅ Set' : '❌ Missing'}`);
+  throw new Error('Missing required Price ID environment variables');
+}
+
+console.log('🔧 Webhook handler initialized with price IDs:');
+console.log(`   Standard (Annual): ${STANDARD_PRICE_ID}`);
+console.log(`   Premium (Monthly): ${PREMIUM_PRICE_ID}`);
+
+export async function POST(context) {
+  const { request } = context;
+
   try {
     // Get the raw body as text
     const body = await request.text();
@@ -106,8 +160,12 @@ export async function POST({ request }) {
 
           console.log('Found trainer:', trainerData);
 
-          if (priceId === import.meta.env.STRIPE_ANNUAL_PRICE_ID) {
-            // Update for annual plan
+          if (priceId === STANDARD_PRICE_ID) {
+            // Update for Standard Annual plan
+            console.log('💳 STANDARD SUBSCRIPTION ACTIVATED');
+            console.log(`   → Trainer ID: ${trainerId}`);
+            console.log(`   → Price ID: ${priceId}`);
+            
             const now = new Date();
             const endDate = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000); // 1 year from now
             
@@ -121,12 +179,18 @@ export async function POST({ request }) {
               .eq('id', trainerId);
               
             if (updateError) {
-              console.error('❌ Error updating trainer for annual plan:', updateError);
+              console.error('❌ Error updating trainer for Standard plan:', updateError);
             } else {
-              console.log('✅ Trainer updated to paid_standard (annual)');
+              console.log('✅ SUCCESS: Standard subscription activated');
+              console.log(`   → Trainer ${trainerId}: payment_status=paid_standard`);
             }
-          } else if (priceId === import.meta.env.STRIPE_MONTHLY_PRICE_ID) {
-            // Update for monthly plan  
+            
+          } else if (priceId === PREMIUM_PRICE_ID) {
+            // Update for Premium Monthly plan
+            console.log('⭐ PREMIUM SUBSCRIPTION ACTIVATED');
+            console.log(`   → Trainer ID: ${trainerId}`);
+            console.log(`   → Price ID: ${priceId}`);
+            
             const now = new Date();
             const endDate = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days from now
             
@@ -140,12 +204,17 @@ export async function POST({ request }) {
               .eq('id', trainerId);
               
             if (updateError) {
-              console.error('❌ Error updating trainer for monthly plan:', updateError);
+              console.error('❌ Error updating trainer for Premium plan:', updateError);
             } else {
-              console.log('✅ Trainer updated to active premium (monthly)');
+              console.log('✅ SUCCESS: Premium subscription activated');
+              console.log(`   → Trainer ${trainerId}: premium_status=active`);
             }
+            
           } else {
-            console.warn('⚠️ Unknown price ID:', priceId);
+            console.warn('⚠️ UNKNOWN PRICE ID in checkout completion');
+            console.warn(`   → Received priceId: ${priceId}`);
+            console.warn(`   → Expected Standard: ${STANDARD_PRICE_ID}`);
+            console.warn(`   → Expected Premium: ${PREMIUM_PRICE_ID}`);
           }
         } else {
           console.warn('⚠️ No trainerId found in checkout session metadata');
@@ -175,38 +244,64 @@ export async function POST({ request }) {
         console.log('Customer ID:', deletedSub.customer);
         console.log('Metadata:', deletedSub.metadata);
 
-        // Update trainer in Supabase
+        // Extract priceId and trainerId as per audit requirements
         if (deletedSub.metadata && deletedSub.metadata.trainerId) {
-          const trainerIdDeleted = deletedSub.metadata.trainerId;
-          const planId = deletedSub.items.data[0].price.id;
+          const trainerId = deletedSub.metadata.trainerId;
+          const priceId = deletedSub.items.data[0].price.id;
+          
+          console.log(`🔍 Processing cancellation for trainer: ${trainerId}, priceId: ${priceId}`);
 
-          if (planId === import.meta.env.STRIPE_MONTHLY_PLAN_ID) {
-            // Monthly plan ended
+          if (priceId === STANDARD_PRICE_ID) {
+            // Standard cancellation: Revoke BOTH Standard AND Premium (audit requirement)
+            console.log('🚨 STANDARD CANCELLATION DETECTED');
+            console.log(`   → Trainer ID: ${trainerId}`);
+            console.log(`   → Cancelled Price ID: ${priceId}`);
+            console.log('   → Action: Setting payment_status=pending_standard AND premium_status=inactive');
+            
+            const { error: updateError } = await supabase
+              .from('trainers')
+              .update({ 
+                payment_status: 'pending_standard',
+                premium_status: 'inactive'
+              })
+              .eq('id', trainerId);
+              
+            if (updateError) {
+              console.error('❌ ERROR updating trainer for Standard cancellation:', updateError);
+            } else {
+              console.log('✅ SUCCESS: Standard cancelled → Both payment_status AND premium_status updated');
+              console.log(`   → Trainer ${trainerId}: payment_status=pending_standard, premium_status=inactive`);
+            }
+            
+          } else if (priceId === PREMIUM_PRICE_ID) {
+            // Premium cancellation: Only revoke Premium, keep Standard intact (audit requirement)
+            console.log('🔄 PREMIUM CANCELLATION DETECTED');
+            console.log(`   → Trainer ID: ${trainerId}`);
+            console.log(`   → Cancelled Price ID: ${priceId}`);
+            console.log('   → Action: Setting premium_status=inactive (Standard unchanged)');
+            
             const { error: updateError } = await supabase
               .from('trainers')
               .update({ premium_status: 'inactive' })
-              .eq('id', trainerIdDeleted);
+              .eq('id', trainerId);
               
             if (updateError) {
-              console.error('Error updating trainer for cancelled monthly plan:', updateError);
+              console.error('❌ ERROR updating trainer for Premium cancellation:', updateError);
             } else {
-              console.log('✅ Trainer premium status set to inactive');
+              console.log('✅ SUCCESS: Premium cancelled → Only premium_status updated');
+              console.log(`   → Trainer ${trainerId}: premium_status=inactive (payment_status unchanged)`);
             }
-          } else if (planId === import.meta.env.STRIPE_ANNUAL_PLAN_ID) {
-            // Annual plan ended
-            const { error: updateError } = await supabase
-              .from('trainers')
-              .update({ payment_status: 'pending_standard' })
-              .eq('id', trainerIdDeleted);
-              
-            if (updateError) {
-              console.error('Error updating trainer for cancelled annual plan:', updateError);
-            } else {
-              console.log('✅ Trainer payment status set to pending_standard');
-            }
+            
+          } else {
+            console.warn('⚠️ UNKNOWN PRICE ID in subscription cancellation');
+            console.warn(`   → Received priceId: ${priceId}`);
+            console.warn(`   → Expected Standard: ${STANDARD_PRICE_ID}`);
+            console.warn(`   → Expected Premium: ${PREMIUM_PRICE_ID}`);
+            console.warn('   → No database updates performed');
           }
         } else {
           console.warn('⚠️ No trainerId found in subscription metadata');
+          console.warn('   → Subscription metadata:', deletedSub.metadata);
         }
 
         break;

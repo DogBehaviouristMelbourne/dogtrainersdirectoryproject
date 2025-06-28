@@ -1,0 +1,1038 @@
+---
+// src/components/AnalyticsDashboard.astro
+// Enhanced analytics dashboard for admin and trainer insights
+
+interface Props {
+    userType?: 'admin' | 'trainer';
+    trainerId?: string | number;
+}
+
+const { userType = 'admin', trainerId } = Astro.props;
+---
+
+<div class="analytics-dashboard" data-user-type={userType} data-trainer-id={trainerId}>
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <h2>Analytics Dashboard</h2>
+        <div class="date-range-selector">
+            <select id="date-range" class="date-select">
+                <option value="7">Last 7 days</option>
+                <option value="30" selected>Last 30 days</option>
+                <option value="90">Last 3 months</option>
+                <option value="365">Last year</option>
+            </select>
+            <button id="refresh-data" class="refresh-btn" aria-label="Refresh analytics data">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="23 4 23 10 17 10"></polyline>
+                    <polyline points="1 20 1 14 7 14"></polyline>
+                    <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Key Metrics Cards -->
+    <div class="metrics-grid">
+        <div class="metric-card" id="views-card">
+            <div class="metric-icon">👁️</div>
+            <div class="metric-content">
+                <h3>Profile Views</h3>
+                <div class="metric-value" id="profile-views">-</div>
+                <div class="metric-change" id="views-change">-</div>
+            </div>
+        </div>
+
+        <div class="metric-card" id="inquiries-card">
+            <div class="metric-icon">📧</div>
+            <div class="metric-content">
+                <h3>Inquiries</h3>
+                <div class="metric-value" id="inquiries-count">-</div>
+                <div class="metric-change" id="inquiries-change">-</div>
+            </div>
+        </div>
+
+        <div class="metric-card" id="rating-card">
+            <div class="metric-icon">⭐</div>
+            <div class="metric-content">
+                <h3>Average Rating</h3>
+                <div class="metric-value" id="avg-rating">-</div>
+                <div class="metric-change" id="rating-change">-</div>
+            </div>
+        </div>
+
+        <div class="metric-card" id="conversion-card">
+            <div class="metric-icon">📈</div>
+            <div class="metric-content">
+                <h3>Conversion Rate</h3>
+                <div class="metric-value" id="conversion-rate">-</div>
+                <div class="metric-change" id="conversion-change">-</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="charts-section">
+        <div class="chart-container">
+            <div class="chart-header">
+                <h3>Views Over Time</h3>
+                <div class="chart-controls">
+                    <button class="chart-type-btn active" data-type="line">Line</button>
+                    <button class="chart-type-btn" data-type="bar">Bar</button>
+                </div>
+            </div>
+            <div class="chart-content" id="views-chart">
+                <canvas id="views-canvas" width="400" height="200"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <div class="chart-header">
+                <h3>Geographic Distribution</h3>
+            </div>
+            <div class="chart-content" id="geo-chart">
+                <div class="geo-list" id="geo-list">
+                    <div class="loading-chart">Loading geographic data...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Analytics -->
+    <div class="detailed-analytics">
+        <div class="analytics-tabs">
+            <button class="tab-btn active" data-tab="traffic">Traffic Sources</button>
+            <button class="tab-btn" data-tab="devices">Devices</button>
+            <button class="tab-btn" data-tab="search">Search Terms</button>
+            <button class="tab-btn" data-tab="performance">Performance</button>
+        </div>
+
+        <div class="tab-content">
+            <!-- Traffic Sources Tab -->
+            <div class="tab-panel active" id="traffic-panel">
+                <div class="traffic-sources" id="traffic-sources">
+                    <div class="loading-data">Loading traffic data...</div>
+                </div>
+            </div>
+
+            <!-- Devices Tab -->
+            <div class="tab-panel" id="devices-panel">
+                <div class="device-breakdown" id="device-breakdown">
+                    <div class="loading-data">Loading device data...</div>
+                </div>
+            </div>
+
+            <!-- Search Terms Tab -->
+            <div class="tab-panel" id="search-panel">
+                <div class="search-terms" id="search-terms">
+                    <div class="loading-data">Loading search data...</div>
+                </div>
+            </div>
+
+            <!-- Performance Tab -->
+            <div class="tab-panel" id="performance-panel">
+                <div class="performance-metrics" id="performance-metrics">
+                    <div class="loading-data">Loading performance data...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Options -->
+    <div class="export-section">
+        <h3>Export Data</h3>
+        <div class="export-buttons">
+            <button class="export-btn" id="export-csv">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14,2 14,8 20,8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10,9 9,9 8,9"></polyline>
+                </svg>
+                Export CSV
+            </button>
+            <button class="export-btn" id="export-pdf">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14,2 14,8 20,8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <line x1="12" y1="9" x2="8" y2="9"></line>
+                </svg>
+                Export PDF
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .analytics-dashboard {
+        padding: 2rem;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    /* Dashboard Header */
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--color-border-light);
+    }
+
+    .dashboard-header h2 {
+        margin: 0;
+        color: var(--color-text-light);
+        font-size: 2rem;
+    }
+
+    .date-range-selector {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .date-select {
+        padding: 0.5rem 1rem;
+        border: 1px solid var(--color-border-light);
+        border-radius: 8px;
+        background: var(--color-background-light);
+        color: var(--color-text-light);
+        font-size: 0.9rem;
+    }
+
+    .refresh-btn {
+        padding: 0.5rem;
+        background: var(--color-accent-teal);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 40px;
+        min-height: 40px;
+    }
+
+    .refresh-btn:hover {
+        background: color-mix(in srgb, var(--color-accent-teal) 85%, black);
+        transform: rotate(180deg);
+    }
+
+    /* Metrics Grid */
+    .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+    }
+
+    .metric-card {
+        background: var(--color-card-bg-light);
+        border: 1px solid var(--color-border-light);
+        border-radius: 12px;
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transition: all 0.2s ease;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .metric-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .metric-icon {
+        font-size: 2rem;
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(90, 155, 156, 0.1);
+        border-radius: 12px;
+    }
+
+    .metric-content h3 {
+        margin: 0 0 0.5rem 0;
+        font-size: 0.9rem;
+        color: var(--color-text-light);
+        opacity: 0.8;
+        font-weight: 500;
+    }
+
+    .metric-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--color-text-light);
+        margin-bottom: 0.25rem;
+        font-family: 'Balsamiq Sans', cursive;
+    }
+
+    .metric-change {
+        font-size: 0.8rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .metric-change.positive {
+        color: #4caf50;
+    }
+
+    .metric-change.negative {
+        color: #f44336;
+    }
+
+    .metric-change.neutral {
+        color: var(--color-text-light);
+        opacity: 0.6;
+    }
+
+    /* Charts Section */
+    .charts-section {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+
+    .chart-container {
+        background: var(--color-card-bg-light);
+        border: 1px solid var(--color-border-light);
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .chart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .chart-header h3 {
+        margin: 0;
+        color: var(--color-text-light);
+        font-size: 1.2rem;
+    }
+
+    .chart-controls {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .chart-type-btn {
+        padding: 0.25rem 0.75rem;
+        border: 1px solid var(--color-border-light);
+        background: var(--color-background-light);
+        color: var(--color-text-light);
+        border-radius: 4px;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .chart-type-btn.active {
+        background: var(--color-accent-teal);
+        color: white;
+        border-color: var(--color-accent-teal);
+    }
+
+    .chart-content {
+        position: relative;
+        min-height: 200px;
+    }
+
+    #views-canvas {
+        width: 100%;
+        height: 200px;
+    }
+
+    .geo-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .geo-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem;
+        background: var(--color-background-light);
+        border-radius: 8px;
+    }
+
+    .geo-location {
+        font-weight: 500;
+        color: var(--color-text-light);
+    }
+
+    .geo-count {
+        font-weight: 600;
+        color: var(--color-accent-teal);
+    }
+
+    /* Detailed Analytics */
+    .detailed-analytics {
+        background: var(--color-card-bg-light);
+        border: 1px solid var(--color-border-light);
+        border-radius: 12px;
+        overflow: hidden;
+        margin-bottom: 3rem;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .analytics-tabs {
+        display: flex;
+        background: var(--color-background-light);
+        border-bottom: 1px solid var(--color-border-light);
+    }
+
+    .tab-btn {
+        flex: 1;
+        padding: 1rem;
+        background: none;
+        border: none;
+        color: var(--color-text-light);
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border-bottom: 3px solid transparent;
+    }
+
+    .tab-btn:hover {
+        background: rgba(90, 155, 156, 0.1);
+    }
+
+    .tab-btn.active {
+        background: var(--color-card-bg-light);
+        border-bottom-color: var(--color-accent-teal);
+        color: var(--color-accent-teal);
+    }
+
+    .tab-content {
+        padding: 2rem;
+    }
+
+    .tab-panel {
+        display: none;
+    }
+
+    .tab-panel.active {
+        display: block;
+    }
+
+    .loading-data,
+    .loading-chart {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 3rem;
+        color: var(--color-text-light);
+        opacity: 0.6;
+        font-style: italic;
+    }
+
+    /* Export Section */
+    .export-section {
+        background: var(--color-card-bg-light);
+        border: 1px solid var(--color-border-light);
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .export-section h3 {
+        margin: 0 0 1rem 0;
+        color: var(--color-text-light);
+    }
+
+    .export-buttons {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .export-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.25rem;
+        background: var(--color-accent-mustard);
+        color: var(--color-text-light);
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .export-btn:hover {
+        background: color-mix(in srgb, var(--color-accent-mustard) 85%, black);
+        transform: translateY(-2px);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1024px) {
+        .charts-section {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .analytics-dashboard {
+            padding: 1rem;
+        }
+
+        .dashboard-header {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: stretch;
+        }
+
+        .metrics-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .analytics-tabs {
+            flex-direction: column;
+        }
+
+        .export-buttons {
+            flex-direction: column;
+        }
+
+        .chart-header {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: stretch;
+        }
+    }
+
+    /* Dark mode support */
+    .dark-mode .metric-icon {
+        background: rgba(90, 155, 156, 0.2);
+    }
+
+    .dark-mode .geo-item {
+        background: rgba(255, 255, 255, 0.05);
+    }
+</style>
+
+<script>
+// Analytics dashboard functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const dashboard = document.querySelector('.analytics-dashboard');
+    if (!dashboard) return;
+
+    const userType = dashboard.dataset.userType;
+    const trainerId = dashboard.dataset.trainerId;
+    const dateRange = document.getElementById('date-range');
+    const refreshBtn = document.getElementById('refresh-data');
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabPanels = document.querySelectorAll('.tab-panel');
+    const chartTypeBtns = document.querySelectorAll('.chart-type-btn');
+
+    let currentData = {};
+    let currentChart = null;
+
+    // Initialize dashboard
+    loadAnalyticsData();
+    setupEventListeners();
+
+    function setupEventListeners() {
+        // Date range change
+        if (dateRange) {
+            dateRange.addEventListener('change', loadAnalyticsData);
+        }
+
+        // Refresh button
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', function() {
+                this.style.transform = 'rotate(180deg)';
+                loadAnalyticsData();
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 500);
+            });
+        }
+
+        // Tab switching
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const tabId = this.dataset.tab;
+                switchTab(tabId);
+            });
+        });
+
+        // Chart type switching
+        chartTypeBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                chartTypeBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                updateChart(this.dataset.type);
+            });
+        });
+
+        // Export buttons
+        const exportCsvBtn = document.getElementById('export-csv');
+        const exportPdfBtn = document.getElementById('export-pdf');
+
+        if (exportCsvBtn) {
+            exportCsvBtn.addEventListener('click', () => exportData('csv'));
+        }
+        if (exportPdfBtn) {
+            exportPdfBtn.addEventListener('click', () => exportData('pdf'));
+        }
+    }
+
+    async function loadAnalyticsData() {
+        try {
+            const days = dateRange ? dateRange.value : '30';
+            console.log(`Loading analytics data for ${days} days`);
+
+            // Simulate API call (replace with actual API)
+            const data = await simulateAnalyticsAPI(days, userType, trainerId);
+            currentData = data;
+
+            updateMetrics(data.metrics);
+            updateChart('line');
+            updateGeographicData(data.geographic);
+            updateDetailedAnalytics(data.detailed);
+
+        } catch (error) {
+            console.error('Error loading analytics data:', error);
+            showError('Failed to load analytics data');
+        }
+    }
+
+    function updateMetrics(metrics) {
+        const elements = {
+            'profile-views': metrics.profileViews,
+            'inquiries-count': metrics.inquiries,
+            'avg-rating': metrics.avgRating.toFixed(1),
+            'conversion-rate': `${metrics.conversionRate}%`
+        };
+
+        const changes = {
+            'views-change': formatChange(metrics.viewsChange),
+            'inquiries-change': formatChange(metrics.inquiriesChange),
+            'rating-change': formatChange(metrics.ratingChange, true),
+            'conversion-change': formatChange(metrics.conversionChange)
+        };
+
+        // Update metric values
+        Object.entries(elements).forEach(([id, value]) => {
+            const element = document.getElementById(id);
+            if (element) {
+                animateValue(element, value);
+            }
+        });
+
+        // Update change indicators
+        Object.entries(changes).forEach(([id, change]) => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.innerHTML = change.html;
+                element.className = `metric-change ${change.class}`;
+            }
+        });
+    }
+
+    function formatChange(value, isRating = false) {
+        const prefix = value > 0 ? '+' : '';
+        const suffix = isRating ? '' : '%';
+        const arrow = value > 0 ? '↗' : value < 0 ? '↘' : '→';
+        const className = value > 0 ? 'positive' : value < 0 ? 'negative' : 'neutral';
+        
+        return {
+            html: `${arrow} ${prefix}${value}${suffix}`,
+            class: className
+        };
+    }
+
+    function animateValue(element, targetValue) {
+        const isNumeric = !isNaN(parseFloat(targetValue));
+        if (!isNumeric) {
+            element.textContent = targetValue;
+            return;
+        }
+
+        const startValue = parseFloat(element.textContent) || 0;
+        const endValue = parseFloat(targetValue);
+        const duration = 1000;
+        const startTime = Date.now();
+
+        function update() {
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const currentValue = startValue + (endValue - startValue) * progress;
+            
+            element.textContent = Math.round(currentValue * 10) / 10;
+            
+            if (progress < 1) {
+                requestAnimationFrame(update);
+            } else {
+                element.textContent = targetValue;
+            }
+        }
+
+        requestAnimationFrame(update);
+    }
+
+    function updateChart(type) {
+        const canvas = document.getElementById('views-canvas');
+        if (!canvas || !currentData.chartData) return;
+
+        const ctx = canvas.getContext('2d');
+        const data = currentData.chartData;
+
+        // Clear canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Simple chart implementation (replace with Chart.js for production)
+        drawSimpleChart(ctx, data, type, canvas.width, canvas.height);
+    }
+
+    function drawSimpleChart(ctx, data, type, width, height) {
+        const padding = 40;
+        const chartWidth = width - padding * 2;
+        const chartHeight = height - padding * 2;
+        
+        const maxValue = Math.max(...data.values);
+        const minValue = Math.min(...data.values);
+        const valueRange = maxValue - minValue || 1;
+
+        ctx.strokeStyle = '#5a9b9c';
+        ctx.fillStyle = 'rgba(90, 155, 156, 0.2)';
+        ctx.lineWidth = 2;
+
+        if (type === 'line') {
+            // Draw line chart
+            ctx.beginPath();
+            data.values.forEach((value, index) => {
+                const x = padding + (index / (data.values.length - 1)) * chartWidth;
+                const y = padding + chartHeight - ((value - minValue) / valueRange) * chartHeight;
+                
+                if (index === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            });
+            ctx.stroke();
+        } else {
+            // Draw bar chart
+            const barWidth = chartWidth / data.values.length * 0.8;
+            data.values.forEach((value, index) => {
+                const x = padding + (index / data.values.length) * chartWidth + barWidth * 0.1;
+                const barHeight = ((value - minValue) / valueRange) * chartHeight;
+                const y = padding + chartHeight - barHeight;
+                
+                ctx.fillRect(x, y, barWidth, barHeight);
+            });
+        }
+
+        // Draw axes
+        ctx.strokeStyle = '#ddd';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(padding, padding);
+        ctx.lineTo(padding, height - padding);
+        ctx.lineTo(width - padding, height - padding);
+        ctx.stroke();
+    }
+
+    function updateGeographicData(geoData) {
+        const geoList = document.getElementById('geo-list');
+        if (!geoList || !geoData) return;
+
+        geoList.innerHTML = geoData.map(item => `
+            <div class="geo-item">
+                <span class="geo-location">${item.location}</span>
+                <span class="geo-count">${item.count}</span>
+            </div>
+        `).join('');
+    }
+
+    function updateDetailedAnalytics(detailedData) {
+        if (!detailedData) return;
+
+        // Update traffic sources
+        const trafficSources = document.getElementById('traffic-sources');
+        if (trafficSources && detailedData.traffic) {
+            trafficSources.innerHTML = createDataTable(detailedData.traffic, ['Source', 'Visits', 'Percentage']);
+        }
+
+        // Update device breakdown
+        const deviceBreakdown = document.getElementById('device-breakdown');
+        if (deviceBreakdown && detailedData.devices) {
+            deviceBreakdown.innerHTML = createDataTable(detailedData.devices, ['Device', 'Users', 'Percentage']);
+        }
+
+        // Update search terms
+        const searchTerms = document.getElementById('search-terms');
+        if (searchTerms && detailedData.searchTerms) {
+            searchTerms.innerHTML = createDataTable(detailedData.searchTerms, ['Search Term', 'Count', 'CTR']);
+        }
+
+        // Update performance metrics
+        const performanceMetrics = document.getElementById('performance-metrics');
+        if (performanceMetrics && detailedData.performance) {
+            performanceMetrics.innerHTML = createPerformanceView(detailedData.performance);
+        }
+    }
+
+    function createDataTable(data, headers) {
+        return `
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        ${headers.map(header => `<th>${header}</th>`).join('')}
+                    </tr>
+                </thead>
+                <tbody>
+                    ${data.map(row => `
+                        <tr>
+                            ${Object.values(row).map(value => `<td>${value}</td>`).join('')}
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
+    }
+
+    function createPerformanceView(performance) {
+        return `
+            <div class="performance-grid">
+                <div class="performance-item">
+                    <h4>Page Load Time</h4>
+                    <div class="performance-value">${performance.loadTime}ms</div>
+                </div>
+                <div class="performance-item">
+                    <h4>Bounce Rate</h4>
+                    <div class="performance-value">${performance.bounceRate}%</div>
+                </div>
+                <div class="performance-item">
+                    <h4>Session Duration</h4>
+                    <div class="performance-value">${performance.sessionDuration}</div>
+                </div>
+                <div class="performance-item">
+                    <h4>Pages per Session</h4>
+                    <div class="performance-value">${performance.pagesPerSession}</div>
+                </div>
+            </div>
+        `;
+    }
+
+    function switchTab(tabId) {
+        // Update tab buttons
+        tabBtns.forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.tab === tabId);
+        });
+
+        // Update tab panels
+        tabPanels.forEach(panel => {
+            panel.classList.toggle('active', panel.id === `${tabId}-panel`);
+        });
+    }
+
+    function exportData(format) {
+        console.log(`Exporting data in ${format} format`);
+        
+        // Simulate export (replace with actual export functionality)
+        const filename = `analytics-${new Date().toISOString().split('T')[0]}.${format}`;
+        
+        if (format === 'csv') {
+            exportCSV(currentData, filename);
+        } else if (format === 'pdf') {
+            exportPDF(currentData, filename);
+        }
+    }
+
+    function exportCSV(data, filename) {
+        // Simple CSV export implementation
+        const csvContent = "data:text/csv;charset=utf-8," + 
+            "Metric,Value\n" +
+            `Profile Views,${data.metrics?.profileViews || 0}\n` +
+            `Inquiries,${data.metrics?.inquiries || 0}\n` +
+            `Average Rating,${data.metrics?.avgRating || 0}\n` +
+            `Conversion Rate,${data.metrics?.conversionRate || 0}%\n`;
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", filename);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    function exportPDF(data, filename) {
+        // PDF export would require a library like jsPDF
+        console.log('PDF export functionality would be implemented here');
+        alert('PDF export feature coming soon!');
+    }
+
+    function showError(message) {
+        console.error(message);
+        // Could show a toast notification or error state
+    }
+
+    // Simulate analytics API
+    async function simulateAnalyticsAPI(days, userType, trainerId) {
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        return {
+            metrics: {
+                profileViews: Math.floor(Math.random() * 1000) + 500,
+                inquiries: Math.floor(Math.random() * 50) + 10,
+                avgRating: (Math.random() * 2 + 3).toFixed(1),
+                conversionRate: Math.floor(Math.random() * 20) + 5,
+                viewsChange: Math.floor(Math.random() * 40) - 20,
+                inquiriesChange: Math.floor(Math.random() * 30) - 15,
+                ratingChange: (Math.random() * 0.4 - 0.2).toFixed(1),
+                conversionChange: Math.floor(Math.random() * 10) - 5
+            },
+            chartData: {
+                labels: generateDateLabels(parseInt(days)),
+                values: generateChartValues(parseInt(days))
+            },
+            geographic: [
+                { location: 'Melbourne CBD', count: 45 },
+                { location: 'Richmond', count: 32 },
+                { location: 'South Yarra', count: 28 },
+                { location: 'Fitzroy', count: 24 },
+                { location: 'St Kilda', count: 19 }
+            ],
+            detailed: {
+                traffic: [
+                    { source: 'Google Search', visits: 234, percentage: '45%' },
+                    { source: 'Direct', visits: 156, percentage: '30%' },
+                    { source: 'Social Media', visits: 78, percentage: '15%' },
+                    { source: 'Referrals', visits: 52, percentage: '10%' }
+                ],
+                devices: [
+                    { device: 'Mobile', users: 312, percentage: '60%' },
+                    { device: 'Desktop', users: 156, percentage: '30%' },
+                    { device: 'Tablet', users: 52, percentage: '10%' }
+                ],
+                searchTerms: [
+                    { term: 'dog trainer melbourne', count: 89, ctr: '12.5%' },
+                    { term: 'puppy training', count: 67, ctr: '8.9%' },
+                    { term: 'obedience training', count: 45, ctr: '6.7%' },
+                    { term: 'dog behaviorist', count: 34, ctr: '5.2%' }
+                ],
+                performance: {
+                    loadTime: '1.2s',
+                    bounceRate: '32%',
+                    sessionDuration: '3m 45s',
+                    pagesPerSession: '2.8'
+                }
+            }
+        };
+    }
+
+    function generateDateLabels(days) {
+        const labels = [];
+        for (let i = days - 1; i >= 0; i--) {
+            const date = new Date();
+            date.setDate(date.getDate() - i);
+            labels.push(date.toLocaleDateString());
+        }
+        return labels;
+    }
+
+    function generateChartValues(days) {
+        const values = [];
+        for (let i = 0; i < days; i++) {
+            values.push(Math.floor(Math.random() * 100) + 20);
+        }
+        return values;
+    }
+});
+</script>
+
+<style>
+    /* Additional styles for data tables and performance grid */
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+    }
+
+    .data-table th,
+    .data-table td {
+        padding: 0.75rem;
+        text-align: left;
+        border-bottom: 1px solid var(--color-border-light);
+    }
+
+    .data-table th {
+        background: var(--color-background-light);
+        font-weight: 600;
+        color: var(--color-text-light);
+    }
+
+    .data-table td {
+        color: var(--color-text-light);
+    }
+
+    .data-table tr:hover {
+        background: rgba(90, 155, 156, 0.05);
+    }
+
+    .performance-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-top: 1rem;
+    }
+
+    .performance-item {
+        background: var(--color-background-light);
+        padding: 1.5rem;
+        border-radius: 8px;
+        text-align: center;
+        border: 1px solid var(--color-border-light);
+    }
+
+    .performance-item h4 {
+        margin: 0 0 0.5rem 0;
+        color: var(--color-text-light);
+        font-size: 0.9rem;
+        opacity: 0.8;
+    }
+
+    .performance-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--color-accent-teal);
+        font-family: 'Balsamiq Sans', cursive;
+    }
+
+    @media (max-width: 768px) {
+        .performance-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .data-table {
+            font-size: 0.9rem;
+        }
+        
+        .data-table th,
+        .data-table td {
+            padding: 0.5rem;
+        }
+    }
+</style>

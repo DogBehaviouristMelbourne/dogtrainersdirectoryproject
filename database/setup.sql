@@ -34,6 +34,11 @@ CREATE TABLE IF NOT EXISTS trainers (
   social_links JSONB,
   slug TEXT UNIQUE NOT NULL,
   status TEXT DEFAULT 'approved',
+  payment_status TEXT DEFAULT 'pending_standard' CHECK (payment_status IN ('pending_standard', 'paid_standard', 'expired_standard')),
+  premium_status TEXT DEFAULT 'inactive' CHECK (premium_status IN ('inactive', 'active', 'cancelled')),
+  stripe_customer_id TEXT,
+  stripe_standard_subscription_id TEXT,
+  stripe_premium_subscription_id TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   approved_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -201,6 +206,37 @@ INSERT INTO trainers (name, suburb, email, phone, website, description, categori
     'calm-canine-behaviorists',
     'approved'
   );
+
+-- Migration: Add payment and premium status columns to existing tables
+-- Run these ALTER statements if the trainers table already exists without these columns
+
+ALTER TABLE trainers 
+ADD COLUMN IF NOT EXISTS payment_status TEXT DEFAULT 'pending_standard' CHECK (payment_status IN ('pending_standard', 'paid_standard', 'expired_standard'));
+
+ALTER TABLE trainers 
+ADD COLUMN IF NOT EXISTS premium_status TEXT DEFAULT 'inactive' CHECK (premium_status IN ('inactive', 'active', 'cancelled'));
+
+ALTER TABLE trainers 
+ADD COLUMN IF NOT EXISTS stripe_customer_id TEXT;
+
+ALTER TABLE trainers 
+ADD COLUMN IF NOT EXISTS stripe_standard_subscription_id TEXT;
+
+ALTER TABLE trainers
+ADD COLUMN IF NOT EXISTS stripe_premium_subscription_id TEXT;
+
+-- Add date tracking columns for subscription periods
+ALTER TABLE trainers
+ADD COLUMN IF NOT EXISTS standard_start_date TIMESTAMP WITH TIME ZONE;
+
+ALTER TABLE trainers
+ADD COLUMN IF NOT EXISTS standard_end_date TIMESTAMP WITH TIME ZONE;
+
+ALTER TABLE trainers
+ADD COLUMN IF NOT EXISTS premium_start_date TIMESTAMP WITH TIME ZONE;
+
+ALTER TABLE trainers
+ADD COLUMN IF NOT EXISTS premium_end_date TIMESTAMP WITH TIME ZONE;
 
 -- Verify the setup
 SELECT 'Tables created successfully!' as status;

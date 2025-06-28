@@ -442,3 +442,20 @@ For complex deployment scenarios or custom requirements, consider consulting wit
 
 This deployment guide provides comprehensive instructions for successfully deploying the Dog Trainers Directory Melbourne website to production environments. Follow these guidelines to ensure a smooth deployment process and optimal performance for your users.
 
+## Step 2: Update Your Webhook in the Stripe Dashboard
+
+> **Note:** The Stripe CLI is currently authenticated to account `acct_1R9c0aDEY1RddZfI`. This session will expire on **September 25 2025**, at which point you must run `stripe login` again to re-authenticate.
+
+1. **Log in** to your [Stripe Dashboard](https://dashboard.stripe.com) with your live account.
+2. **Navigate** to **Developers → Webhooks**.
+3. **Select** your existing webhook endpoint (e.g. `https://your-domain.com/api/webhooks/stripe`).
+4. **Edit** the endpoint URL to point to your production site (replace any `localhost` URL).
+5. **Verify** the subscribed events: ensure only **checkout.session.completed** and **customer.subscription.deleted** are checked.
+6. **Save** the endpoint.
+7. **Reveal** the **Signing Secret** and copy it.
+8. **Add** the secret to your production environment variables (e.g. in Vercel):
+   ```bash
+   STRIPE_WEBHOOK_SECRET=whsec_live_your_live_signing_secret
+   ```
+9. **Redeploy** your production app so the new URL and secret take effect.
+

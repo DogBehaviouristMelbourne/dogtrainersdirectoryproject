@@ -1,0 +1,459 @@
+---
+// src/components/EnhancedSearch.astro
+// Enhanced search component with debouncing, filters, and mobile optimization
+
+interface Props {
+    categories: string[];
+    suburbs: string[];
+    placeholder?: string;
+}
+
+const { 
+    categories, 
+    suburbs, 
+    placeholder = "Search by trainer name, location, or specialization..." 
+} = Astro.props;
+---
+
+<div class="enhanced-search">
+    <!-- Search Input with Icon -->
+    <div class="search-input-container">
+        <div class="search-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.35-4.35"></path>
+            </svg>
+        </div>
+        <input 
+            type="text" 
+            id="enhanced-search-input" 
+            class="search-input"
+            placeholder={placeholder}
+            aria-label="Search trainers"
+            autocomplete="off"
+            spellcheck="false"
+        >
+        <button type="button" class="clear-search" id="clear-search" aria-label="Clear search" style="display: none;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Quick Filters -->
+    <div class="quick-filters">
+        <div class="filter-section">
+            <label class="filter-label">Specialization:</label>
+            <div class="filter-buttons" role="group" aria-label="Filter by specialization">
+                <button class="filter-btn active" data-category="" data-type="category">
+                    All Trainers
+                </button>
+                {categories.map(cat => (
+                    <button class="filter-btn" data-category={cat} data-type="category">
+                        {cat}
+                    </button>
+                ))}
+            </div>
+        </div>
+
+        <div class="filter-section">
+            <label class="filter-label" for="suburb-select">Location:</label>
+            <div class="select-wrapper">
+                <select id="suburb-select" class="suburb-select" aria-label="Filter by suburb">
+                    <option value="">All suburbs</option>
+                    {suburbs.map(suburb => (
+                        <option value={suburb}>{suburb}</option>
+                    ))}
+                </select>
+                <div class="select-arrow">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6,9 12,15 18,9"></polyline>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Filters Display -->
+    <div class="active-filters" id="active-filters" style="display: none;">
+        <span class="active-filters-label">Active filters:</span>
+        <div class="active-filter-tags" id="active-filter-tags"></div>
+        <button class="clear-all-filters" id="clear-all-filters">Clear all</button>
+    </div>
+
+    <!-- Search Results Summary -->
+    <div class="search-summary" id="search-summary">
+        <span id="results-count">Loading trainers...</span>
+        <div class="search-actions">
+            <button class="sort-toggle" id="sort-toggle" aria-label="Sort options">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 6h18M7 12h10m-7 6h4"></path>
+                </svg>
+                Sort
+            </button>
+        </div>
+    </div>
+
+    <!-- Sort Options (Hidden by default) -->
+    <div class="sort-options" id="sort-options" style="display: none;">
+        <div class="sort-option-buttons">
+            <button class="sort-btn active" data-sort="featured">Featured First</button>
+            <button class="sort-btn" data-sort="name">Name (A-Z)</button>
+            <button class="sort-btn" data-sort="suburb">Location (A-Z)</button>
+            <button class="sort-btn" data-sort="reviews">Most Reviewed</button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .enhanced-search {
+        background: var(--color-card-bg-light);
+        border: 1px solid var(--color-border-light);
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-sm);
+    }
+
+    /* Search Input */
+    .search-input-container {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--color-text-light);
+        opacity: 0.6;
+        pointer-events: none;
+        z-index: 2;
+    }
+
+    .search-input {
+        width: 100%;
+        height: var(--tap-target-min);
+        padding: 0.75rem 3rem 0.75rem 3rem;
+        border: 2px solid var(--color-border-light);
+        border-radius: 12px;
+        font-size: 1rem;
+        background: var(--color-background-light);
+        color: var(--color-text-light);
+        transition: all 0.2s ease;
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: var(--color-accent-teal);
+        box-shadow: 0 0 0 3px rgba(90, 155, 156, 0.1);
+    }
+
+    .clear-search {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: var(--color-text-light);
+        opacity: 0.6;
+        cursor: pointer;
+        padding: 0.25rem;
+        border-radius: 4px;
+        transition: opacity 0.2s ease;
+    }
+
+    .clear-search:hover {
+        opacity: 1;
+        background: var(--color-border-light);
+    }
+
+    /* Quick Filters */
+    .quick-filters {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .filter-section {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .filter-label {
+        font-weight: 600;
+        color: var(--color-text-light);
+        font-size: 0.9rem;
+        margin: 0;
+    }
+
+    .filter-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .filter-btn {
+        padding: 0.5rem 1rem;
+        border: 2px solid var(--color-border-light);
+        border-radius: 20px;
+        background: var(--color-background-light);
+        color: var(--color-text-light);
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+        min-height: var(--tap-target-min);
+        display: flex;
+        align-items: center;
+    }
+
+    .filter-btn:hover {
+        border-color: var(--color-accent-teal);
+        transform: translateY(-1px);
+    }
+
+    .filter-btn.active {
+        background: var(--color-accent-teal);
+        border-color: var(--color-accent-teal);
+        color: white;
+        font-weight: 600;
+    }
+
+    /* Select Wrapper */
+    .select-wrapper {
+        position: relative;
+        display: inline-block;
+        min-width: 200px;
+    }
+
+    .suburb-select {
+        width: 100%;
+        height: var(--tap-target-min);
+        padding: 0.75rem 2.5rem 0.75rem 1rem;
+        border: 2px solid var(--color-border-light);
+        border-radius: 12px;
+        background: var(--color-background-light);
+        color: var(--color-text-light);
+        font-size: 1rem;
+        cursor: pointer;
+        appearance: none;
+        transition: all 0.2s ease;
+    }
+
+    .suburb-select:focus {
+        outline: none;
+        border-color: var(--color-accent-teal);
+        box-shadow: 0 0 0 3px rgba(90, 155, 156, 0.1);
+    }
+
+    .select-arrow {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        pointer-events: none;
+        color: var(--color-text-light);
+        opacity: 0.6;
+    }
+
+    /* Active Filters */
+    .active-filters {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-top: 1rem;
+        padding: 1rem;
+        background: rgba(90, 155, 156, 0.05);
+        border-radius: 8px;
+        flex-wrap: wrap;
+    }
+
+    .active-filters-label {
+        font-weight: 600;
+        color: var(--color-text-light);
+        font-size: 0.875rem;
+    }
+
+    .active-filter-tags {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .filter-tag {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.25rem 0.75rem;
+        background: var(--color-accent-teal);
+        color: white;
+        border-radius: 16px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+
+    .filter-tag-remove {
+        background: none;
+        border: none;
+        color: white;
+        cursor: pointer;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        opacity: 0.8;
+    }
+
+    .filter-tag-remove:hover {
+        opacity: 1;
+    }
+
+    .clear-all-filters {
+        background: none;
+        border: 1px solid var(--color-accent-teal);
+        color: var(--color-accent-teal);
+        padding: 0.25rem 0.75rem;
+        border-radius: 16px;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .clear-all-filters:hover {
+        background: var(--color-accent-teal);
+        color: white;
+    }
+
+    /* Search Summary */
+    .search-summary {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--color-border-light);
+    }
+
+    #results-count {
+        font-weight: 500;
+        color: var(--color-text-light);
+    }
+
+    .search-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .sort-toggle {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border: 1px solid var(--color-border-light);
+        border-radius: 8px;
+        background: var(--color-background-light);
+        color: var(--color-text-light);
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .sort-toggle:hover {
+        border-color: var(--color-accent-teal);
+        background: var(--color-card-bg-light);
+    }
+
+    /* Sort Options */
+    .sort-options {
+        margin-top: 1rem;
+        padding: 1rem;
+        background: var(--color-background-light);
+        border: 1px solid var(--color-border-light);
+        border-radius: 8px;
+    }
+
+    .sort-option-buttons {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .sort-btn {
+        padding: 0.5rem 1rem;
+        border: 1px solid var(--color-border-light);
+        border-radius: 6px;
+        background: var(--color-background-light);
+        color: var(--color-text-light);
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .sort-btn:hover {
+        border-color: var(--color-accent-teal);
+    }
+
+    .sort-btn.active {
+        background: var(--color-accent-teal);
+        border-color: var(--color-accent-teal);
+        color: white;
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+        .enhanced-search {
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-buttons {
+            gap: 0.25rem;
+        }
+
+        .filter-btn {
+            font-size: 0.8rem;
+            padding: 0.4rem 0.8rem;
+        }
+
+        .search-summary {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: stretch;
+        }
+
+        .search-actions {
+            justify-content: center;
+        }
+
+        .sort-option-buttons {
+            justify-content: center;
+        }
+
+        .active-filters {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+    }
+
+    @media (min-width: 768px) {
+        .quick-filters {
+            flex-direction: row;
+            align-items: flex-start;
+            gap: 2rem;
+        }
+
+        .filter-section:first-child {
+            flex: 1;
+        }
+
+        .filter-section:last-child {
+            flex-shrink: 0;
+        }
+    }
+</style>

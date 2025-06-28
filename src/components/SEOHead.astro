@@ -1,0 +1,359 @@
+---
+// src/components/SEOHead.astro
+// Enhanced SEO component with dynamic meta tags and structured data
+
+import { generateCanonicalUrl, optimizeMetaDescription } from '../utils/seoUtils.js';
+
+interface Props {
+    title?: string;
+    description?: string;
+    canonical?: string;
+    openGraph?: {
+        title?: string;
+        description?: string;
+        url?: string;
+        type?: string;
+        image?: string;
+        site_name?: string;
+    };
+    twitter?: {
+        card?: string;
+        title?: string;
+        description?: string;
+        image?: string;
+    };
+    schema?: object | object[];
+    keywords?: string[];
+    noindex?: boolean;
+    nofollow?: boolean;
+}
+
+const {
+    title = 'Dog Trainers Directory Australia - Find Professional Dog Training Services',
+    description = 'Find qualified dog trainers across Australia. Compare services, read reviews, and book consultations with professional dog training experts.',
+    canonical,
+    openGraph,
+    twitter,
+    schema,
+    keywords = [],
+    noindex = false,
+    nofollow = false
+} = Astro.props;
+
+// Optimize meta description
+const optimizedDescription = optimizeMetaDescription(description);
+
+// Generate canonical URL
+const canonicalUrl = canonical ? generateCanonicalUrl(canonical) : generateCanonicalUrl(Astro.url.pathname);
+
+// Default Open Graph data
+const defaultOG = {
+    title: title,
+    description: optimizedDescription,
+    url: canonicalUrl,
+    type: 'website',
+    image: 'https://dogtrainersdirectory.com.au/images/og-default.jpg',
+    site_name: 'Dog Trainers Directory Australia'
+};
+
+const ogData = { ...defaultOG, ...openGraph };
+
+// Default Twitter data
+const defaultTwitter = {
+    card: 'summary_large_image',
+    title: title,
+    description: optimizedDescription,
+    image: ogData.image
+};
+
+const twitterData = { ...defaultTwitter, ...twitter };
+
+// Robots meta content
+const robotsContent = [
+    noindex ? 'noindex' : 'index',
+    nofollow ? 'nofollow' : 'follow'
+].join(', ');
+
+// Keywords string
+const keywordsString = keywords.length > 0 ? keywords.join(', ') : 'dog trainer, dog training, pet training, professional dog trainer, Australia';
+---
+
+<!-- Primary Meta Tags -->
+<title>{title}</title>
+<meta name="title" content={title} />
+<meta name="description" content={optimizedDescription} />
+<meta name="keywords" content={keywordsString} />
+<meta name="robots" content={robotsContent} />
+<meta name="author" content="Dog Trainers Directory Australia" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<!-- Canonical URL -->
+<link rel="canonical" href={canonicalUrl} />
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content={ogData.type} />
+<meta property="og:url" content={ogData.url} />
+<meta property="og:title" content={ogData.title} />
+<meta property="og:description" content={ogData.description} />
+<meta property="og:image" content={ogData.image} />
+<meta property="og:site_name" content={ogData.site_name} />
+
+<!-- Twitter -->
+<meta property="twitter:card" content={twitterData.card} />
+<meta property="twitter:url" content={ogData.url} />
+<meta property="twitter:title" content={twitterData.title} />
+<meta property="twitter:description" content={twitterData.description} />
+<meta property="twitter:image" content={twitterData.image} />
+
+<!-- Additional Meta Tags -->
+<meta name="theme-color" content="#5a9b9c" />
+<meta name="msapplication-TileColor" content="#5a9b9c" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="format-detection" content="telephone=no" />
+
+<!-- Favicon and Icons -->
+<link rel="icon" type="image/x-icon" href="/favicon.ico" />
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+<link rel="manifest" href="/site.webmanifest" />
+
+<!-- Preconnect to external domains for performance -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+<!-- DNS Prefetch for external resources -->
+<link rel="dns-prefetch" href="//www.google-analytics.com" />
+<link rel="dns-prefetch" href="//www.googletagmanager.com" />
+
+<!-- Structured Data -->
+{schema && (
+    <script type="application/ld+json" set:html={JSON.stringify(Array.isArray(schema) ? schema : [schema])} />
+)}
+
+<!-- Hreflang for international SEO (if needed) -->
+<link rel="alternate" hreflang="en-au" href={canonicalUrl} />
+<link rel="alternate" hreflang="en" href={canonicalUrl} />
+
+<!-- Additional SEO optimizations -->
+<meta name="geo.region" content="AU" />
+<meta name="geo.placename" content="Australia" />
+<meta name="ICBM" content="-25.274398, 133.775136" />
+
+<!-- Rich Snippets Support -->
+<meta name="application-name" content="Dog Trainers Directory" />
+<meta name="msapplication-tooltip" content="Find Professional Dog Trainers in Australia" />
+<meta name="msapplication-starturl" content="/" />
+
+<!-- Performance and Security -->
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="referrer" content="strict-origin-when-cross-origin" />
+
+<!-- Social Media Optimization -->
+<meta property="fb:app_id" content="your-facebook-app-id" />
+<meta name="twitter:site" content="@dogtrainersau" />
+<meta name="twitter:creator" content="@dogtrainersau" />
+
+<!-- Additional Open Graph Properties -->
+<meta property="og:locale" content="en_AU" />
+<meta property="og:locale:alternate" content="en_US" />
+
+<!-- Article specific meta (for blog posts) -->
+{Astro.url.pathname.includes('/blog/') && (
+    <>
+        <meta property="article:publisher" content="https://facebook.com/dogtrainersdirectoryau" />
+        <meta property="article:author" content="Dog Trainers Directory Australia" />
+        <meta property="article:section" content="Dog Training" />
+    </>
+)}
+
+<!-- Business specific meta -->
+{Astro.url.pathname.includes('/trainers/') && (
+    <>
+        <meta property="business:contact_data:locality" content="Australia" />
+        <meta property="business:contact_data:region" content="AU" />
+        <meta property="business:contact_data:country_name" content="Australia" />
+    </>
+)}
+
+<style>
+    /* Ensure proper rendering of meta elements */
+    head {
+        display: none;
+    }
+</style>
+
+<script>
+    // Enhanced SEO tracking and optimization
+    document.addEventListener('DOMContentLoaded', function() {
+        // Track page views for SEO analytics
+        if (typeof gtag !== 'undefined') {
+            gtag('config', 'GA_MEASUREMENT_ID', {
+                page_title: document.title,
+                page_location: window.location.href,
+                content_group1: getContentGroup()
+            });
+        }
+
+        // Optimize images for SEO
+        optimizeImagesForSEO();
+        
+        // Add structured data for breadcrumbs if not present
+        addBreadcrumbStructuredData();
+        
+        // Monitor Core Web Vitals
+        monitorCoreWebVitals();
+    });
+
+    function getContentGroup() {
+        const path = window.location.pathname;
+        if (path.includes('/trainers/')) return 'Trainer Profile';
+        if (path.includes('/search')) return 'Search Results';
+        if (path.includes('/blog/')) return 'Blog';
+        if (path === '/') return 'Homepage';
+        return 'Other';
+    }
+
+    function optimizeImagesForSEO() {
+        // Add alt text to images without it
+        const images = document.querySelectorAll('img:not([alt])');
+        images.forEach(img => {
+            const src = img.src || '';
+            const filename = src.split('/').pop()?.split('.')[0] || '';
+            img.alt = filename.replace(/[-_]/g, ' ') || 'Dog training image';
+        });
+
+        // Add loading="lazy" to images below the fold
+        const imagesLazy = document.querySelectorAll('img:not([loading])');
+        imagesLazy.forEach((img, index) => {
+            if (index > 2) { // Skip first 3 images (likely above fold)
+                img.loading = 'lazy';
+            }
+        });
+    }
+
+    function addBreadcrumbStructuredData() {
+        // Only add if breadcrumbs exist and no structured data is present
+        const breadcrumbs = document.querySelector('.breadcrumbs, nav[aria-label="breadcrumb"]');
+        const existingBreadcrumbSchema = document.querySelector('script[type="application/ld+json"]');
+        
+        if (breadcrumbs && !existingBreadcrumbSchema?.textContent?.includes('BreadcrumbList')) {
+            const links = breadcrumbs.querySelectorAll('a');
+            if (links.length > 0) {
+                const breadcrumbSchema = {
+                    "@context": "https://schema.org",
+                    "@type": "BreadcrumbList",
+                    "itemListElement": Array.from(links).map((link, index) => ({
+                        "@type": "ListItem",
+                        "position": index + 1,
+                        "name": link.textContent?.trim(),
+                        "item": link.href
+                    }))
+                };
+
+                const script = document.createElement('script');
+                script.type = 'application/ld+json';
+                script.textContent = JSON.stringify(breadcrumbSchema);
+                document.head.appendChild(script);
+            }
+        }
+    }
+
+    function monitorCoreWebVitals() {
+        // Monitor Largest Contentful Paint (LCP)
+        if ('PerformanceObserver' in window) {
+            try {
+                const observer = new PerformanceObserver((list) => {
+                    const entries = list.getEntries();
+                    const lastEntry = entries[entries.length - 1];
+                    
+                    // Send to analytics if available
+                    if (typeof gtag !== 'undefined') {
+                        gtag('event', 'web_vitals', {
+                            event_category: 'Web Vitals',
+                            event_label: 'LCP',
+                            value: Math.round(lastEntry.startTime),
+                            non_interaction: true
+                        });
+                    }
+                });
+                
+                observer.observe({ entryTypes: ['largest-contentful-paint'] });
+            } catch (e) {
+                console.warn('Performance monitoring not available');
+            }
+        }
+
+        // Monitor Cumulative Layout Shift (CLS)
+        if ('PerformanceObserver' in window) {
+            try {
+                let clsValue = 0;
+                const observer = new PerformanceObserver((list) => {
+                    for (const entry of list.getEntries()) {
+                        if (!entry.hadRecentInput) {
+                            clsValue += entry.value;
+                        }
+                    }
+                });
+                
+                observer.observe({ entryTypes: ['layout-shift'] });
+                
+                // Report CLS on page unload
+                window.addEventListener('beforeunload', () => {
+                    if (typeof gtag !== 'undefined') {
+                        gtag('event', 'web_vitals', {
+                            event_category: 'Web Vitals',
+                            event_label: 'CLS',
+                            value: Math.round(clsValue * 1000),
+                            non_interaction: true
+                        });
+                    }
+                });
+            } catch (e) {
+                console.warn('Layout shift monitoring not available');
+            }
+        }
+    }
+
+    // Optimize for search engines
+    function optimizeForSearch() {
+        // Add schema markup for FAQ sections
+        const faqSections = document.querySelectorAll('.faq-item, .accordion-item');
+        if (faqSections.length > 0) {
+            const faqSchema = {
+                "@context": "https://schema.org",
+                "@type": "FAQPage",
+                "mainEntity": Array.from(faqSections).map(item => {
+                    const question = item.querySelector('h3, .question, .accordion-header')?.textContent?.trim();
+                    const answer = item.querySelector('p, .answer, .accordion-content')?.textContent?.trim();
+                    
+                    if (question && answer) {
+                        return {
+                            "@type": "Question",
+                            "name": question,
+                            "acceptedAnswer": {
+                                "@type": "Answer",
+                                "text": answer
+                            }
+                        };
+                    }
+                }).filter(Boolean)
+            };
+
+            if (faqSchema.mainEntity.length > 0) {
+                const script = document.createElement('script');
+                script.type = 'application/ld+json';
+                script.textContent = JSON.stringify(faqSchema);
+                document.head.appendChild(script);
+            }
+        }
+    }
+
+    // Run optimization after DOM is fully loaded
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', optimizeForSearch);
+    } else {
+        optimizeForSearch();
+    }
+</script>
