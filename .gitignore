@@ -18,6 +18,9 @@ pnpm-debug.log*
 .env.local
 .env.production
 
+# troubleshooting files with sensitive data
+TROUBLESHOOTING.md
+
 # macOS-specific files
 .DS_Store
 
