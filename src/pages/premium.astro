@@ -257,7 +257,7 @@ async function loadSubscriptionStatus(trainerId) {
     
     try {
         // Import centralized Supabase client
-        const { supabase } = await import('../../lib/supabaseClient.js');
+        const { supabase } = await import('../lib/supabaseClient.js');
         
         // Query trainer by ID or email
         let query = supabase
