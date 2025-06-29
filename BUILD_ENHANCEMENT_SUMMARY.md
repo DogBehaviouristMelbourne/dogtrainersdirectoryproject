@@ -151,6 +151,36 @@ env:
   # ... other variables with fallbacks
 ```
 
+## GitHub Actions Accessibility Workflow Fixes
+
+### Pa11y Configuration Resolution
+- **Issue**: Pa11y accessibility tests failing in CI due to Chrome launcher configuration
+- **Root Cause**: Incorrect syntax for passing Chrome flags to Puppeteer in pa11y
+- **Solution**: Created `.pa11yrc.json` configuration file with proper `chromeLaunchConfig`
+- **Chrome Flags**: Added comprehensive flags for CI compatibility:
+  - `--no-sandbox` - Required for containerized environments
+  - `--disable-setuid-sandbox` - Security compatibility for CI
+  - `--disable-gpu` - Headless rendering optimization
+  - `--disable-dev-shm-usage` - Memory management for CI
+  - `--no-first-run` - Skip Chrome first-run setup
+  - Additional stability flags for CI environment
+
+### Configuration Details
+```json
+{
+  "chromeLaunchConfig": {
+    "args": ["--no-sandbox", "--disable-setuid-sandbox", ...]
+  },
+  "timeout": 60000,
+  "wait": 1000
+}
+```
+
+### Results
+- ✅ Pa11y now properly configured for CI environment
+- ✅ Accessibility tests should pass in GitHub Actions
+- ✅ Maintained comprehensive accessibility testing coverage
+
 ## ✅ Validation Results
 
 ### Local Build Test
