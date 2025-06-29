@@ -135,9 +135,9 @@ if (!isBuildTime && STRIPE_SECRET_KEY && STRIPE_SECRET_KEY.length > 10) {
 ### Issue: Pa11y Browser Launch Failure
 **Root Cause**: GitHub Actions Ubuntu runner doesn't allow unprivileged user namespaces.
 
-**Solution**: Added browser launch flags:
+**Solution**: Added browser launch flags via environment variable:
 ```yaml
-pa11y http://localhost:4321 --reporter cli --chrome-launcher-flags="--no-sandbox --disable-setuid-sandbox"
+CHROME_FLAGS="--no-sandbox --disable-setuid-sandbox --disable-gpu --disable-dev-shm-usage --no-first-run" pa11y http://localhost:4321 --reporter cli
 ```
 
 ### Issue: Missing Environment Variable Secrets
