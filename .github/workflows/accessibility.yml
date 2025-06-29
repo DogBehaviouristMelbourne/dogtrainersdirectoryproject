@@ -69,5 +69,4 @@ jobs:
         run: |
           npx astro preview &
           sleep 5
-          export PUPPETEER_ARGS="--no-sandbox --disable-setuid-sandbox --disable-gpu --disable-dev-shm-usage --no-first-run"
-          pa11y http://localhost:4321 --reporter cli
+          pa11y http://localhost:4321 --reporter cli --config .pa11yrc.json
